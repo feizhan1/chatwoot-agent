@@ -24,11 +24,14 @@ echo "📝 找到 $FILE_COUNT 个文件需要翻译:"
 echo "$PROMPT_FILES" | sed 's/^/   - /' | sed "s|$PROJECT_ROOT/||g"
 echo ""
 
-read -p "确认开始批量翻译？(y/N) " -n 1 -r
-echo
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo "❌ 已取消"
-    exit 0
+# 支持 --yes 参数跳过确认
+if [ "$1" != "--yes" ] && [ "$1" != "-y" ]; then
+    read -p "确认开始批量翻译？(y/N) " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "❌ 已取消"
+        exit 0
+    fi
 fi
 
 echo ""

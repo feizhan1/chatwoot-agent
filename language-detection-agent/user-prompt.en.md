@@ -1,0 +1,1 @@
+{{ $('Code in JavaScript1').first().json.ask || 'Unsolvable problem' }}

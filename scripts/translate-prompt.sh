@@ -17,53 +17,48 @@ else
     exit 1
 fi
 
-# 检查 API Key
-if [ -z "$ANTHROPIC_API_KEY" ]; then
-    echo "❌ 错误: ANTHROPIC_API_KEY 未设置"
-    echo "💡 请在 $CONFIG_FILE 中设置您的 API Key"
+# 检查 API 配置
+if [ -z "$ANTHROPIC_AUTH_TOKEN" ] && [ -z "$ANTHROPIC_API_KEY" ]; then
+    echo "❌ 错误: ANTHROPIC_AUTH_TOKEN 或 ANTHROPIC_API_KEY 未设置"
+    echo "💡 请在 $CONFIG_FILE 中设置您的认证信息"
     exit 1
 fi
 
+# 设置默认值
+API_BASE_URL="${ANTHROPIC_BASE_URL:-https://api.anthropic.com}"
+API_KEY="${ANTHROPIC_AUTH_TOKEN:-$ANTHROPIC_API_KEY}"
+MODEL="${MODEL:-claude-sonnet-4-5-20250929}"
+MAX_TOKENS="${MAX_TOKENS:-8000}"
+
 # 翻译系统提示词（翻译指令）
-TRANSLATION_SYSTEM_PROMPT='你是一个专业的AI提示词翻译专家。你的任务是将中文提示词翻译为英文，同时严格遵守以下规则：
+TRANSLATION_SYSTEM_PROMPT='你是专业的 AI 提示词翻译专家。将中文提示词翻译为英文，严格遵守以下规则：
 
-**必须保持不变的内容**：
-1. XML 标签名称（如 `<session_metadata>`, `<user_query>` 等）
-2. 模板变量语法（如 `{{ $(...) }}` ）
-3. 字段名/键名（如 `Login Status`, `Channel`, `iso_code` 等）
-4. 意图枚举值（如 `query_product_data`, `handoff` 等）
-5. URL 链接
-6. 专有名词（如 `TVCMALL`, `TVC Assistant`, `MOQ`, `SKU` 等）
-7. Markdown 格式标记（`#`, `**`, `-`, `>`, 缩进等）
-8. 代码块标记和换行符（`\n\n`）
+**保持不变**：
+- XML 标签：`<session_metadata>`, `<user_query>` 等
+- 模板变量：`{{ $(...) }}` 语法完全保持
+- 字段名：`Login Status`, `Channel`, `iso_code` 等
+- 枚举值：`query_product_data`, `handoff` 等
+- URL 链接
+- 专有名词：`TVCMALL`, `TVC Assistant`, `MOQ`, `SKU`
+- Markdown 格式：`#`, `**`, `-`, `>`, 缩进
+- 换行符：`\n\n`
 
-**需要翻译的内容**：
-1. 自然语言描述和说明
-2. 章节标题（如 "角色与身份" → "Role & Identity"）
-3. 用户话术示例（如 "请问您的订单号是多少？" → "Could you please share your order number?"）
-4. 固定回复模板的文字内容
+**翻译内容**：
+- 自然语言描述
+- 章节标题
+- 用户话术示例
+- 回复模板中的文字
 
 **术语对照**：
-- 角色与身份 → Role & Identity
-- 核心目标 → Core Goals
-- 上下文优先级与逻辑 → Context Priority & Logic
-- 工具失败处理 → Tool Failure Handling
-- 语言策略 → Language Policy
-- 输出模板 → Output Templates
-- 场景处理规则 → Scenario Handling Rules
-- 语气与约束 → Tone & Constraints
-- 关键 → CRITICAL
-- 强制要求 → MANDATORY
-- 严格 → STRICT
-- 必须 → MUST
-- 不得 → DO NOT
-- 绝不 → NEVER
+角色与身份→Role & Identity | 核心目标→Core Goals | 语言策略→Language Policy
+关键→CRITICAL | 强制要求→MANDATORY | 严格→STRICT | 必须→MUST | 不得→DO NOT
 
-**输出要求**：
-1. 保持原有文件的完整结构和格式
-2. 确保 Markdown 渲染效果一致
-3. 保持专业的 AI 提示词工程术语
-4. 直接输出翻译后的完整文件内容，不要添加任何说明或注释'
+**关键要求**：
+1. 直接输出翻译后的完整内容
+2. 不要添加任何解释、说明或注释
+3. 不要用代码块包裹结果
+4. 保持原文件的确切格式和结构
+5. 如果原文只有一行，输出也只有一行'
 
 # 翻译单个文件的函数
 translate_file() {
@@ -82,11 +77,13 @@ translate_file() {
 
     # 构建 API 请求
     REQUEST_JSON=$(jq -n \
+        --arg model "$MODEL" \
+        --argjson max_tokens "$MAX_TOKENS" \
         --arg system "$TRANSLATION_SYSTEM_PROMPT" \
         --arg content "$CONTENT" \
         '{
-            model: "claude-sonnet-4-5-20250929",
-            max_tokens: 8000,
+            model: $model,
+            max_tokens: $max_tokens,
             system: $system,
             messages: [
                 {
@@ -97,9 +94,9 @@ translate_file() {
         }')
 
     # 调用 Claude API
-    RESPONSE=$(curl -s https://api.anthropic.com/v1/messages \
+    RESPONSE=$(curl -s "${API_BASE_URL}/v1/messages" \
         -H "Content-Type: application/json" \
-        -H "x-api-key: $ANTHROPIC_API_KEY" \
+        -H "x-api-key: $API_KEY" \
         -H "anthropic-version: 2023-06-01" \
         -d "$REQUEST_JSON")
 
