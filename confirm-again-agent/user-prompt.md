@@ -1,0 +1,26 @@
+请使用以下上下文信息来处理用户的请求。
+
+<context_data>
+    <user_profile>
+        Channel: {{ $('Code in JavaScript1').first().json.channel }}
+        Login Status: {{ $('Code in JavaScript1').first().json.isLogin }}
+    </user_profile>
+
+    <conversation_history>
+        {{ $('Code in JavaScript').first().json.history_context }}
+    </conversation_history>
+</context_data>
+
+<current_request>
+    <user_query>
+        {{ $('Code in JavaScript1').first().json.ask }}
+    </user_query>
+</current_request>
+
+<instructions>
+    1. 分析 <user_query> 和 <conversation_history>，识别**具体缺少什么信息**。
+    2. 检查 <user_profile> 以个性化语气（例如：如果已登录，可根据情况引用其账户上下文）。
+    3. **暂不回答业务问题。**
+    4. 根据缺少的信息，生成一个**有帮助的后续问题**来澄清用户意图。
+       （例如："请问您能提供订单号吗？"或"您指的是哪个具体产品型号？"）
+</instructions>

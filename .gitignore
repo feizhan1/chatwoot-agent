@@ -1,0 +1,25 @@
+# AI 提示词自动翻译系统配置
+scripts/translation-config.env
+
+# 英文版本提示词（自动生成，可选是否提交）
+# 如果您希望将英文版本也加入版本控制，注释掉下面这行
+# *.en.md
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Node
+node_modules/
+package-lock.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Logs
+*.log
