@@ -1,93 +1,250 @@
-# chatwoot-agent
+# AI Reply Agent - 智能客服代理系统
 
+## 📖 项目简介
 
+AI 智能客服代理系统，包含多个专业化 Agent，支持产品查询、订单管理、业务咨询等功能。
 
-## Getting started
+**特色功能**：提示词自动翻译系统 - 修改中文提示词时自动生成英文版本。
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+---
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+## 🚀 快速开始
 
-## Add your files
+### 1. 安装自动翻译系统
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin http://gitlab.tvcmall.com/root/chatwoot-agent.git
-git branch -M main
-git push -uf origin main
+```bash
+# 运行一键设置脚本
+./scripts/setup-translation.sh
 ```
 
-## Integrate with your tools
+系统会引导您：
+1. 创建配置文件
+2. 输入 Anthropic API Key（[获取地址](https://console.anthropic.com/settings/keys)）
+3. 验证配置
 
-- [ ] [Set up project integrations](http://gitlab.tvcmall.com/root/chatwoot-agent/-/settings/integrations)
+### 2. 使用方法
 
-## Collaborate with your team
+#### 自动模式（推荐）⭐
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+修改任何 `system-prompt.md` 或 `user-prompt.md` 后，直接提交：
 
-## Test and Deploy
+```bash
+# 修改提示词文件
+vim production-agent/system-prompt.md
 
-Use the built-in continuous integration in GitLab.
+# 提交时自动翻译
+git add .
+git commit -m "更新产品查询提示词"
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+# 系统会自动：
+# 1. 检测修改的文件
+# 2. 翻译为英文
+# 3. 生成 .en.md 文件
+# 4. 添加到本次提交
+```
 
-***
+#### 手动翻译单个文件
 
-# Editing this README
+```bash
+./scripts/translate-prompt.sh production-agent/system-prompt.md
+```
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+#### 批量翻译所有文件
 
-## Suggestions for a good README
+```bash
+./scripts/batch-translate.sh
+```
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+---
 
-## Name
-Choose a self-explaining name for your project.
+## 📂 项目结构
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+```
+ai-reply-agent/
+├── scripts/                          # 自动化脚本
+│   ├── setup-translation.sh          # 一键设置脚本
+│   ├── translate-prompt.sh           # 核心翻译脚本
+│   ├── batch-translate.sh            # 批量翻译脚本
+│   ├── translation-config.env        # 配置文件（包含 API Key）
+│   └── translation-config.env.example # 配置模板
+│
+├── production-agent/                 # 产品查询代理
+│   ├── system-prompt.md              # 系统提示词（中文）
+│   ├── system-prompt.en.md           # 系统提示词（英文，自动生成）
+│   ├── user-prompt.md                # 用户提示词（中文）
+│   └── user-prompt.en.md             # 用户提示词（英文，自动生成）
+│
+├── order-agent/                      # 订单查询代理
+├── business-consulting-agent/        # 业务咨询代理
+├── language-detection-agent/         # 语言检测代理
+├── rewrite-reply-agent/              # 回复改写代理
+├── confirm-again-agent/              # 二次确认代理
+├── error-handle-agent/               # 错误处理代理
+├── no-clear-intent-agent/            # 未明确意图代理
+├── handling-error-in-generating-suggestions/ # 错误提示翻译
+└── intent-agent/                     # 意图识别代理（核心路由）
+```
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+---
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+## 🔧 配置说明
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+### API Key 配置
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+配置文件位置：`scripts/translation-config.env`
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+```bash
+# Anthropic API Key（必填）
+ANTHROPIC_API_KEY=sk-ant-xxxxx
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+# 使用的模型（可选）
+MODEL=claude-sonnet-4-5-20250929
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+# 最大 tokens（可选）
+MAX_TOKENS=8000
+```
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+### Git Hook 工作原理
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+当您运行 `git commit` 时：
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+1. **Pre-commit Hook** 被触发
+2. 检测暂存区中的 `*-prompt.md` 文件
+3. 调用 `translate-prompt.sh` 进行翻译
+4. 生成对应的 `.en.md` 文件
+5. 自动添加到本次提交
 
-## License
-For open source projects, say how it is licensed.
+---
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+## 📝 翻译规则
+
+系统会严格遵守以下规则：
+
+### ✅ 保持不变的内容
+
+- XML 标签名称：`<session_metadata>`, `<user_query>` 等
+- 模板变量：`{{ $('language_detection_agent')... }}`
+- 字段名/键名：`Login Status`, `Channel`, `iso_code` 等
+- 意图枚举值：`query_product_data`, `handoff` 等
+- URL 链接
+- 专有名词：`TVCMALL`, `TVC Assistant`, `MOQ`, `SKU` 等
+- Markdown 格式标记
+- 换行符 `\n\n`
+
+### 🌐 翻译的内容
+
+- 自然语言描述
+- 章节标题
+- 用户话术示例
+- 固定回复模板的文字内容
+
+### 术语对照表
+
+| 中文 | 英文 |
+|------|------|
+| 角色与身份 | Role & Identity |
+| 核心目标 | Core Goals |
+| 上下文优先级与逻辑 | Context Priority & Logic |
+| 工具失败处理 | Tool Failure Handling |
+| 语言策略 | Language Policy |
+| 输出模板 | Output Templates |
+| 场景处理规则 | Scenario Handling Rules |
+| 语气与约束 | Tone & Constraints |
+
+---
+
+## 💡 常见问题
+
+### Q: 如何跳过自动翻译？
+
+```bash
+git commit --no-verify -m "临时提交，跳过翻译"
+```
+
+### Q: 翻译失败怎么办？
+
+1. 检查 API Key 是否正确
+2. 检查网络连接
+3. 查看错误信息
+4. 手动运行翻译脚本调试：
+   ```bash
+   ./scripts/translate-prompt.sh <文件路径>
+   ```
+
+### Q: 是否需要将 .en.md 文件提交到仓库？
+
+根据需求选择：
+- **推荐**：提交 `.en.md` 文件，方便国际化和代码审查
+- **可选**：在 `.gitignore` 中忽略 `*.en.md`，仅保留中文版本
+
+### Q: 可以自定义翻译模型吗？
+
+可以！在 `scripts/translation-config.env` 中修改：
+```bash
+MODEL=claude-opus-4-5-20251101  # 使用更强大的 Opus 模型
+```
+
+### Q: 翻译效果不理想怎么办？
+
+1. 检查原文是否清晰规范
+2. 调整翻译系统提示词（在 `scripts/translate-prompt.sh` 中的 `TRANSLATION_SYSTEM_PROMPT`）
+3. 尝试使用更强大的模型（如 Opus）
+
+---
+
+## 🛠️ 高级用法
+
+### 自定义翻译逻辑
+
+编辑 `scripts/translate-prompt.sh` 中的 `TRANSLATION_SYSTEM_PROMPT` 变量，添加您的特殊要求。
+
+### 集成到 CI/CD
+
+```yaml
+# .github/workflows/translate.yml
+name: Auto Translate Prompts
+
+on:
+  push:
+    paths:
+      - '**/*-prompt.md'
+      - '!**/*.en.md'
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: sudo apt-get install -y jq curl
+      - name: Translate
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: ./scripts/batch-translate.sh
+      - name: Commit changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add "**/*.en.md"
+          git commit -m "Auto-translate prompts to English" || true
+          git push
+```
+
+---
+
+## 📜 许可证
+
+本项目仅供内部使用。
+
+---
+
+## 🙋 支持
+
+遇到问题？
+1. 查看本 README 的常见问题部分
+2. 检查 `scripts/` 目录下的脚本注释
+3. 联系项目维护者
+
+---
+
+**最后更新**: 2026-01-20
