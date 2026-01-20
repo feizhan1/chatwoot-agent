@@ -4,6 +4,8 @@
     <user_profile>
         Channel: {{ $('Code in JavaScript1').first().json.channel }}
         Login Status: {{ $('Code in JavaScript1').first().json.isLogin }}
+        Target Language: {{ $('language_detection_agent').first().json.output.language_name }}
+        Language Code: {{ $('language_detection_agent').first().json.output.iso_code }}
     </user_profile>
 
     <conversation_history>

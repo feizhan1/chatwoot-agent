@@ -3,6 +3,8 @@
 <session_metadata>
     Channel: {{ $('Code in JavaScript1').first().json.channel }}
     Login Status: {{ $('Code in JavaScript1').first().json.isLogin }}
+    Target Language: {{ $('language_detection_agent').first().json.output.language_name }}
+    Language Code: {{ $('language_detection_agent').first().json.output.iso_code }}
 </session_metadata>
 
 <memory_bank>

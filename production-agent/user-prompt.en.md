@@ -1,8 +1,10 @@
-Please use the following hierarchical information to understand the user's request.
+Please use the following layered information to understand the user's request.
 
 <session_metadata>
     Channel: {{ $('Code in JavaScript1').first().json.channel }}
     Login Status: {{ $('Code in JavaScript1').first().json.isLogin }}
+    Target Language: {{ $('language_detection_agent').first().json.output.language_name }}
+    Language Code: {{ $('language_detection_agent').first().json.output.iso_code }}
 </session_metadata>
 
 <memory_bank>
@@ -20,8 +22,8 @@ Please use the following hierarchical information to understand the user's reque
 </current_request>
 
 <instructions>
-    1. **First check <session_metadata>**. If the user needs to download images but Login Status is false, guide them to log in regardless of other memory.
-    2. **Analyze <recent_dialogue>** to understand immediate flow. If the user says "that one" or "no, the other one," use this raw dialogue to resolve.
+    1. **Check <session_metadata> first**. If the user needs to download images but Login Status is false, guide them to log in regardless of other memory.
+    2. **Analyze <recent_dialogue>** to understand the immediate flow. If the user says "that one" or "no, the other one," use this raw conversation to resolve.
     3. **Consult <memory_bank>** for personalization.
        - If the user query is broad (e.g., "recommend a phone case"), use preferences from <memory_bank> (e.g., "likes red") to filter results.
        - Note: If information in <recent_dialogue> conflicts with <memory_bank>, trust <recent_dialogue> as it is most recent.

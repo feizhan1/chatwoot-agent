@@ -12,7 +12,8 @@
       "Bash(./scripts/batch-translate.sh:*)",
       "Bash(./scripts/translate-prompt.sh:*)",
       "Bash(brew install:*)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "Bash(xargs:*)"
     ]
   }
 }

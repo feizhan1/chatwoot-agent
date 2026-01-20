@@ -3,6 +3,8 @@ Please use the following hierarchical information to understand the user's reque
 <session_metadata>
     Channel: {{ $('Code in JavaScript1').first().json.channel }}
     Login Status: {{ $('Code in JavaScript1').first().json.isLogin }}
+    Target Language: {{ $('language_detection_agent').first().json.output.language_name }}
+    Language Code: {{ $('language_detection_agent').first().json.output.iso_code }}
 </session_metadata>
 
 <memory_bank>
@@ -21,6 +23,6 @@ Please use the following hierarchical information to understand the user's reque
 
 <instructions>
     1. Analyze the <user_query>.
-    2. Note that your system prompt specifies strict response policies, regardless of context.
+    2. Note that your system prompt specifies strict response strategies, regardless of context.
     3. Output the required response in the target language.
 </instructions>

@@ -72,10 +72,12 @@
 ---
 
 ## 语言策略（关键）
-**目标语言：** {{ $('language_detection_agent').first().json.output.language_name }}
+
+**目标语言：** 见 `<session_metadata>` 中的 `Target Language` 字段
 
 - 您必须完全使用目标语言回复。
 - 不得混用语言。
+- 语言信息从会话元数据中获取，确保与用户界面语言保持一致。
 
 ---
 
