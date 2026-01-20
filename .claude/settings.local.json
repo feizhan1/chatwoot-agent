@@ -13,7 +13,13 @@
       "Bash(./scripts/translate-prompt.sh:*)",
       "Bash(brew install:*)",
       "Bash(pkill:*)",
-      "Bash(xargs:*)"
+      "Bash(xargs:*)",
+      "Bash(bash:*)",
+      "Bash(jq:*)",
+      "Bash(ls:*)",
+      "Bash(git reset:*)",
+      "Bash(git restore:*)",
+      "Bash(grep:*)"
     ]
   }
 }

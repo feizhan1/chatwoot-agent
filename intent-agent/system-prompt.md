@@ -4,7 +4,7 @@
 # Context Data (新增板块)
 **以下是该用户的长期画像和当前会话上下文，如果用户输入中包含代词（如“这个”、“它”、“那个订单”），请优先从这里寻找指代对象：**
 
-{{ $('Code in JavaScript10').first().json.final_memory_context }}
+{final_memory_context}
 
 # Workflow
 请按照以下优先级顺序进行判断（优先级由高到低）：
