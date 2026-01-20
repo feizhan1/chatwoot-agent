@@ -1,9 +1,18 @@
-### 历史上下文（先前对话）：
-{{ $('Code in JavaScript').first().json.history_context || "未提供上下文。" }}
+<recent_dialogue>
+    {recent_dialogue}
+</recent_dialogue>
 
-### 草稿消息（待改进的输入）：
-{{ $('Merge').first().json.body.draft_message }}
+<draft_message>
+    {draft_message}
+</draft_message>
 
-### 指令：
-请使用 **{{ $('Merge').first().json.body.event_type }}** 模式改写草稿。
-使用上下文确保准确性。
+<event_type>
+    {event_type}
+</event_type>
+
+<instructions>
+    1. 仔细检查 <draft_message> 中的草稿内容。
+    2. 参考 <recent_dialogue> 来理解对话上下文。
+    3. 根据 <event_type> 确定是添加个性化还是直接改写。
+    4. 根据系统提示词中定义的改写模式，优化消息内容和语气。
+</instructions>

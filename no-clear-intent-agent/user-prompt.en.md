@@ -1,23 +1,23 @@
 Please use the following hierarchical information to understand the user's request.
 
 <session_metadata>
-    Channel: {{ $('Code in JavaScript1').first().json.channel }}
-    Login Status: {{ $('Code in JavaScript1').first().json.isLogin }}
-    Target Language: {{ $('language_detection_agent').first().json.output.language_name }}
-    Language Code: {{ $('language_detection_agent').first().json.output.iso_code }}
+    Channel: {channel}
+    Login Status: {login_status}
+    Target Language: {target_language}
+    Language Code: {language_code}
 </session_metadata>
 
 <memory_bank>
-    {{ $('Code in JavaScript10').first().json.final_memory_context }}
+    {memory_bank}
 </memory_bank>
 
 <recent_dialogue>
-    {{ $('Code in JavaScript').first().json.history_context }}
+    {recent_dialogue}
 </recent_dialogue>
 
 <current_request>
     <user_query>
-        {{ $('Code in JavaScript1').first().json.ask }}
+        {user_query}
     </user_query>
 </current_request>
 

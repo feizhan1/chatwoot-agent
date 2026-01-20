@@ -1,1 +1,1 @@
-{{ $('Code in JavaScript1').first().json.ask || '无法解决的问题' }}
+{user_query}

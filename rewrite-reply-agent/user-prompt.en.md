@@ -1,9 +1,18 @@
-### Historical Context (Previous Conversation):
-{{ $('Code in JavaScript').first().json.history_context || "No context provided." }}
+<recent_dialogue>
+    {recent_dialogue}
+</recent_dialogue>
 
-### Draft Message (Input to be Improved):
-{{ $('Merge').first().json.body.draft_message }}
+<draft_message>
+    {draft_message}
+</draft_message>
 
-### Instructions:
-Please rewrite the draft using **{{ $('Merge').first().json.body.event_type }}** mode.
-Use the context to ensure accuracy.
+<event_type>
+    {event_type}
+</event_type>
+
+<instructions>
+    1. Carefully review the draft content in <draft_message>.
+    2. Reference <recent_dialogue> to understand the conversation context.
+    3. Determine whether to add personalization or directly rewrite based on <event_type>.
+    4. Optimize message content and tone according to the rewrite mode defined in the system prompt.
+</instructions>

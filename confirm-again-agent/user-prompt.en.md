@@ -1,28 +1,26 @@
 Please use the following context information to process the user's request.
 
-<context_data>
-    <user_profile>
-        Channel: {{ $('Code in JavaScript1').first().json.channel }}
-        Login Status: {{ $('Code in JavaScript1').first().json.isLogin }}
-        Target Language: {{ $('language_detection_agent').first().json.output.language_name }}
-        Language Code: {{ $('language_detection_agent').first().json.output.iso_code }}
-    </user_profile>
+<session_metadata>
+    Channel: {channel}
+    Login Status: {login_status}
+    Target Language: {target_language}
+    Language Code: {language_code}
+</session_metadata>
 
-    <conversation_history>
-        {{ $('Code in JavaScript').first().json.history_context }}
-    </conversation_history>
-</context_data>
+<recent_dialogue>
+    {recent_dialogue}
+</recent_dialogue>
 
 <current_request>
     <user_query>
-        {{ $('Code in JavaScript1').first().json.ask }}
+        {user_query}
     </user_query>
 </current_request>
 
 <instructions>
-    1. Analyze <user_query> and <conversation_history> to identify **what specific information is missing**.
-    2. Check <user_profile> to personalize the tone (e.g., if logged in, reference their account context when appropriate).
+    1. Analyze <user_query> and <recent_dialogue>, identify **what specific information is missing**.
+    2. Check <session_metadata> to personalize tone (e.g., if logged in, reference their account context as appropriate).
     3. **Do not answer business questions yet.**
     4. Based on the missing information, generate a **helpful follow-up question** to clarify user intent.
-       (For example: "Could you please provide the order number?" or "Which specific product model are you referring to?")
+       (e.g., "Could you please provide the order number?" or "Which specific product model are you referring to?")
 </instructions>

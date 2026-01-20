@@ -1,1 +1,1 @@
-{{ $('Code in JavaScript1').first().json.ask}}
+{user_query}
