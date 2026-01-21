@@ -1,4 +1,4 @@
-Please use the following hierarchical information to understand the user's request.
+Please use the following layered information to understand the user's request.
 
 <session_metadata>
     Channel: {channel}
@@ -8,7 +8,11 @@ Please use the following hierarchical information to understand the user's reque
 </session_metadata>
 
 <memory_bank>
-    {memory_bank}
+    ### User Long-term Profile (Historical Data)
+    {user_profile}
+
+    ### Active Context (Current Session Summary)
+    {active_context}
 </memory_bank>
 
 <recent_dialogue>
@@ -22,7 +26,7 @@ Please use the following hierarchical information to understand the user's reque
 </current_request>
 
 <instructions>
-    1. Analyze the <user_query>.
+    1. Analyze <user_query>.
     2. Note that your system prompt specifies strict response strategies, regardless of context.
     3. Output the required response in the target language.
 </instructions>

@@ -7,9 +7,13 @@
     Language Code: {language_code}
 </session_metadata>
 
-<recent_dialogue>
-    {recent_dialogue}
-</recent_dialogue>
+<memory_bank>
+    ### User Long-term Profile (Historical Data)
+    {user_profile}
+
+    ### Active Context (Current Session Summary)
+    {active_context}
+</memory_bank>
 
 <current_request>
     <user_query>
