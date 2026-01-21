@@ -143,6 +143,19 @@ transfer  order  product business confirm  general
 - **输出**：优化后的回复文本
 - **用途**：统一语气、修正语法、增强友好度
 
+##### rag-query-rewrite-agent（查询改写）
+- **职责**：优化用户查询，用于知识库 RAG 检索
+- **核心功能**：
+  - 指代消解：将"它"、"这个"替换为具体实体
+  - 话题切换检测：判断是否需要合并历史上下文
+  - 去噪简化：去除礼貌用语和情绪表达
+  - 统一英语输出：无论输入什么语言，输出统一为英语
+- **输入**：`{user_query}`, `{recent_dialogue}`, `{memory_bank}`
+- **输出**：简洁的英语搜索查询（无前缀、无解释）
+- **示例**：
+  - 输入："你好，请问 iPhone 17 手机壳库存？" → 输出：`iPhone 17 case stock`
+  - 输入（带指代）："它有透明款吗？" → 输出：`iPhone 17 case transparent option`
+
 ##### error-handle-agent（错误处理）
 - **职责**：作为系统的兜底层
 - **触发条件**：上游 agent 失败、工具调用超时、解析错误
@@ -584,6 +597,14 @@ curl https://api.anthropic.com/v1/messages \
   - 简化输出要求文档（从320行精简到62行）
   - 添加置信度分级标准
   - 补充 resolution_source 追溯机制
+
+- ✅ **RAG-Query-Rewrite-Agent 标准化**：
+  - 从英文改写为中文系统提示词
+  - 统一使用标准占位符格式（`{variable}`）
+  - 添加完整的上下文结构（session_metadata, memory_bank, recent_dialogue）
+  - 新增 5 大改写规则（指代消解、话题切换、去噪简化、上下文合并、统一英语输出）
+  - 添加 6 个完整示例和质量检查清单
+  - **关键特性**：无论输入什么语言，输出统一为英语
 
 ## 未来优化方向
 

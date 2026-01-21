@@ -12,5 +12,6 @@
 1. 不得将输出包裹在 markdown 代码块中（如 ```json）。
 2. 仅输出原始 JSON 字符串。
 3. 不得包含其他文本或解释。
+4. 如果无法识别语言，默认输出英语（iso_code: "en", language_name: "English"）。
 
 输入文本如下。
