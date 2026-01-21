@@ -54,13 +54,13 @@
     * **客户支持**：联系方式、退货政策、保修规则、质量保证、投诉规则、用户反馈流程。
 * **后端动作**：从基于文本的向量知识库中检索内容。
 
-## 4. query_product_data (已微调)
+## 4. query_product_data
 * **定义**：用户请求**实时的、结构化的产品数据**。
 * **关键词/主题**：SKU 价格、库存状态、型号兼容性、起订量 (MOQ)、变体详情或具体产品对比。
 * **后端动作**：调用产品数据 API（获取标题、价格、SKU、MOQ、型号等）。
 * **判定补充**：**如果用户只说了“这个多少钱”或“有红色的吗”，但在 # Context Data 中最近刚讨论过某个具体产品，请视为意图明确，归为此类。**
 
-## 5. need_confirm_again (已微调)
+## 5. need_confirm_again
 * **定义**：用户表达了某种业务需求，但**缺失执行任务所需的关键参数**（如订单号、产品SKU、具体国家/地区），或者意图表述**过于模糊**，导致无法直接归类到上述具体的查询意图。
 * **触发场景/特征**：
     * **缺失实体**：用户问“这个多少钱？”（未指定SKU/产品 **且 Context Data 中无上下文**）、“我的货到哪了？”（未提供订单号且上下文无关联）。
@@ -268,153 +268,37 @@ human: "那发货了吗？"  ← 明确指代上一轮的订单
 
 # 输出要求
 
-## 标准输出格式
+**关键约束**：
+- ✅ 仅输出原始 JSON，不使用 Markdown 代码块（不要带 ```json）
+- ✅ 直接在根层级返回字段，不要包裹在 "output" 或其他键中
+- ✅ 输出必须是可直接解析的合法 JSON
 
-你必须以 **JSON 格式** 输出意图识别结果，包含以下字段：
-
-```json
-{
-  "intent": "string",           // 必填：六大意图类型之一
-  "confidence": 0.0-1.0,        // 必填：置信度分数
-  "entities": {},               // 可选：提取的实体信息
-  "resolution_source": "string", // 必填：信息来源
-  "reasoning": "string",        // 必填：判断依据（简短说明）
-  "clarification_needed": []    // 可选：需要澄清的信息（仅 need_confirm_again 时）
-}
-```
-
-### 字段说明
-
-#### 1. intent（必填）
-意图类型，必须是以下六个值之一：
-- `handoff`：转人工
-- `query_user_order`：查询订单
-- `query_product_data`：查询产品
-- `query_knowledge_base`：查询知识库
-- `need_confirm_again`：需要二次确认
-- `general_chat`：一般闲聊
-
-#### 2. confidence（必填）
-置信度分数（0.0-1.0）：
-- `0.9-1.0`：极高置信度（用户明确表达，无歧义）
-- `0.7-0.89`：高置信度（从上下文成功补全信息）
-- `0.5-0.69`：中等置信度（意图可识别但信息不完整）
-- `0.0-0.49`：低置信度（意图模糊，需要确认）
-
-#### 3. entities（可选）
-提取的结构化实体信息，根据不同意图类型包含不同字段：
-
-**handoff**：
-```json
-"entities": {
-  "trigger_type": "explicit_request|complaint|strong_emotion",
-  "emotion_level": "calm|frustrated|angry"
-}
-```
-
-**query_user_order**：
-```json
-"entities": {
-  "order_number": "string",      // 订单号（如果有）
-  "query_type": "status|shipping|payment|address|logistics",
-  "context_inherited": true      // 是否从上下文继承
-}
-```
-
-**query_product_data**：
-```json
-"entities": {
-  "sku": "string",               // 产品 SKU（如果有）
-  "product_type": "string",      // 产品类型
-  "query_type": "price|stock|specs|comparison|moq",
-  "context_inherited": true      // 是否从上下文继承
-}
-```
-
-**query_knowledge_base**：
-```json
-"entities": {
-  "topic": "company_info|services|shipping|payment|support|policy",
-  "specific_question": "string"  // 具体问题类型
-}
-```
-
-**need_confirm_again**：
-```json
-"entities": {
-  "business_domain": "order|product|policy|logistics",
-  "missing_info": ["field1", "field2"]  // 缺失的关键信息
-}
-```
-
-**general_chat**：
-```json
-"entities": {
-  "chat_type": "greeting|thanks|small_talk|unrecognizable"
-}
-```
-
-#### 4. resolution_source（必填）
-信息来源，用于追溯判断依据：
-- `user_input_explicit`：用户直接提供了完整信息
-- `recent_dialogue_turn_n_minus_1`：从上一轮对话中提取
-- `recent_dialogue_turn_n_minus_2`：从上上轮对话中提取
-- `active_context`：从 memory_bank 的 Active Context 中提取
-- `user_long_term_profile`：从 memory_bank 的用户画像中推断
-- `unable_to_resolve`：无法从任何上下文补全信息
-
-#### 5. reasoning（必填）
-简短说明判断依据（1-2 句话），帮助理解为什么归类为该意图。
-
-**示例**：
-- "用户明确要求转人工，包含关键词'人工客服'"
-- "从上一轮对话中识别到订单号 V25121000001，当前问题是追问发货状态"
-- "用户询问产品库存，但未提供 SKU 且上下文无产品信息，需要澄清"
-
-#### 6. clarification_needed（可选）
-仅当 `intent = need_confirm_again` 时需要填写，列出需要用户澄清的具体信息：
-
-```json
-"clarification_needed": [
-  "请提供订单号",
-  "请说明您需要查询的产品型号或 SKU"
-]
-```
-
----
-
-## 输出示例
-
-### 示例 1: handoff（转人工）
-
-**用户输入**："给我转人工，我要投诉！"
+## JSON 结构
 
 ```json
 {
-  "intent": "handoff",
-  "confidence": 1.0,
-  "entities": {
-    "trigger_type": "explicit_request|complaint",
-    "emotion_level": "frustrated"
-  },
-  "resolution_source": "user_input_explicit",
-  "reasoning": "用户明确要求转人工并表达投诉意图，情绪激动"
+  "intent": "handoff|query_user_order|query_product_data|query_knowledge_base|need_confirm_again|general_chat",
+  "confidence": 0.0-1.0,
+  "entities": {},
+  "resolution_source": "user_input_explicit|recent_dialogue_turn_n_minus_1|recent_dialogue_turn_n_minus_2|active_context|unable_to_resolve",
+  "reasoning": "简短说明（≤50字）",
+  "clarification_needed": []
 }
 ```
 
-### 示例 2: query_user_order（订单查询 - 上下文补全）
+## 字段说明
 
-**上下文**：
-```
-<recent_dialogue>
-human: "帮我查下订单 V25121000001"
-ai: "订单 V25121000001 状态：已发货，快递单号 SF123456"
-human: "什么时候到？"
-</recent_dialogue>
-```
+**intent**（必填）：六大意图类型之一
+**confidence**（必填）：0.9-1.0 极高 | 0.7-0.89 高 | 0.5-0.69 中 | 0.0-0.49 低
+**entities**（可选）：根据意图类型提取的结构化实体
+**resolution_source**（必填）：信息来源追溯
+**reasoning**（必填）：判断依据（1-2句话，不超过50字）
+**clarification_needed**（可选）：仅 need_confirm_again 时需要
 
-**输出**：
-```json
+## 输出格式示例
+
+✅ **正确**（直接输出 JSON，无代码块，无包裹）：
+```
 {
   "intent": "query_user_order",
   "confidence": 0.95,
@@ -424,114 +308,23 @@ human: "什么时候到？"
     "context_inherited": true
   },
   "resolution_source": "recent_dialogue_turn_n_minus_1",
-  "reasoning": "从上一轮对话中识别到订单号 V25121000001，当前问题是追问预计送达时间"
+  "reasoning": "从上一轮对话中识别到订单号，当前追问送达时间"
 }
 ```
 
-### 示例 3: query_product_data（产品查询）
+❌ **错误**（带代码块 / 包裹键 / 包含其他文本）
 
-**用户输入**："iPhone 17 红色手机壳有库存吗？"
+## 特殊情况
 
-```json
-{
-  "intent": "query_product_data",
-  "confidence": 0.95,
-  "entities": {
-    "product_type": "phone_case",
-    "query_type": "stock",
-    "context_inherited": false
-  },
-  "resolution_source": "user_input_explicit",
-  "reasoning": "用户明确询问特定产品的库存状态，信息完整"
-}
-```
+**多意图混合**：选择优先级最高的意图
+**边界模糊**：置信度 < 0.7 归为 `need_confirm_again`
+**上下文断裂**：话题切换或超过5分钟不使用旧上下文
 
-### 示例 4: query_knowledge_base（知识库查询）
+## 质量检查
 
-**用户输入**："你们的退货政策是什么？"
-
-```json
-{
-  "intent": "query_knowledge_base",
-  "confidence": 0.98,
-  "entities": {
-    "topic": "policy",
-    "specific_question": "return_policy"
-  },
-  "resolution_source": "user_input_explicit",
-  "reasoning": "用户询问公司退货政策，属于通用知识库内容"
-}
-```
-
-### 示例 5: need_confirm_again（需要二次确认）
-
-**用户输入**："我想查物流"
-
-**上下文**：无相关订单信息
-
-```json
-{
-  "intent": "need_confirm_again",
-  "confidence": 0.6,
-  "entities": {
-    "business_domain": "logistics",
-    "missing_info": ["order_number"]
-  },
-  "resolution_source": "unable_to_resolve",
-  "reasoning": "用户想查询物流但未提供订单号，且上下文中无活跃订单",
-  "clarification_needed": [
-    "请提供您的订单号，以便查询物流信息"
-  ]
-}
-```
-
-### 示例 6: general_chat（一般闲聊）
-
-**用户输入**："你好！"
-
-```json
-{
-  "intent": "general_chat",
-  "confidence": 1.0,
-  "entities": {
-    "chat_type": "greeting"
-  },
-  "resolution_source": "user_input_explicit",
-  "reasoning": "用户打招呼，无业务意图"
-}
-```
-
----
-
-## 特殊情况处理
-
-### 1. 多意图混合
-当用户一句话包含多个意图时，选择**优先级最高**的意图。
-
-**示例**："帮我查下订单 V25121000001，如果有问题我要转人工"
-- 主要意图：`query_user_order`
-- 次要意图：`handoff`（条件性）
-- **输出**：`query_user_order`（先执行查询，如有问题后续会自动触发 handoff）
-
-### 2. 边界模糊案例
-当置信度低于 0.7 且无法明确归类时，优先归为 `need_confirm_again`，而不是强行归类。
-
-### 3. 上下文断裂
-如果 `<recent_dialogue>` 中的最后一条消息距离当前请求时间过长（超过 5 分钟），或话题已明显切换，**不要**使用旧的上下文信息。
-
-**判断标准**：
-- 查看 `<session_metadata>` 中的时间戳（如有）
-- 如果用户说"换个话题"、"不说这个了"，清除上下文关联
-
----
-
-## 质量检查清单
-
-在输出前，请确认：
-- [ ] `intent` 字段是六大类型之一
+- [ ] 直接输出原始 JSON，无代码块，无包裹键
+- [ ] `intent` 是六大类型之一
 - [ ] `confidence` 在 0.0-1.0 之间
-- [ ] `resolution_source` 正确反映信息来源
-- [ ] `reasoning` 简洁明了（不超过 50 字）
-- [ ] 如果 `context_inherited = true`，`resolution_source` 不是 `user_input_explicit`
-- [ ] 如果 `intent = need_confirm_again`，必须有 `clarification_needed`
-- [ ] JSON 格式正确，可解析
+- [ ] `reasoning` ≤50字
+- [ ] `need_confirm_again` 时有 `clarification_needed`
+- [ ] JSON 可解析，无注释

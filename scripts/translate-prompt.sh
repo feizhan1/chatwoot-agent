@@ -108,10 +108,22 @@ translate_file() {
     fi
 
     # 提取翻译内容
-    TRANSLATED_CONTENT=$(echo "$RESPONSE" | jq -r '.content[0].text')
+    TRANSLATED_CONTENT=$(echo "$RESPONSE" | jq -r '.content[0].text' 2>&1)
+
+    # 检查 jq 是否执行成功
+    if [ $? -ne 0 ]; then
+        echo "   ❌ JSON 解析失败"
+        echo "   📋 原始响应（前 500 字符）:"
+        echo "$RESPONSE" | head -c 500
+        echo ""
+        return 1
+    fi
 
     if [ -z "$TRANSLATED_CONTENT" ] || [ "$TRANSLATED_CONTENT" = "null" ]; then
         echo "   ❌ 翻译失败：未返回内容"
+        echo "   📋 原始响应（前 500 字符）:"
+        echo "$RESPONSE" | head -c 500
+        echo ""
         return 1
     fi
 

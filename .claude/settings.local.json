@@ -20,7 +20,10 @@
       "Bash(git reset:*)",
       "Bash(git restore:*)",
       "Bash(grep:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(source:*)",
+      "Bash(curl:*)",
+      "Bash(./scripts/debug-translate.sh:*)"
     ]
   }
 }
