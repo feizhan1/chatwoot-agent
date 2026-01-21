@@ -62,8 +62,25 @@ transfer  order  product business confirm  general
 6. `general_chat`（闲聊）- 兜底处理
 
 **关键文件**：
-- `intent-agent/system-prompt.md`（✅ 存在）
-- `intent-agent/user-prompt.md`（❌ 缺失，建议补充）
+- `intent-agent/system-prompt.md`：定义意图分类逻辑、指代解析规则、结构化输出格式
+- `intent-agent/user-prompt.md`：提供上下文数据模板
+
+**输出格式**（结构化 JSON）：
+```json
+{
+  "intent": "handoff|query_user_order|query_product_data|query_knowledge_base|need_confirm_again|general_chat",
+  "confidence": 0.0-1.0,
+  "entities": {},
+  "resolution_source": "user_input_explicit|recent_dialogue_turn_n_minus_1|active_context|unable_to_resolve",
+  "reasoning": "简短说明（≤50字）",
+  "clarification_needed": []
+}
+```
+
+**重要约束**：
+- ✅ 直接输出原始 JSON，不使用 Markdown 代码块
+- ✅ 不要将结果包裹在 "output" 或其他键中
+- ✅ 必须包含 `intent`, `confidence`, `resolution_source`, `reasoning` 四个字段
 
 #### 2. 六大专业 Agent
 
@@ -523,18 +540,25 @@ curl https://api.anthropic.com/v1/messages \
    - 查看 `intent-agent/system-prompt.md` 了解路由逻辑
    - 优先级：handoff > 业务查询 > 确认 > 闲聊
 
-5. **上下文优先级**：
+5. **Intent-Agent 输出规范**（重要）：
+   - ✅ 直接输出原始 JSON，不使用 ```json 代码块
+   - ✅ 不要包裹在 "output" 或其他键中
+   - ✅ 必须包含：`intent`, `confidence`, `entities`, `resolution_source`, `reasoning`
+   - ✅ `need_confirm_again` 时必须包含 `clarification_needed` 字段
+   - ✅ `confidence` 范围：0.9-1.0（极高）| 0.7-0.89（高）| 0.5-0.69（中）| 0.0-0.49（低）
+
+6. **上下文优先级**：
    - `<memory_bank>`：用户长期画像
    - `<recent_dialogue>`：即时上下文
    - `<user_query>`：当前请求
    - 冲突时：recent_dialogue > memory_bank
 
-6. **工具调用原则**：
+7. **工具调用原则**：
    - 仅在需要外部数据时调用工具
    - 优先使用缓存（如适用）
    - 工具失败时有降级策略
 
-7. **个性化策略**：
+8. **个性化策略**：
    - 从 `<memory_bank>` 提取用户类型
    - Dropshipper：强调无 MOQ、API
    - Wholesaler：强调批量、定制
@@ -550,6 +574,16 @@ curl https://api.anthropic.com/v1/messages \
 6. ✅ **灵活路由**：intent-agent 集中管理路由逻辑
 7. ✅ **标准化**：统一的输入输出格式
 8. ✅ **个性化**：基于用户画像的动态响应
+
+## 最近更新
+
+### 2026-01-21
+- ✅ **Intent-Agent 结构化输出优化**：
+  - 新增标准 JSON 输出格式定义（6个字段）
+  - 明确输出约束（不使用代码块、不包裹额外键）
+  - 简化输出要求文档（从320行精简到62行）
+  - 添加置信度分级标准
+  - 补充 resolution_source 追溯机制
 
 ## 未来优化方向
 
@@ -571,7 +605,3 @@ curl https://api.anthropic.com/v1/messages \
 4. **A/B 测试**：
    - 不同 prompt 版本对比
    - 不同 LLM 模型效果评估
-
-5. **补充 intent-agent user-prompt**：
-   - 当前缺失，建议添加标准模板
-   - 提高意图识别的一致性
