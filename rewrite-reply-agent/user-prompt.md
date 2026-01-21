@@ -2,9 +2,13 @@
     {recent_dialogue}
 </recent_dialogue>
 
-<draft_message>
-    {draft_message}
-</draft_message>
+<memory_bank>
+    ### User Long-term Profile (Historical Data)
+    {user_profile}
+
+    ### Active Context (Current Session Summary)
+    {active_context}
+</memory_bank>
 
 <event_type>
     {event_type}
