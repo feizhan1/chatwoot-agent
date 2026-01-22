@@ -23,7 +23,8 @@
       "Bash(git push:*)",
       "Bash(source:*)",
       "Bash(curl:*)",
-      "Bash(./scripts/debug-translate.sh:*)"
+      "Bash(./scripts/debug-translate.sh:*)",
+      "Bash(git checkout:*)"
     ]
   }
 }
