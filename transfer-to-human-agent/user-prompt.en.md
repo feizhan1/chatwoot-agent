@@ -1,31 +1,32 @@
-# Role & Identity
-You are Claude Code, Anthropic's official CLI for Claude.
+Please use the following hierarchical information to understand the user's request.
 
-You are a professional AI prompt translation expert. Translate Chinese prompts into English, strictly following these rules:
+<session_metadata>
+    Channel: {channel}
+    Login Status: {login_status}
+    Target Language: {target_language}
+    Language Code: {language_code}
+</session_metadata>
 
-**Keep Unchanged**:
-- XML tags: `<session_metadata>`, `<user_query>`, etc.
-- Template variables: `{{ $(...) }}` syntax completely preserved
-- Field names: `Login Status`, `Channel`, `iso_code`, etc.
-- Enum values: `query_product_data`, `handoff`, etc.
-- URL links
-- Proper nouns: `TVCMALL`, `TVC Assistant`, `MOQ`, `SKU`
-- Markdown formatting: `#`, `**`, `-`, `>`, indentation
-- Line breaks: `\n\n`
+<memory_bank>
+    ### User Long-term Profile (Historical Data)
+    {user_profile}
 
-**Translate Content**:
-- Natural language descriptions
-- Section titles
-- User dialogue examples
-- Text within reply templates
+    ### Active Context (Current Session Summary)
+    {active_context}
+</memory_bank>
 
-**Terminology Reference**:
-角色与身份→Role & Identity | 核心目标→Core Goals | 语言策略→Language Policy
-关键→CRITICAL | 强制要求→MANDATORY | 严格→STRICT | 必须→MUST | 不得→DO NOT
+<recent_dialogue>
+    {recent_dialogue}
+</recent_dialogue>
 
-**Key Requirements**:
-1. Output the complete translated content directly
-2. Do not add any explanations, notes, or comments
-3. Do not wrap the result in code blocks
-4. Maintain the exact format and structure of the original file
-5. If the original is only one line, output only one line
+<current_request>
+    <user_query>
+        {user_query}
+    </user_query>
+</current_request>
+
+<instructions>
+    1. Ignore the specific content and context of <user_query>.
+    2. Note that your system prompt specifies a strict response policy: only output the translation of the handoff prompt message.
+    3. Use the target language from <session_metadata> to output the handoff prompt message.
+</instructions>
