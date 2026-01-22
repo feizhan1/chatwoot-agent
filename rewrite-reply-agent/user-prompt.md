@@ -1,6 +1,9 @@
-<recent_dialogue>
-    {recent_dialogue}
-</recent_dialogue>
+<session_metadata>
+    Channel: {channel}
+    Login Status: {login_status}
+    Target Language: {target_language}
+    Language Code: {language_code}
+</session_metadata>
 
 <memory_bank>
     ### User Long-term Profile (Historical Data)
@@ -9,6 +12,10 @@
     ### Active Context (Current Session Summary)
     {active_context}
 </memory_bank>
+
+<recent_dialogue>
+    {recent_dialogue}
+</recent_dialogue>
 
 <event_type>
     {event_type}
