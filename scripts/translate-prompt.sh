@@ -93,8 +93,8 @@ translate_file() {
             ]
         }')
 
-    # 调用 Claude API
-    RESPONSE=$(curl -s "${API_BASE_URL}/v1/messages" \
+    # 调用 Claude API（增加超时设置）
+    RESPONSE=$(curl -s --max-time 300 "${API_BASE_URL}/v1/messages" \
         -H "Content-Type: application/json" \
         -H "x-api-key: $API_KEY" \
         -H "anthropic-version: 2023-06-01" \
