@@ -1,0 +1,45 @@
+{
+  "scenario": "闲聊与基础交互",
+  "description": "测试用户打招呼、礼貌用语、无意义输入等基础对话",
+  "cases": [
+    {
+      "id": "TC001",
+      "name": "用户打招呼",
+      "intent": "general_chat",
+      "input": {
+        "query": "hello",
+        "login": false,
+        "language": "en"
+      },
+      "expect": {
+        "keywords": ["help", "product", "order"]
+      }
+    },
+    {
+      "id": "TC002",
+      "name": "礼貌用语",
+      "intent": "general_chat",
+      "input": {
+        "query": "thank you",
+        "login": false,
+        "language": "en"
+      },
+      "expect": {
+        "keywords": ["welcome", "help"]
+      }
+    },
+    {
+      "id": "TC003",
+      "name": "无意义输入",
+      "intent": "general_chat",
+      "input": {
+        "query": "test test",
+        "login": false,
+        "language": "en"
+      },
+      "expect": {
+        "keywords": ["help", "assist"]
+      }
+    }
+  ]
+}

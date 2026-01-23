@@ -1,5 +1,0 @@
-[
-  {
-    "text": "{\n  \"intent\": \"need_confirm_again\",\n  \"confidence\": 0.6,\n  \"entities\": {},\n  \"resolution_source\": \"unable_to_resolve\",\n  \"reasoning\": \"用户只提供了国家名，但缺乏关键信息以明确查询内容。\",\n  \"clarification_needed\": [\n    \"请告知您想查询关于中国的运输时间还是其他信息？\"\n  ]\n}"
-  }
-]

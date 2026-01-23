@@ -1,0 +1,147 @@
+{
+  "scenario": "产品查询",
+  "description": "测试按 SKU 查询、价格查询、库存查询、产品推荐、样品订单等",
+  "cases": [
+    {
+      "id": "TC019",
+      "name": "按 SKU 查询产品",
+      "intent": "query_product_data",
+      "input": {
+        "query": "Tell me about product 6604028714A",
+        "login": false,
+        "language": "en"
+      },
+      "expect": {
+        "tool": "query_production_xx",
+        "keywords": ["6604028714A", "Price", "iPhone"]
+      }
+    },
+    {
+      "id": "TC020",
+      "name": "查询产品价格",
+      "intent": "query_product_data",
+      "input": {
+        "query": "What's the price of 6604032642A?",
+        "login": false,
+        "language": "en"
+      },
+      "expect": {
+        "tool": "query_production_xx",
+        "keywords": ["6604032642A", "$"]
+      }
+    },
+    {
+      "id": "TC021",
+      "name": "查询产品库存",
+      "intent": "query_product_data",
+      "input": {
+        "query": "Is 6604028714A in stock?",
+        "login": false,
+        "language": "en"
+      },
+      "expect": {
+        "tool": "query_production_xx",
+        "keywords": ["6604028714A", "stock"]
+      }
+    },
+    {
+      "id": "TC022",
+      "name": "查询产品重量（指代消解）",
+      "priority": "high",
+      "intent": "query_product_data",
+      "input": {
+        "query": "What's the weight?",
+        "login": false,
+        "language": "en",
+        "context": [
+          {"role": "user", "content": "Tell me about product 6604028714A"},
+          {"role": "ai", "content": "Product 6604028714A is priced at $3.13..."}
+        ]
+      },
+      "expect": {
+        "tool": "query_production_xx",
+        "keywords": ["6604028714A", "kg", "weight"],
+        "resolution": "从上下文推断 SKU"
+      },
+      "note": "⚠️ 测试指代消解能力"
+    },
+    {
+      "id": "TC023",
+      "name": "查询产品规格（指代消解）",
+      "priority": "high",
+      "intent": "query_product_data",
+      "input": {
+        "query": "What are the specs for this product?",
+        "login": false,
+        "language": "en",
+        "memory": "User inquired about product 6604028714A",
+        "context": [
+          {"role": "user", "content": "What's the weight?"},
+          {"role": "ai", "content": "The weight of 6604028714A is 0.05 kg"}
+        ]
+      },
+      "expect": {
+        "tool": "query_production_xx",
+        "keywords": ["6604028714A", "specifications"],
+        "resolution": "从 memory_bank 推断 SKU"
+      },
+      "note": "⚠️ 测试从 memory_bank 提取信息"
+    },
+    {
+      "id": "TC024",
+      "name": "批量产品推荐",
+      "intent": "query_product_data",
+      "input": {
+        "query": "I need transparent iPhone 17 cases, any recommendations?",
+        "login": false,
+        "language": "en"
+      },
+      "expect": {
+        "tool": "相似度查询-rag推荐",
+        "keywords": ["iPhone 17", "transparent", "case", "SKU"]
+      }
+    },
+    {
+      "id": "TC025",
+      "name": "模糊产品搜索",
+      "intent": "query_product_data",
+      "input": {
+        "query": "Do you have Samsung Galaxy S24 screen protectors?",
+        "login": false,
+        "language": "en"
+      },
+      "expect": {
+        "tool": "相似度查询-rag推荐",
+        "keywords": ["Samsung", "Galaxy S24", "screen protector"]
+      }
+    },
+    {
+      "id": "TC026",
+      "name": "样品订单咨询",
+      "intent": "query_product_data",
+      "input": {
+        "query": "Can I order samples first?",
+        "login": false,
+        "language": "en",
+        "memory": "User is looking to purchase a batch of iPhone cases"
+      },
+      "expect": {
+        "keywords": ["sample", "MOQ", "minimum order"]
+      }
+    },
+    {
+      "id": "TC027",
+      "name": "错误的 SKU",
+      "intent": "query_product_data",
+      "input": {
+        "query": "Show me product ABC123XYZ",
+        "login": false,
+        "language": "en"
+      },
+      "expect": {
+        "tool": "query_production_xx",
+        "keywords": ["not found", "cannot find", "invalid"]
+      }
+    }
+  ]
+}

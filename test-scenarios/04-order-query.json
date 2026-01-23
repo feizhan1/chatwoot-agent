@@ -1,0 +1,140 @@
+{
+  "scenario": "订单查询",
+  "description": "测试订单状态查询、物流追踪、投诉处理等",
+  "cases": [
+    {
+      "id": "TC028",
+      "name": "未登录查询订单",
+      "priority": "high",
+      "intent": "query_user_order",
+      "input": {
+        "query": "Where is my order?",
+        "login": false,
+        "language": "en"
+      },
+      "expect": {
+        "keywords": ["log in", "login", "account security"]
+      },
+      "note": "⚠️ 必须验证登录状态"
+    },
+    {
+      "id": "TC029",
+      "name": "已登录查询订单（无订单号）",
+      "intent": "need_confirm_again",
+      "input": {
+        "query": "Where is my package?",
+        "login": true,
+        "user": "John",
+        "language": "en"
+      },
+      "expect": {
+        "keywords": ["order number", "John"],
+        "clarification": true
+      }
+    },
+    {
+      "id": "TC030",
+      "name": "提供订单号查询",
+      "priority": "high",
+      "intent": "query_user_order",
+      "input": {
+        "query": "M26011500001",
+        "login": true,
+        "user": "John",
+        "language": "en",
+        "context": [
+          {"role": "user", "content": "Where is my package?"},
+          {"role": "ai", "content": "Could you please provide your order number?"}
+        ]
+      },
+      "expect": {
+        "tool": "query_order_data",
+        "keywords": ["M26011500001"],
+        "resolution": "从上下文推断用户在查询订单"
+      },
+      "note": "⚠️ 测试上下文理解"
+    },
+    {
+      "id": "TC031",
+      "name": "直接提供订单号查询",
+      "intent": "query_user_order",
+      "input": {
+        "query": "Check order M26011500001",
+        "login": true,
+        "user": "John",
+        "language": "en"
+      },
+      "expect": {
+        "tool": "query_order_data",
+        "keywords": ["M26011500001"]
+      }
+    },
+    {
+      "id": "TC032",
+      "name": "查询订单状态",
+      "intent": "query_user_order",
+      "input": {
+        "query": "What's the status of my order M26011500001?",
+        "login": true,
+        "user": "John",
+        "language": "en"
+      },
+      "expect": {
+        "tool": "query_order_data",
+        "keywords": ["M26011500001", "status"]
+      }
+    },
+    {
+      "id": "TC033",
+      "name": "物流追踪",
+      "intent": "query_user_order",
+      "input": {
+        "query": "Track my order M26011500001",
+        "login": true,
+        "user": "John",
+        "language": "en"
+      },
+      "expect": {
+        "tool": "query_order_data",
+        "keywords": ["M26011500001", "tracking"]
+      }
+    },
+    {
+      "id": "TC034",
+      "name": "订单延迟投诉",
+      "priority": "high",
+      "intent": "query_user_order",
+      "input": {
+        "query": "My order M26011500001 hasn't arrived yet! It's been 2 weeks!",
+        "login": true,
+        "user": "John",
+        "language": "en"
+      },
+      "expect": {
+        "tool": "query_order_data",
+        "keywords": ["M26011500001"],
+        "emotion": "complaint"
+      },
+      "note": "⚠️ 检测投诉情绪，可能需要转人工"
+    },
+    {
+      "id": "TC035",
+      "name": "订单未收到但显示已送达",
+      "priority": "critical",
+      "intent": "query_user_order",
+      "input": {
+        "query": "Order shows delivered but I didn't receive it",
+        "login": true,
+        "user": "John",
+        "language": "en",
+        "memory": "User inquired about order M26011500001"
+      },
+      "expect": {
+        "tool": "query_order_data",
+        "keywords": ["delivered", "not received"],
+        "should_escalate": true
+      },
+      "note": "⚠️ 严重问题，应该升级转人工"
+    }
+  ]
+}
