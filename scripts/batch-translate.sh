@@ -11,8 +11,8 @@ echo ""
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
-# 查找所有中文提示词文件
-PROMPT_FILES=$(find "$PROJECT_ROOT" -type f \( -name "system-prompt.md" -o -name "user-prompt.md" \) ! -name "*.en.md" | sort)
+# 查找所有中文提示词文件（排除 bak 后缀的目录）
+PROMPT_FILES=$(find "$PROJECT_ROOT" -type d -name "*bak" -prune -o -type f \( -name "system-prompt.md" -o -name "user-prompt.md" \) ! -name "*.en.md" -print | sort)
 
 if [ -z "$PROMPT_FILES" ]; then
     echo "❌ 未找到任何提示词文件"

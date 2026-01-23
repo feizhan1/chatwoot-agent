@@ -25,7 +25,8 @@
       "Bash(curl:*)",
       "Bash(./scripts/debug-translate.sh:*)",
       "Bash(git checkout:*)",
-      "Bash(./quick-view.sh:*)"
+      "Bash(./quick-view.sh:*)",
+      "Bash(find:*)"
     ]
   }
 }
