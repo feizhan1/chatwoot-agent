@@ -26,7 +26,8 @@
       "Bash(./scripts/debug-translate.sh:*)",
       "Bash(git checkout:*)",
       "Bash(./quick-view.sh:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(./scripts/generate-env-json.sh:*)"
     ]
   }
 }
