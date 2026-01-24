@@ -65,7 +65,7 @@ read_prompt_file_zh() {
 }
 
 # ============================================
-# 函数：构建英文prompt部分
+# 函数：构建英文prompt部分（包含tools）
 # ============================================
 build_prompt_section_en() {
     local prompt_json="{}"
@@ -89,19 +89,58 @@ build_prompt_section_en() {
         local user_prompt_en=$(read_prompt_file_en "$agent_dir" "user-prompt")
         local system_prompt_en=$(read_prompt_file_en "$agent_dir" "system-prompt")
 
-        # 构建该agent的英文JSON
-        prompt_json=$(echo "$prompt_json" | jq \
-            --arg name "$agent_name" \
-            --arg up "$user_prompt_en" \
-            --arg sp "$system_prompt_en" \
-            '. + {($name): {"user-prompt": $up, "system-prompt": $sp}}')
+        # 读取该agent的tools（如果有）
+        local agent_tools_json="{}"
+        if [ -d "${agent_dir}tools" ]; then
+            for tool_file in "${agent_dir}tools/"*.md; do
+                [ ! -f "$tool_file" ] && continue
+
+                local tool_name=$(basename "$tool_file" .md)
+                [[ "$tool_name" == *.en ]] && continue
+
+                local en_file="${agent_dir}tools/${tool_name}.en.md"
+                local zh_file="${agent_dir}tools/${tool_name}.md"
+                local content=""
+
+                if [ -f "$en_file" ]; then
+                    content=$(cat "$en_file")
+                elif [ -f "$zh_file" ]; then
+                    content=$(cat "$zh_file")
+                else
+                    continue
+                fi
+
+                agent_tools_json=$(echo "$agent_tools_json" | jq \
+                    --arg name "$tool_name" \
+                    --arg content "$content" \
+                    '. + {($name): $content}')
+            done
+        fi
+
+        # 构建该agent的英文JSON（包含tools）
+        if [ "$agent_tools_json" = "{}" ]; then
+            # 没有tools，只包含prompts
+            prompt_json=$(echo "$prompt_json" | jq \
+                --arg name "$agent_name" \
+                --arg up "$user_prompt_en" \
+                --arg sp "$system_prompt_en" \
+                '. + {($name): {"user-prompt": $up, "system-prompt": $sp}}')
+        else
+            # 有tools，包含prompts和tools
+            prompt_json=$(echo "$prompt_json" | jq \
+                --arg name "$agent_name" \
+                --arg up "$user_prompt_en" \
+                --arg sp "$system_prompt_en" \
+                --argjson tools "$agent_tools_json" \
+                '. + {($name): {"user-prompt": $up, "system-prompt": $sp, "tools": $tools}}')
+        fi
     done
 
     echo "$prompt_json"
 }
 
 # ============================================
-# 函数：构建中文prompt部分
+# 函数：构建中文prompt部分（包含tools）
 # ============================================
 build_prompt_section_zh() {
     local prompt_json="{}"
@@ -125,12 +164,44 @@ build_prompt_section_zh() {
         local user_prompt_zh=$(read_prompt_file_zh "$agent_dir" "user-prompt")
         local system_prompt_zh=$(read_prompt_file_zh "$agent_dir" "system-prompt")
 
-        # 构建该agent的中文JSON
-        prompt_json=$(echo "$prompt_json" | jq \
-            --arg name "$agent_name" \
-            --arg up "$user_prompt_zh" \
-            --arg sp "$system_prompt_zh" \
-            '. + {($name): {"user-prompt": $up, "system-prompt": $sp}}')
+        # 读取该agent的tools（如果有）
+        local agent_tools_json="{}"
+        if [ -d "${agent_dir}tools" ]; then
+            for tool_file in "${agent_dir}tools/"*.md; do
+                [ ! -f "$tool_file" ] && continue
+
+                local tool_name=$(basename "$tool_file" .md)
+                [[ "$tool_name" == *.en ]] && continue
+
+                local zh_file="${agent_dir}tools/${tool_name}.md"
+                [ ! -f "$zh_file" ] && continue
+
+                local content=$(cat "$zh_file")
+
+                agent_tools_json=$(echo "$agent_tools_json" | jq \
+                    --arg name "$tool_name" \
+                    --arg content "$content" \
+                    '. + {($name): $content}')
+            done
+        fi
+
+        # 构建该agent的中文JSON（包含tools）
+        if [ "$agent_tools_json" = "{}" ]; then
+            # 没有tools，只包含prompts
+            prompt_json=$(echo "$prompt_json" | jq \
+                --arg name "$agent_name" \
+                --arg up "$user_prompt_zh" \
+                --arg sp "$system_prompt_zh" \
+                '. + {($name): {"user-prompt": $up, "system-prompt": $sp}}')
+        else
+            # 有tools，包含prompts和tools
+            prompt_json=$(echo "$prompt_json" | jq \
+                --arg name "$agent_name" \
+                --arg up "$user_prompt_zh" \
+                --arg sp "$system_prompt_zh" \
+                --argjson tools "$agent_tools_json" \
+                '. + {($name): {"user-prompt": $up, "system-prompt": $sp, "tools": $tools}}')
+        fi
     done
 
     echo "$prompt_json"
@@ -162,12 +233,12 @@ main() {
     echo "   解析 production.env..."
     production_json=$(parse_env_to_json "production.env")
 
-    # 3. 构建英文prompt部分
-    echo "   读取所有agent的英文prompt..."
+    # 3. 构建英文prompt部分（包含tools）
+    echo "   读取所有agent的英文prompt和tools..."
     prompt_json=$(build_prompt_section_en)
 
-    # 4. 构建中文prompt部分
-    echo "   读取所有agent的中文prompt..."
+    # 4. 构建中文prompt部分（包含tools）
+    echo "   读取所有agent的中文prompt和tools..."
     zh_prompt_json=$(build_prompt_section_zh)
 
     # 5. 合并所有部分
