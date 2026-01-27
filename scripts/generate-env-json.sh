@@ -211,13 +211,7 @@ build_prompt_section_zh() {
 # 主函数
 # ============================================
 main() {
-    echo "📝 生成 env.json..."
-
-    # 检查必要文件
-    if [ ! -f "stage.env" ] || [ ! -f "production.env" ]; then
-        echo "❌ 错误: stage.env 或 production.env 不存在" >&2
-        exit 1
-    fi
+    echo "📝 更新 env.json 中的 prompt 字段..."
 
     # 检查jq可用性
     if ! command -v jq &> /dev/null; then
@@ -225,37 +219,50 @@ main() {
         exit 1
     fi
 
-    # 1. 解析stage环境
-    echo "   解析 stage.env..."
-    stage_json=$(parse_env_to_json "stage.env")
+    # 1. 读取现有的 env.json（如果存在）
+    if [ -f "env.json" ]; then
+        echo "   读取现有的 env.json..."
+        existing_json=$(cat env.json)
+    else
+        echo "   env.json 不存在，将创建新文件..."
+        # 初始化基础结构
+        existing_json='{}'
 
-    # 2. 解析production环境
-    echo "   解析 production.env..."
-    production_json=$(parse_env_to_json "production.env")
+        # 如果 stage.env 和 production.env 存在，解析它们
+        if [ -f "stage.env" ]; then
+            echo "   解析 stage.env..."
+            stage_json=$(parse_env_to_json "stage.env")
+            existing_json=$(echo "$existing_json" | jq --argjson stage "$stage_json" '. + {stage: $stage}')
+        fi
 
-    # 3. 构建英文prompt部分（包含tools）
+        if [ -f "production.env" ]; then
+            echo "   解析 production.env..."
+            production_json=$(parse_env_to_json "production.env")
+            existing_json=$(echo "$existing_json" | jq --argjson production "$production_json" '. + {production: $production}')
+        fi
+    fi
+
+    # 2. 构建英文prompt部分（包含tools）
     echo "   读取所有agent的英文prompt和tools..."
     prompt_json=$(build_prompt_section_en)
 
-    # 4. 构建中文prompt部分（包含tools）
+    # 3. 构建中文prompt部分（包含tools）
     echo "   读取所有agent的中文prompt和tools..."
     zh_prompt_json=$(build_prompt_section_zh)
 
-    # 5. 合并所有部分
-    echo "   合并JSON..."
-    final_json=$(jq -n \
-        --argjson stage "$stage_json" \
-        --argjson production "$production_json" \
+    # 4. 只更新 prompt 和 zh_prompt 字段，保留其他所有字段
+    echo "   更新 prompt 和 zh_prompt 字段..."
+    final_json=$(echo "$existing_json" | jq \
         --argjson prompt "$prompt_json" \
         --argjson zh_prompt "$zh_prompt_json" \
-        '{stage: $stage, production: $production, prompt: $prompt, zh_prompt: $zh_prompt}')
+        '. + {prompt: $prompt, zh_prompt: $zh_prompt}')
 
-    # 6. 写入文件（原子操作）
+    # 5. 写入文件（原子操作）
     echo "   写入 env.json..."
     echo "$final_json" | jq '.' > env.json.tmp
     mv env.json.tmp env.json
 
-    echo "✅ env.json 生成完成"
+    echo "✅ env.json 已更新（仅更新 prompt 和 zh_prompt 字段）"
 }
 
 # 执行主函数
