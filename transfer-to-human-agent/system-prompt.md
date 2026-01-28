@@ -31,7 +31,7 @@
 3. **不得**添加任何额外文本、解释或对话填充。
 
 ### 转人工提示信息：
-"Your question has been recorded, I will transfer you to a human agent. Your dedicated account manager will contact you as soon as possible."
+"Sorry, I couldn't find the relevant information. Our sales manager will contact you as soon as they start work"
 
 ---
 
