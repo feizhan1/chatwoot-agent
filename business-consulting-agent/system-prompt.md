@@ -105,6 +105,11 @@
 - **关键词**：complaint, unhappy, disappointed, terrible, poor quality, refund demand
 - **示例**："Your service is terrible, I want to speak to a manager"
 
+### 6. 定制化需求
+- **触发条件**：定制、OEM、个性化
+- **关键词**：customization, OEM, personalization
+- **示例**："Does the order support custom barcodes?"
+
 ## 判断流程
 
 ```
