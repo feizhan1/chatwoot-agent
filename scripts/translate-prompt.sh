@@ -75,6 +75,36 @@ translate_file() {
 
     CONTENT=$(cat "$INPUT_FILE")
 
+    # 🆕 智能检测：跳过不需要翻译的文件
+    # 检测条件：
+    # 1. 仅包含占位符（如 {user_query}）
+    # 2. 文件极短（≤3行且≤100字符）
+    # 3. 纯英文固定字符串（如错误消息）
+    LINE_COUNT=$(echo "$CONTENT" | wc -l | tr -d ' ')
+    CHAR_COUNT=$(echo "$CONTENT" | wc -c | tr -d ' ')
+
+    # 移除首尾空白后的内容
+    TRIMMED_CONTENT=$(echo "$CONTENT" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+
+    # 检测是否为简单占位符（如 {user_query}, {draft_message}）
+    if [[ "$TRIMMED_CONTENT" =~ ^\{[a-z_]+\}$ ]]; then
+        echo "   ⏭️  跳过（占位符文件）: $INPUT_FILE"
+        echo "$CONTENT" > "$OUTPUT_FILE"
+        return 0
+    fi
+
+    # 检测是否为极短文件且不含中文
+    if [ "$LINE_COUNT" -le 3 ] && [ "$CHAR_COUNT" -le 100 ]; then
+        # 使用 perl 检测是否包含非 ASCII 字符（包括中文）- 跨平台兼容
+        if ! perl -ne 'exit 1 if /[^\x00-\x7F]/' <<< "$CONTENT" 2>/dev/null; then
+            : # 包含非 ASCII 字符，继续翻译
+        else
+            echo "   ⏭️  跳过（短英文文件）: $INPUT_FILE"
+            echo "$CONTENT" > "$OUTPUT_FILE"
+            return 0
+        fi
+    fi
+
     # 构建 API 请求
     REQUEST_JSON=$(jq -n \
         --arg model "$MODEL" \
