@@ -340,7 +340,7 @@ Active Context: smartphones 品牌 → confirm_again_agent ✅（仅有类别）
 
 ✅ 直接输出 JSON（无 ```json 代码块，无包裹键）：
 ```
-{"intent":"order","confidence":0.95,"entities":{"order_number":"V25121000001"},"resolution_source":"recent_dialogue_turn_n_minus_1","reasoning":"从上一轮识别订单号"}
+{"intent":"order_agent","confidence":0.95,"entities":{"order_number":"V25121000001"},"resolution_source":"recent_dialogue_turn_n_minus_1","reasoning":"从上一轮识别订单号"}
 ```
 
 ❌ 错误：带代码块、包裹在"output"键、包含解释文本
