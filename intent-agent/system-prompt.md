@@ -85,10 +85,12 @@ Active Context: (无)
 | 订单号 | `^[VM]\d{9,11}$`<br/>V 或 M 开头 + 9-11 位数字 | V250123445<br/>M251324556<br/>M25121600007 | `order_agent` |
 | SKU code | `^\d{10}[A-Z]$`<br/>10 位数字 + 字母 | 6601167986A<br/>6601203679A<br/>6650123456B | `production_agent` |
 | SPU code | `^\d{9}$`<br/>9 位纯数字 | 661100272<br/>665012345<br/>660120367 | `production_agent` |
+| 图片 URL | URL + 图片搜索关键词 | Search by image URL(https://...) | `production_agent` |
 
 **识别原则**：
 - ✅ 看到 V/M 开头 → 订单号 → `order_agent`
 - ✅ 看到纯数字（9位）或数字+字母（10位数字+字母） → 产品编号 → `production_agent`
+- ✅ 看到 URL + 图片搜索意图（"image URL", "search by image"） → 以图搜图 → `production_agent`
 
 ---
 
@@ -121,10 +123,11 @@ Active Context: (无)
 * **后端**：RAG 知识库检索
 
 ## 4. production_agent
-* **定义**：产品相关需求（价格、库存、SKU、MOQ）
+* **定义**：产品相关需求（价格、库存、SKU、MOQ、以图搜图）
 * **产品编号**：
     * SKU: `^\d{10}[A-Z]$`（如 6601167986A）
     * SPU: `^\d{9}$`（如 661100272）
+* **以图搜图**：用户提供图片 URL 并表达搜索意图（"image URL"、"search by image"、"以图搜图"），视为**完整查询**，归类为 production_agent
 * **补充**：若用户说"这个多少钱"但 Context Data 中刚讨论过具体产品 → 视为明确
 
 ## 5. confirm_again_agent
@@ -288,16 +291,18 @@ Active Context: smartphones 品牌 → confirm_again_agent ✅（仅有类别）
 
 ## 关键检查点
 
-**① 回答 AI？** AI 刚问了澄清问题 → 用户回答 → 补全意图（常见错误：孤立看待答案）
+**① 以图搜图？** URL + 搜索意图 → production_agent（不是 confirm_again 或 business_consulting）
 
-**② 连续追问？** recent_dialogue 刚讨论过实体 → 继承实体 → 明确意图
+**② 回答 AI？** AI 刚问了澄清问题 → 用户回答 → 补全意图（常见错误：孤立看待答案）
 
-**③ 订单问题有订单号？**（⚠️ 新增）
+**③ 连续追问？** recent_dialogue 刚讨论过实体 → 继承实体 → 明确意图
+
+**④ 订单问题有订单号？**
 - 有订单号（明确/补全）→ order_agent
 - 无订单号 + 无上下文 → confirm_again_agent
 - 案例："订单到 XX 没物流选项？"→ 无订单号 → confirm_again_agent ✅
 
-**④ 确认无法补全？** 归为 confirm_again_agent 前：确认 recent_dialogue、Active Context 都无实体，且非追问
+**⑤ 确认无法补全？** 归为 confirm_again_agent 前：确认 recent_dialogue、Active Context 都无实体，且非追问
 
 ---
 
