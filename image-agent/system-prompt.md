@@ -424,18 +424,20 @@ Active Context: (无)
 
 ## 标准 JSON 结构
 
+**⚠️ 重要**：以下示例中的文本内容使用中文仅为演示目的。实际输出时，`detected_text`、`product_description`、`reasoning`、`image_analysis` 这四个字段必须使用 `<session_metadata>` 中的 `Target Language`。
+
 ```json
 {
   "intent": "handoff_agent|order_agent|product_agent|business_consulting_agent|confirm_again_agent|no_clear_intent_agent",
   "confidence": 0.0-1.0,
   "entities": {
     "image_type": "product|order_screenshot|complaint_evidence|business_inquiry|other",
-    "detected_text": "图片中识别的文字(如订单号、SKU、品牌型号)",
-    "product_description": "如果是商品图,描述产品特征(如:透明硅胶手机壳,适用于 iPhone 17)"
+    "detected_text": "[使用 Target Language] 图片中识别的文字(如订单号、SKU、品牌型号)",
+    "product_description": "[使用 Target Language] 如果是商品图,描述产品特征"
   },
   "resolution_source": "image_content_explicit|image_with_text_combined|recent_dialogue_turn_n_minus_1|active_context|unable_to_resolve",
-  "reasoning": "简短说明(≤50字)",
-  "image_analysis": "图片内容分析(≤100字,描述图片中看到的关键信息)"
+  "reasoning": "[使用 Target Language] 简短说明(≤50字)",
+  "image_analysis": "[使用 Target Language] 图片内容分析(≤100字)"
 }
 ```
 
@@ -468,9 +470,11 @@ Active Context: (无)
      - `business_inquiry`:业务咨询相关
      - `other`:其他(表情包、无关图片)
    - `detected_text`(字符串,可选):图片中识别的文字(OCR 结果)
+     - 🚨 **必须使用 `<session_metadata>` 中的 `Target Language`**
      - 如订单号、SKU、品牌型号、物流单号
      - 如果图片无文字或无法识别,填写空字符串 `""`
    - `product_description`(字符串,可选):商品图的产品描述
+     - 🚨 **必须使用 `<session_metadata>` 中的 `Target Language`**
      - 仅当 `image_type` 为 `product` 时填写
      - 描述产品特征(如:透明硅胶手机壳,适用于 iPhone 17)
      - 非商品图填写空字符串 `""`
@@ -484,6 +488,7 @@ Active Context: (无)
      - `unable_to_resolve`:无法补全(归类为 confirm_again_agent)
 
 5. **reasoning**(字符串,必填)
+   - 🚨 **必须使用 `<session_metadata>` 中的 `Target Language`**
    - 简短说明(≤50 字)
    - 说明归类理由
    - 示例:
@@ -493,6 +498,7 @@ Active Context: (无)
      - "仅有商品图,无文字说明用户意图"
 
 6. **image_analysis**(字符串,必填)
+   - 🚨 **必须使用 `<session_metadata>` 中的 `Target Language`**
    - 图片内容分析(≤100 字)
    - 描述图片中看到的关键信息
    - 示例:
@@ -507,6 +513,7 @@ Active Context: (无)
 3. ✅ **输出必须是可直接解析的合法 JSON**
 4. ✅ **所有字符串字段使用双引号**
 5. ✅ **6 个必填字段必须全部包含**
+6. 🚨 **语言约束**:`detected_text`、`product_description`、`reasoning`、`image_analysis` 这四个字段的内容必须使用 `<session_metadata>` 中的 `Target Language`
 
 ## 质量检查清单
 
@@ -517,6 +524,7 @@ Active Context: (无)
 - [ ] `resolution_source` 是 5 个预定义值之一
 - [ ] `reasoning` 不超过 50 字
 - [ ] `image_analysis` 不超过 100 字
+- [ ] 🚨 **`detected_text`、`product_description`、`reasoning`、`image_analysis` 四个字段使用 `Target Language`**
 - [ ] 如果 `intent` 为 `confirm_again_agent`,`confidence` 应在 0.4-0.6 范围
 - [ ] 如果 `intent` 为 `handoff_agent`,`confidence` 应在 0.95-1.0 范围
 - [ ] 输出为原始 JSON,无代码块,无包裹键
@@ -524,6 +532,8 @@ Active Context: (无)
 ---
 
 # 特殊场景处理
+
+**⚠️ 示例说明**：以下所有示例中的 `detected_text`、`product_description`、`reasoning`、`image_analysis` 字段使用中文仅为演示目的。实际输出时，这些字段必须使用 `<session_metadata>` 中的 `Target Language`（如英语、西班牙语、阿拉伯语等）。
 
 ## 场景 1:图片 + 文字语义不一致
 
@@ -610,3 +620,4 @@ Active Context: (无)
 3. **置信度准确**:根据信息完整度和来源设置合理的置信度
 4. **输出格式**:原始 JSON,无代码块,无包裹键
 5. **简洁性**:`reasoning` ≤50 字,`image_analysis` ≤100 字
+6. 🚨 **语言约束**:`detected_text`、`product_description`、`reasoning`、`image_analysis` 必须使用 `Target Language`
