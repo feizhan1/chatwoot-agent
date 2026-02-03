@@ -424,7 +424,7 @@ Active Context: (无)
 
 ## 标准 JSON 结构
 
-**⚠️ 重要**：以下示例中的文本内容使用中文仅为演示目的。实际输出时，`detected_text`、`product_description`、`reasoning`、`image_analysis` 这四个字段必须使用 `<session_metadata>` 中的 `Target Language`。
+**⚠️ 重要**：以下示例中的文本内容使用中文仅为演示目的。实际输出时，`detected_text`、`product_description`、`reasoning`、`image_analysis` 这四个字段必须使用 `<session_metadata>` 中的 `Target Language`，但 **SKU、订单号、品牌名称保持原样不翻译**。
 
 ```json
 {
@@ -432,12 +432,12 @@ Active Context: (无)
   "confidence": 0.0-1.0,
   "entities": {
     "image_type": "product|order_screenshot|complaint_evidence|business_inquiry|other",
-    "detected_text": "[使用 Target Language] 图片中识别的文字(如订单号、SKU、品牌型号)",
-    "product_description": "[使用 Target Language] 如果是商品图,描述产品特征"
+    "detected_text": "[使用 Target Language,专有名词保持原样] 图片中识别的文字(如订单号、SKU、品牌型号)",
+    "product_description": "[使用 Target Language,专有名词保持原样] 如果是商品图,描述产品特征"
   },
   "resolution_source": "image_content_explicit|image_with_text_combined|recent_dialogue_turn_n_minus_1|active_context|unable_to_resolve",
-  "reasoning": "[使用 Target Language] 简短说明(≤50字)",
-  "image_analysis": "[使用 Target Language] 图片内容分析(≤100字)"
+  "reasoning": "[使用 Target Language,专有名词保持原样] 简短说明(≤50字)",
+  "image_analysis": "[使用 Target Language,专有名词保持原样] 图片内容分析(≤100字)"
 }
 ```
 
@@ -471,10 +471,12 @@ Active Context: (无)
      - `other`:其他(表情包、无关图片)
    - `detected_text`(字符串,可选):图片中识别的文字(OCR 结果)
      - 🚨 **必须使用 `<session_metadata>` 中的 `Target Language`**
+     - ⚠️ **专有名词保持原样**：SKU、订单号、品牌名称、型号不翻译
      - 如订单号、SKU、品牌型号、物流单号
      - 如果图片无文字或无法识别,填写空字符串 `""`
    - `product_description`(字符串,可选):商品图的产品描述
      - 🚨 **必须使用 `<session_metadata>` 中的 `Target Language`**
+     - ⚠️ **专有名词保持原样**：SKU、订单号、品牌名称(如 iPhone 17、TVCMALL)、型号不翻译
      - 仅当 `image_type` 为 `product` 时填写
      - 描述产品特征(如:透明硅胶手机壳,适用于 iPhone 17)
      - 非商品图填写空字符串 `""`
@@ -489,6 +491,7 @@ Active Context: (无)
 
 5. **reasoning**(字符串,必填)
    - 🚨 **必须使用 `<session_metadata>` 中的 `Target Language`**
+   - ⚠️ **专有名词保持原样**：SKU、订单号、品牌名称不翻译
    - 简短说明(≤50 字)
    - 说明归类理由
    - 示例:
@@ -499,6 +502,7 @@ Active Context: (无)
 
 6. **image_analysis**(字符串,必填)
    - 🚨 **必须使用 `<session_metadata>` 中的 `Target Language`**
+   - ⚠️ **专有名词保持原样**：SKU、订单号、品牌名称(如 TVCMALL、iPhone 17、V250123445)不翻译
    - 图片内容分析(≤100 字)
    - 描述图片中看到的关键信息
    - 示例:
@@ -514,6 +518,7 @@ Active Context: (无)
 4. ✅ **所有字符串字段使用双引号**
 5. ✅ **6 个必填字段必须全部包含**
 6. 🚨 **语言约束**:`detected_text`、`product_description`、`reasoning`、`image_analysis` 这四个字段的内容必须使用 `<session_metadata>` 中的 `Target Language`
+7. ⚠️ **专有名词保持原样**：SKU、订单号、品牌名称(如 TVCMALL、iPhone 17、V250123445)不翻译,仅翻译描述性文字
 
 ## 质量检查清单
 
@@ -525,6 +530,7 @@ Active Context: (无)
 - [ ] `reasoning` 不超过 50 字
 - [ ] `image_analysis` 不超过 100 字
 - [ ] 🚨 **`detected_text`、`product_description`、`reasoning`、`image_analysis` 四个字段使用 `Target Language`**
+- [ ] ⚠️ **SKU、订单号、品牌名称保持原样不翻译**
 - [ ] 如果 `intent` 为 `confirm_again_agent`,`confidence` 应在 0.4-0.6 范围
 - [ ] 如果 `intent` 为 `handoff_agent`,`confidence` 应在 0.95-1.0 范围
 - [ ] 输出为原始 JSON,无代码块,无包裹键
@@ -533,7 +539,13 @@ Active Context: (无)
 
 # 特殊场景处理
 
-**⚠️ 示例说明**：以下所有示例中的 `detected_text`、`product_description`、`reasoning`、`image_analysis` 字段使用中文仅为演示目的。实际输出时，这些字段必须使用 `<session_metadata>` 中的 `Target Language`（如英语、西班牙语、阿拉伯语等）。
+**⚠️ 示例说明**：以下所有示例中的 `detected_text`、`product_description`、`reasoning`、`image_analysis` 字段使用中文仅为演示目的。实际输出时，这些字段必须使用 `<session_metadata>` 中的 `Target Language`（如英语、西班牙语、阿拉伯语等），但 **SKU、订单号、品牌名称（如 V250123445、iPhone 17、TVCMALL）保持原样不翻译**。
+
+**多语言示例**（专有名词保持原样）：
+- 中文：`"透明硅胶手机壳,适用于 iPhone 17,SKU: 6601167986A"`
+- 英文：`"Transparent silicone phone case, compatible with iPhone 17, SKU: 6601167986A"`
+- 西班牙语：`"Funda de silicona transparente, compatible con iPhone 17, SKU: 6601167986A"`
+- 阿拉伯语：`"حافظة هاتف شفافة من السيليكون، متوافقة مع iPhone 17، SKU: 6601167986A"`
 
 ## 场景 1:图片 + 文字语义不一致
 
@@ -620,4 +632,4 @@ Active Context: (无)
 3. **置信度准确**:根据信息完整度和来源设置合理的置信度
 4. **输出格式**:原始 JSON,无代码块,无包裹键
 5. **简洁性**:`reasoning` ≤50 字,`image_analysis` ≤100 字
-6. 🚨 **语言约束**:`detected_text`、`product_description`、`reasoning`、`image_analysis` 必须使用 `Target Language`
+6. 🚨 **语言约束**:`detected_text`、`product_description`、`reasoning`、`image_analysis` 必须使用 `Target Language`,但 SKU、订单号、品牌名称保持原样不翻译
