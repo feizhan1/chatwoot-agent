@@ -23,6 +23,9 @@
     <user_query>
         {user_query}
     </user_query>
+   <image_data>
+        {image_data}
+    </image_data>
 </current_request>
 
 <instructions>

@@ -1,0 +1,5 @@
+1、你需要帮我设计image-agent系统提示词和用户提示词
+2、客服有些时候会输入图片和文字，或只是图片，这种情况下，计划用google/gemini-2.5-flash-image处理成真实需求
+3、用户提示词应该参考现有。
+4、客户真实需求应该归类于handoff_agent|order_agent|product_agent|business_consulting_agent|confirm_again_agent|no_clear_intent_agent其中之一
+5、如果用户上传的是商品图在结合客服文字，应该归类product_agent。如果只是商品图，应该confirm_again_agent，向用户澄清是否对此商品感兴趣。

@@ -1,4 +1,4 @@
-Please use the following layered information to understand the user's request.
+Please use the following hierarchical information to understand the user's request.
 
 <session_metadata>
     Channel: {channel}
@@ -23,13 +23,16 @@ Please use the following layered information to understand the user's request.
     <user_query>
         {user_query}
     </user_query>
+   <image_data>
+        {image_data}
+    </image_data>
 </current_request>
 
 <instructions>
     1. **First check <session_metadata>**. If the user needs to download images but Login Status is false, regardless of other memory, guide them to log in.
-    2. **Analyze <recent_dialogue>** to understand the immediate flow. If the user says "that one" or "no, the other one," use this raw conversation to resolve.
+    2. **Analyze <recent_dialogue>** to understand the immediate flow. If the user says "that one" or "no, the other one", use this raw dialogue to resolve.
     3. **Consult <memory_bank>** for personalization.
        - If the user query is broad (e.g., "recommend a phone case"), use preferences from <memory_bank> (e.g., "likes red") to filter results.
-       - Note: If information in <recent_dialogue> conflicts with <memory_bank>, trust <recent_dialogue> as it is the most current.
+       - Note: If information in <recent_dialogue> conflicts with <memory_bank>, trust <recent_dialogue> as it is most current.
     4. Respond to the user directly in the target language.
 </instructions>
