@@ -168,7 +168,7 @@ assert extracted_entity in (recent_dialogue + memory_bank)
 
 ### 6. 情绪检测
 ```python
-# 强烈情绪必须转人工
+# 强烈情绪必须提供人工帮助
 if emotion in ["angry", "complaint"]:
     assert intent == "handoff"
 ```

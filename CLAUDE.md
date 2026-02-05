@@ -86,7 +86,7 @@ transfer  order  product business confirm  general
 
 ##### transfer-to-human-agent（转人工）
 - **触发条件**：用户明确要求人工、投诉、强烈情绪
-- **工具**：`handoff.tool2`
+- **工具**：`need-human-help-tool`
 - **特点**：最高优先级，立即响应
 - **无需工具调用**：直接返回转人工指令
 
@@ -95,7 +95,7 @@ transfer  order  product business confirm  general
 - **工具集**：
   - `query_order_data`：查询订单状态
   - `query_logistics_xx`：物流追踪
-  - `handoff.tool2`：必要时转人工
+  - `need-human-help-tool`：必要时转人工
 - **数据源**：OMS/CRM 系统
 - **关键约束**：必须验证 `login_status`
 
@@ -176,7 +176,7 @@ transfer  order  product business confirm  general
   - `相似度查询-rag推荐`：产品推荐（向量检索）
   - `相似度查询-rag咨询`：业务咨询（知识库）
 - **图片搜索**：`相似图片查询`（以图搜图）
-- **人工转接**：`handoff.tool2`
+- **人工转接**：`need-human-help-tool`
 
 #### 输出格式化
 - **Structured Output Parser**：
@@ -419,8 +419,8 @@ const userPrompt = $env.prompt['production-agent']['user-prompt']
 **决策流程**：
 ```
 修改请求 → 调用 query-order-info-tool → 检查支付状态
-├─ 未支付 → 引导自助（禁止转人工）
-└─ 已支付/处理中 → 转人工
+├─ 未支付 → 引导自助（禁止提供人工帮助）
+└─ 已支付/处理中 → 调用 need-human-help-tool
 ```
 ```
 
@@ -429,12 +429,12 @@ const userPrompt = $env.prompt['production-agent']['user-prompt']
 - ✅ 正确：每个规则1-2个典型示例，或完全省略（如果规则清晰）
 
 **场景合并**：
-- ❌ 避免：10个独立场景都是"调用 transfer-to-human-agent-tool"
+- ❌ 避免：10个独立场景都是"调用 need-human-help-tool"
 - ✅ 正确：合并为1个列表章节
 
 ```markdown
-## 场景 9-17：必须转人工的场景
-以下场景**必须调用 transfer-to-human-agent-tool**：
+## 场景 9-17：需要人工协助的场景
+以下场景**必须调用 need-human-help-tool**（显示转人工按钮）：
 - 订单发票需求
 - 退货/换货/售后
 - 付款错误
