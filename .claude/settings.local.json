@@ -31,7 +31,9 @@
       "Bash(MODEL=claude-opus-4-5-20251101 MAX_TOKENS=16000 ./scripts/translate-prompt.sh:*)",
       "Bash(git rm:*)",
       "Bash(git show:*)",
-      "Bash(MODEL=claude-3-5-haiku-20241022 MAX_TOKENS=16000 ./scripts/translate-prompt.sh:*)"
+      "Bash(MODEL=claude-3-5-haiku-20241022 MAX_TOKENS=16000 ./scripts/translate-prompt.sh:*)",
+      "Bash(while ps aux)",
+      "Bash(do sleep 2)"
     ]
   }
 }
