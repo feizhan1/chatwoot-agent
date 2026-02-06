@@ -10,6 +10,24 @@
 - **language_code**：ISO 639-1 双字母代码（如 "zh", "en", "es"）
 - **规则**：如果无法识别语言，默认为英语（"English", "en"）
 
+**语言检测示例**：
+```
+示例1：
+<user_query>hello</user_query> → detected_language: "English", language_code: "en"
+（即使 <recent_dialogue> 中有中文，也只检测 user_query）
+
+示例2：
+<user_query>你好</user_query> → detected_language: "Chinese", language_code: "zh"
+
+示例3：
+<user_query>Hola</user_query> → detected_language: "Spanish", language_code: "es"
+```
+
+**输出语言规范**：
+- ✅ `detected_language` 和 `language_code` 始终为英文字段名和英文语言名
+- ✅ `reasoning` 字段**必须使用检测到的语言**输出（如果检测到英语，reasoning 就用英语）
+- ✅ `clarification_needed` 等用户可见字段也应使用检测到的语言
+
 ---
 
 # ⚠️ CRITICAL RULES（核心规则 - 必须严格遵守）
@@ -355,9 +373,9 @@ Active Context: smartphones 品牌 → confirm_again_agent ✅（仅有类别）
 
 **resolution_source**（必填）：`user_input_explicit` | `recent_dialogue_turn_n_minus_1/2` | `active_context` | `unable_to_resolve`
 
-**reasoning**（必填）：≤50字
+**reasoning**（必填）：≤50字，**必须使用 detected_language 检测到的语言**（如检测到英语则用英语，检测到中文则用中文）
 
-**clarification_needed**（可选）：need_confirm_again 时需要
+**clarification_needed**（可选）：need_confirm_again 时需要，**使用 detected_language 检测到的语言**
 
 ## 输出示例
 
@@ -368,11 +386,15 @@ Active Context: smartphones 品牌 → confirm_again_agent ✅（仅有类别）
 
 更多示例：
 ```
-{"intent":"product_agent","confidence":0.92,"detected_language":"English","language_code":"en","entities":{"sku":"6601167986A"},"resolution_source":"user_input_explicit","reasoning":"明确提供SKU查询"}
+{"intent":"product_agent","confidence":0.92,"detected_language":"English","language_code":"en","entities":{"sku":"6601167986A"},"resolution_source":"user_input_explicit","reasoning":"Explicit SKU query provided"}
 ```
 
 ```
-{"intent":"confirm_again_agent","confidence":0.55,"detected_language":"Spanish","language_code":"es","entities":{},"resolution_source":"unable_to_resolve","reasoning":"缺少订单号","clarification_needed":["order_number"]}
+{"intent":"confirm_again_agent","confidence":0.55,"detected_language":"Spanish","language_code":"es","entities":{},"resolution_source":"unable_to_resolve","reasoning":"Falta el número de pedido","clarification_needed":["order_number"]}
+```
+
+```
+{"intent":"no_clear_intent_agent","confidence":0.85,"detected_language":"English","language_code":"en","entities":{},"resolution_source":"user_input_explicit","reasoning":"User greeting, no business intent"}
 ```
 
 ❌ 错误：带代码块、包裹在"output"键、包含解释文本
@@ -384,3 +406,5 @@ Active Context: smartphones 品牌 → confirm_again_agent ✅（仅有类别）
 - [ ] confirm_again_agent 时有 clarification_needed
 - [ ] detected_language 为英文名称（如 "Chinese" 而非 "中文"）
 - [ ] language_code 为 ISO 639-1 双字母代码
+- [ ] **detected_language 仅基于 `<user_query>` 检测，不受 `<recent_dialogue>` 干扰**
+- [ ] **reasoning 使用与 detected_language 相同的语言**（英语输入→英语reasoning，中文输入→中文reasoning）
