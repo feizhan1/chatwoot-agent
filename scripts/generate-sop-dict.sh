@@ -17,9 +17,9 @@ if [ ! -f "$SOP_FILE" ]; then
 fi
 
 SOP_DIR="$(dirname "$SOP_FILE")"
-BASENAME="$(basename "$SOP_FILE")"
+BASENAME="$(basename "$SOP_FILE" | tr '[:upper:]' '[:lower:]')"
 
-# sop.en.md → sop_dict.en.json，其余 → sop_dict.json
+# sop.en.md → sop_dict.en.json，其余（sop.md / SOP.md）→ sop_dict.json
 if [ "$BASENAME" = "sop.en.md" ]; then
     OUTPUT_FILE="$SOP_DIR/sop_dict.en.json"
 else
