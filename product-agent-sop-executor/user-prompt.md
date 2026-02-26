@@ -28,6 +28,8 @@
     </image_data>
 </current_request>
 
+<current_system_time>{{ $now.format('yyyy-MM-dd') }}</current_system_time>
+
 <instructions>
     1. **首先检查 <session_metadata>**。如果用户需要下载图片但 Login Status 为 false，无论其他记忆如何，都要引导他们登录。
     2. **分析 <recent_dialogue>** 以理解即时流程。如果用户说"那个"或"不，另一个"，使用此原始对话来解决。

@@ -33,7 +33,12 @@
       "Bash(git show:*)",
       "Bash(MODEL=claude-3-5-haiku-20241022 MAX_TOKENS=16000 ./scripts/translate-prompt.sh:*)",
       "Bash(while ps aux)",
-      "Bash(do sleep 2)"
+      "Bash(do sleep 2)",
+      "Bash(for f in order-agent-sop-router/sop.md product-agent-sop-router/sop.md; do bash scripts/generate-sop-dict.sh \"$f\"; done)",
+      "Bash(for f in order-agent-sop-router/sop.en.md product-agent-sop-router/sop.en.md; do bash scripts/generate-sop-dict.sh \"$f\"; done)",
+      "Bash(for f in order-agent-sop-router/sop.md order-agent-sop-router/sop.en.md product-agent-sop-router/sop.md product-agent-sop-router/sop.en.md; do bash scripts/generate-sop-dict.sh \"$f\"; done)",
+      "Bash(bash scripts/generate-sop-dict.sh order-agent-sop-router/sop.en.md && python3 -c \"import json; d=json.load\\(open\\('order-agent-sop-router/sop_dict.en.json'\\)\\); print\\(list\\(d.keys\\(\\)\\)\\)\")",
+      "Bash(python3 -c \"import json; d=json.load\\(open\\('env.json'\\)\\); p=d.get\\('prompt',{}\\); [print\\(k, '→ sop_dict keys:', list\\(p[k]['sop_dict'].keys\\(\\)\\) if 'sop_dict' in p[k] else 'no sop_dict'\\) for k in p]\")"
     ]
   }
 }

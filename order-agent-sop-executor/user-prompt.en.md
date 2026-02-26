@@ -1,4 +1,4 @@
-Please use the following hierarchical information to understand the user's request.
+Please use the following layered information to understand the user's request.
 
 <session_metadata>
     Channel: {channel}
@@ -25,9 +25,11 @@ Please use the following hierarchical information to understand the user's reque
     </user_query>
 </current_request>
 
+<current_system_time>{{ $now.format('yyyy-MM-dd') }}</current_system_time>
+
 <instructions>
-    1. **First check <session_metadata>**. If `Login Status` is false and the user asks about private order information, you MUST guide them to log in.
+    1. **Check <session_metadata> first.** If `Login Status` is false and the user asks about private order information, you MUST guide them to log in.
     2. **Analyze <user_query>** to detect order numbers. If none found, check <recent_dialogue> and <memory_bank> for previously mentioned order numbers.
-    3. **Strictly follow the scenario logic in the system prompt.** DO NOT over-disclose order data.
+    3. **STRICTLY follow the scenario logic in the system prompt.** DO NOT over-disclose order data.
     4. Respond to the user directly in the target language.
 </instructions>

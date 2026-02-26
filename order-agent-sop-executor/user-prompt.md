@@ -25,6 +25,8 @@
     </user_query>
 </current_request>
 
+<current_system_time>{{ $now.format('yyyy-MM-dd') }}</current_system_time>
+
 <instructions>
     1. **首先检查 <session_metadata>**。如果 `Login Status` 为 false，且用户询问私人订单信息，必须引导他们登录。
     2. **分析 <user_query>** 以检测订单号。如果未找到，检查 <recent_dialogue> 和 <memory_bank> 中先前提到的订单号。
