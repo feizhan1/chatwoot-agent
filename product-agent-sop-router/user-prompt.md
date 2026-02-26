@@ -1,24 +1,27 @@
 <session_metadata>
-    Login Status: {{ $('Code in JavaScript1').first().json.isLogin }}
+    Channel: {channel}
+    Login Status: {login_status}
+    Target Language: {target_language}
+    Language Code: {language_code}
 </session_metadata>
 
 <memory_bank>
     ### User Long-term Profile (Historical Data)
-    {{ $('Code in JavaScript10').first().json.user_profile || '无' }}
+    {user_profile}
 
     ### Active Context (Current Session Summary)
-    {{ $('Code in JavaScript10').first().json.active_context || '无' }}
+    {active_context}
 </memory_bank>
 
 <recent_dialogue>
-    {{ $('Code in JavaScript').first().json.history_context || '无' }}
+    {recent_dialogue}
 </recent_dialogue>
 
 <current_request>
     <user_query>
-        {{ $('Code in JavaScript1').first().json.ask }}
+        {user_query}
     </user_query>
-    <image_data>
+   <image_data>
         {image_data}
     </image_data>
 </current_request>
