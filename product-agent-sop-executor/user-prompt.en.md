@@ -28,7 +28,9 @@ Please use the following layered information to understand the user's request.
     </image_data>
 </current_request>
 
-<current_system_time>{{ $now.format('yyyy-MM-dd') }}</current_system_time>
+<current_system_time>
+    {current_system_time}
+</current_system_time>
 
 <instructions>
     1. **Check <session_metadata> first**. If the user needs to download images but Login Status is false, regardless of other memories, guide them to log in.

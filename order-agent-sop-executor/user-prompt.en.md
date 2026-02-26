@@ -25,7 +25,9 @@ Please use the following layered information to understand the user's request.
     </user_query>
 </current_request>
 
-<current_system_time>{{ $now.format('yyyy-MM-dd') }}</current_system_time>
+<current_system_time>
+    {current_system_time}
+</current_system_time>
 
 <instructions>
     1. **Check <session_metadata> first.** If `Login Status` is false and the user asks about private order information, you MUST guide them to log in.

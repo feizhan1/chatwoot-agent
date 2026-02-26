@@ -28,7 +28,9 @@
     </image_data>
 </current_request>
 
-<current_system_time>{{ $now.format('yyyy-MM-dd') }}</current_system_time>
+<current_system_time>
+    {current_system_time}
+</current_system_time>
 
 <instructions>
     1. **首先检查 <session_metadata>**。如果用户需要下载图片但 Login Status 为 false，无论其他记忆如何，都要引导他们登录。
