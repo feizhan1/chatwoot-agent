@@ -26,14 +26,10 @@
     </image_data>
 </current_request>
 
+<current_system_time>{{ $now.format('yyyy-MM-dd') }}</current_system_time>
+
 <instructions>
     STRICTLY follow the rules defined in the system prompt and analyze the XML data context provided above.
-    
-    Execution Steps:
-    1. Check <recent_dialogue> to determine if there is a continuation of "handoff / business customization" intent.
-    2. Analyze the <user_query> and <image_data> within <current_request>.
-    3. Cross-reference <session_metadata> and <memory_bank> to confirm contextual relevance.
-    4. Match the most appropriate SOP.
-    
+    Match the most appropriate SOP.
     Output JSON directly. DO NOT add any additional explanatory text.
 </instructions>
