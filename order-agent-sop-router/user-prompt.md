@@ -17,15 +17,6 @@
     {recent_dialogue}
 </recent_dialogue>
 
-<current_request>
-    <user_query>
-        {user_query}
-    </user_query>
-   <image_data>
-        {image_data}
-    </image_data>
-</current_request>
-
 <current_system_time>
     {current_system_time}
 </current_system_time>

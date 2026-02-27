@@ -18,12 +18,6 @@ Please use the following layered information to understand the user's request.
     {recent_dialogue}
 </recent_dialogue>
 
-<current_request>
-    <user_query>
-        {user_query}
-    </user_query>
-</current_request>
-
 <current_system_time>
     {current_system_time}
 </current_system_time>

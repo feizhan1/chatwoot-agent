@@ -17,16 +17,9 @@
     {recent_dialogue}
 </recent_dialogue>
 
-<current_request>
-    <user_query>
-        {user_query}
-    </user_query>
-   <image_data>
-        {image_data}
-    </image_data>
-</current_request>
-
-<current_system_time>{{ $now.format('yyyy-MM-dd') }}</current_system_time>
+<current_system_time>
+    {current_system_time}
+</current_system_time>
 
 <instructions>
     请严格遵循系统提示词中的规则，分析上述提供的 XML 数据上下文。

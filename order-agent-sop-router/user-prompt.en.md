@@ -17,21 +17,12 @@
     {recent_dialogue}
 </recent_dialogue>
 
-<current_request>
-    <user_query>
-        {user_query}
-    </user_query>
-   <image_data>
-        {image_data}
-    </image_data>
-</current_request>
-
 <current_system_time>
     {current_system_time}
 </current_system_time>
 
 <instructions>
-    STRICTLY follow the rules defined in the system prompt and analyze the XML data context provided above.
+    STRICTLY follow the rules defined in the system prompt, and analyze the XML data context provided above.
     Match the most appropriate SOP.
-    Output JSON directly. DO NOT add any additional explanatory text.
+    Output JSON directly, DO NOT add any additional explanatory text.
 </instructions>
