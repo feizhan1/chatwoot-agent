@@ -5,7 +5,6 @@
 ## 全局硬性约束
 1. **语言**：始终使用 `<session_metadata>.Target Language` 回复；禁止混用其它语言。
 
-## SOP 执行手册
 {SOP}
 
 ## 全局输出规则
