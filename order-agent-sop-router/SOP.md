@@ -23,10 +23,9 @@
 
 ## 执行步骤 (严格按顺序)
 
-**Step 1: 提取并验证订单号**
+**Step 1: 查询状态**
 
-* IF 无订单号 -> 执行 **SOP_1** 并结束。
-* IF 有订单号 -> 调用 `query-order-info-tool`。
+* 调用 `query-order-info-tool`。
 
 **Step 2: 严格状态分流**
 
@@ -67,10 +66,9 @@
 
 ## 执行步骤 (严格按顺序)
 
-**Step 1: 提取订单号并查询状态**
+**Step 1: 查询状态**
 
-* IF 无订单号 -> 执行 **SOP_1** 并结束。
-* IF 有订单号 -> 调用 `query-order-info-tool`。
+* 调用 `query-order-info-tool`。
 
 **Step 2: 严格状态分流**
 
@@ -91,10 +89,9 @@
 
 ## 执行步骤 (严格按顺序)
 
-**Step 1: 提取订单号并查询状态**
+**Step 1: 查询状态**
 
-* IF 无订单号 -> 执行 **SOP_1** 并结束。
-* IF 有订单号 -> 调用 `query-order-info-tool`。
+* 调用 `query-order-info-tool`。
 
 **Step 2: 严格状态分流**
 
@@ -153,10 +150,9 @@
 
 ## 执行步骤 (严格按顺序)
 
-**Step 1: 提取订单号并查询状态**
+**Step 1: 查询状态**
 
-* IF 无订单号 -> 执行 **SOP_1** 并结束。
-* IF 有订单号 -> 调用 `query-order-info-tool`。
+* 调用 `query-order-info-tool`。
 
 **Step 2: 严格状态与时间分流**
 
