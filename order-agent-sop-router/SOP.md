@@ -35,8 +35,8 @@
 
 * IF 状态为 [已支付/等待确认 (Paid / Awaiting)]：
 * <current_system_time>为当前时间`。
-* IF 订单创建时间 [createdOn]在3天内：回复：“您的付款正在处理中。请耐心等待2-3个工作日以确认。”
-* ELSE 订单创建时间 [createdOn]超过3天：回复：“您的付款正在处理中。感谢您的耐心等待，你的专属业务员会为您处理。” **并且【必须】调用 `need-human-help-tool`。**
+* IF 订单创建时间 [createdOn]和当前时间<current_system_time>比较，是在最近3天内创建的：回复：“您的付款正在处理中。请耐心等待2-3个工作日以确认。”
+* IF 订单创建时间 [createdOn]和当前时间<current_system_time>比较，是在3天前创建的：回复：“您的付款正在处理中。感谢您的耐心等待，你的专属业务员会为您处理。” **并且【必须】调用 `need-human-help-tool`。**
 
 * IF 状态为 [处理中/In Process]：
 * 回复：“您的订单正在处理中。预计发货周期为 3-7 天”
