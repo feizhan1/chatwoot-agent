@@ -43,9 +43,14 @@
 * **SOP_11**: 未登录安全提示（非 WhatsApp 渠道，固定安全提醒，不调用工具）。
 
 ## 输出格式 (严格遵循 JSON)
-你必须仅输出一个合法的 JSON 对象，不要包含任何 Markdown 代码块包裹（如 ```json），直接输出 JSON 本身：
+你必须且只能输出一个合法的 JSON 对象。
+- 不要包含任何 Markdown 代码块包裹（如 ```json ）。
+- 直接输出 JSON 本身，绝对不要在最外层添加 "output" 等任何多余的嵌套键。
+- JSON 中绝对不要包含任何 // 或 /**/ 注释。
+
+预期输出示例：
 {
   "selected_sop": "SOP_3", 
-  "extracted_order_number": "M25121600007", // 提取到的订单号，如果没有找到任何订单号，则输出 null
+  "extracted_order_number": "M25121600007",
   "reasoning": "简短的一句话解释为什么选择这个 SOP 以及订单号的来源"
 }

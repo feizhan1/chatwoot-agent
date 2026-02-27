@@ -31,7 +31,12 @@
 * **SOP_10**: 工具故障兜底处理（产品数据工具异常时的底线提示）。
 
 ## 输出格式 (严格遵循 JSON)
-你必须仅输出一个合法的 JSON 对象，不要包含任何 Markdown 代码块包裹（如 ```json），直接输出 JSON 本身：
+你必须且只能输出一个合法的 JSON 对象。
+- 不要包含任何 Markdown 代码块包裹（如 ```json ）。
+- 直接输出 JSON 本身，绝对不要在最外层添加 "output" 等任何多余的嵌套键。
+- JSON 中绝对不要包含任何 // 或 /**/ 注释。
+
+预期输出示例：
 {
   "selected_sop": "SOP_1", 
   "extracted_product_identifier": "6601162439A", // 提取到的 SKU、产品名或图片 URL。如无则为 null
