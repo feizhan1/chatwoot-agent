@@ -8,9 +8,6 @@
 <memory_bank>
     ### User Long-term Profile (Historical Data)
     {user_profile}
-
-    ### Active Context (Current Session Summary)
-    {active_context}
 </memory_bank>
 
 <recent_dialogue>
