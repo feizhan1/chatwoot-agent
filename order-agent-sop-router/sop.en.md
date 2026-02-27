@@ -33,9 +33,10 @@
 * Reply: "Your order has not been paid yet. We will process the order once payment is completed."
 
 * IF status is [Paid / Awaiting]:
-* Check the order creation time.
-* IF order creation time [createdOn] relative to current time `<current_system_time>` has NOT exceeded 3 days: Reply: "Your payment is being processed. Please allow 2-3 business days for confirmation."
-* IF order creation time [createdOn] relative to current time `<current_system_time>` has exceeded 3 days: Reply: "Your payment is being processed. Thank you for your patience, your dedicated account manager will handle this for you." **And MUST call `need-human-help-tool`.**
+* Parse order creation time [createdOn] (ISO 8601, default UTC) and compute `delta_hours = (<current_system_time> - createdOn)`.
+* IF `delta_hours < 72`: Reply: "Your payment is being processed. Please allow 2-3 business days for confirmation."
+* IF `delta_hours >= 72`: Reply: "Your payment is being processed. Thank you for your patience, your dedicated account manager will handle this for you." **And MUST call `need-human-help-tool`.**
+* IF `createdOn` is missing or fails to parse: default to the `< 72 hours` path and add "We have forwarded this to a human agent to confirm the time." to the reply.
 
 * IF status is [In Process]:
 * Reply: "Your order is being processed. The estimated shipping timeframe is 3-7 days."

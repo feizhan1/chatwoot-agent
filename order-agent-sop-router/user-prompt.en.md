@@ -26,10 +26,12 @@
     </image_data>
 </current_request>
 
-<current_system_time>{{ $now.format('yyyy-MM-dd') }}</current_system_time>
+<current_system_time>
+    {current_system_time}
+</current_system_time>
 
 <instructions>
-    Strictly follow the rules defined in the system prompt and analyze the XML data context provided above.
+    STRICTLY follow the rules defined in the system prompt and analyze the XML data context provided above.
     Match the most appropriate SOP.
     Output JSON directly. DO NOT add any additional explanatory text.
 </instructions>

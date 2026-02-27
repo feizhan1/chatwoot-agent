@@ -135,6 +135,30 @@
         "should_escalate": true
       },
       "note": "⚠️ 严重问题，应该升级转人工"
+    },
+    {
+      "id": "TC052",
+      "name": "付款超过72小时仍待确认，需转人工",
+      "priority": "high",
+      "intent": "query_user_order",
+      "input": {
+        "query": "查下订单 V26022100001",
+        "login": true,
+        "user": "Alice",
+        "language": "zh",
+        "current_system_time": "2026-02-27T01:49:23.946Z",
+        "mock_order": {
+          "orderId": "V26022100001",
+          "status": "Paid / Awaiting",
+          "createdOn": "2026-02-21T00:07:17.809Z"
+        }
+      },
+      "expect": {
+        "tool": "need-human-help-tool",
+        "keywords": ["感谢您的耐心等待", "专属业务员", "付款正在处理中"],
+        "logic": "createdOn 与 current_system_time 间隔 >=72 小时时必须转人工"
+      },
+      "note": "校验 SOP_2 中 Paid/Awaiting 分支：超过72小时必须调用 need-human-help-tool 并输出相应文案"
     }
   ]
 }

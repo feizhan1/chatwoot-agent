@@ -32,3 +32,5 @@
 ## Security & Configuration Tips
 - Never commit real API keys; copy `scripts/translation-config.env.example` and keep secrets local.
 - `env.json` is generated—review diffs for unintended prompt exposure before pushing.
+
+## 请使用中文回复
