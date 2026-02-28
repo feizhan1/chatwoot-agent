@@ -18,6 +18,12 @@
     {recent_dialogue}
 </recent_dialogue>
 
+<current_request>
+    <image_data>
+        {image_data}
+    </image_data>
+</current_request>
+
 <current_system_time>
     {current_system_time}
 </current_system_time>
