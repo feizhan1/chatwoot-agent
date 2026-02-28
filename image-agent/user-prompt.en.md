@@ -1,4 +1,4 @@
-Please use the following context information to analyze image content and identify user intent.
+Please use the following context information to analyze the image content and identify user intent.
 
 <session_metadata>
     Channel: {channel}
@@ -19,21 +19,8 @@ Please use the following context information to analyze image content and identi
     {recent_dialogue}
 </recent_dialogue>
 
-<current_request>
-    <user_query>
-        {user_query}
-    </user_query>
-
-    <image_data>
-        [Image content - directly processed by gemini-2.5-flash-image multimodal model]
-    </image_data>
-</current_request>
-
 <instructions>
-    1. **First analyze <image_data>**: Identify image type (product image/order screenshot/complaint evidence/business inquiry/other)
-    2. **Combine with <user_query>**: Understand the relationship between user's text description and image
-    3. **Check <recent_dialogue>**: Look for relevant context in the most recent 1-2 turns
-    4. **Review <memory_bank>**: Supplement information from Active Context (if available)
-    5. **Strictly follow priority rules in system prompt**
-    6. **CRITICAL**: Only classify as confirm_again_agent when image content is unclear + text is ambiguous/absent + both recent_dialogue and active_context have no relevant information
+    1. Combine <recent_dialogue> recent conversation and image content to determine the business action the user wants to execute
+    2. Strictly route according to the priority and single decision flow in the system prompt
+    3. Only categorize as confirm_again_agent when "possibly business-related but unable to determine specific action"
 </instructions>
