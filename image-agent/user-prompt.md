@@ -16,23 +16,26 @@
 </memory_bank>
 
 <recent_dialogue>
+    ### Latest conversations
     {recent_dialogue}
 </recent_dialogue>
 
 <current_request>
-    <user_query>
-        {user_query}
-    </user_query>
-    <image_data>
-        {image_data}
-    </image_data>
+    ### User is currently asking
+    <user_query>{user_query}</user_query>
+    ### Pictures currently provided by the user
+    <image_data>{image_data}</image_data>
 </current_request>
 
+<current_system_time>
+    ### current system time
+    {current_system_time}
+</current_system_time>
 
 <instructions>
     1. 严格按 system-prompt 规则判断，不要回答业务问题。
-    2. 若 <current_request><user_query> 非空：以 user_query 作为主判定输入；recent_dialogue 和 active_context 仅用于补全实体与消歧。
-    3. 若 <current_request><user_query> 为空：禁止从 user_query 提取诉求；按 recent_dialogue 最近 1-2 轮 → image_data → “具体信息”的顺序确定诉求。
+    2. 若 <user_query> 非空：以 user_query 作为主判定输入；recent_dialogue 和 active_context 仅用于补全实体与消歧。
+    3. 若 <user_query> 为空：禁止从 user_query 提取诉求；从 recent_dialogue 最近 1-2 轮 获取诉求。
     4. 输出只允许两种：
        - 用户可能想xxx，需要向用户澄清
        - 用户无明确意图
