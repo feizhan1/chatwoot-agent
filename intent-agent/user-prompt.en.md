@@ -1,4 +1,4 @@
-Please use the following layered information to understand the user's request.
+Please use the following hierarchical information to understand the user's request.
 
 <session_metadata>
     Channel: {channel}
@@ -20,15 +20,16 @@ Please use the following layered information to understand the user's request.
 </recent_dialogue>
 
 <current_request>
-    <user_query>
-        {user_query}
-    </user_query>
+    ### User is currently asking
+    {user_query}
+    ### Pictures currently provided by the user
+    {image_data}
 </current_request>
 
 <instructions>
-    1. **Check <recent_dialogue> first**: If the user uses referential expressions ("that order", "this product", "it") or omits the subject, look for the referenced entity in the most recent 1-2 turns of dialogue.
+    1. **First check <recent_dialogue>**: If the user uses pronouns ("that order", "this product", "it") or omits the subject, look for the referenced entity in the most recent 1-2 rounds of dialogue.
     2. **Analyze <recent_dialogue>**: Identify the user's true intent.
     3. **Consult <memory_bank>**: Understand the user's long-term preferences and active topics in the current session.
-    4. **STRICTLY follow priority**: Safety detection → Clear intent (including context-completed intent) → Ambiguous intent → Chitchat.
-    5. **CRITICAL principle**: Only classify as `need_confirm_again` when there is **no** relevant information in **both** recent_dialogue and active_context.
+    4. **Strictly follow priority**: Safety detection → Clear intent (including completion from context) → Ambiguous intent → Casual chat.
+    5. **Key principle**: Only classify as `confirm_again_agent` when there is **no** relevant information in both recent_dialogue and active_context.
 </instructions>

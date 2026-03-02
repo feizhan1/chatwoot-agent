@@ -1,4 +1,4 @@
-请使用以下上下文信息分析图片内容并识别用户意图。
+请基于以下结构化上下文识别图片意图，并仅输出最终文案。
 
 <session_metadata>
     Channel: {channel}
@@ -19,8 +19,22 @@
     {recent_dialogue}
 </recent_dialogue>
 
+<current_request>
+    <user_query>
+        {user_query}
+    </user_query>
+    <image_data>
+        {image_data}
+    </image_data>
+</current_request>
+
+
 <instructions>
-    1. 结合 <recent_dialogue> 近期对话和图片内容判断用户要执行的业务动作
-    2. 严格按系统提示词中的优先级和单一决策流程路由
-    3. 仅当“可能是业务相关，但无法确定具体动作”时，才归类为 confirm_again_agent
+    1. 严格按 system-prompt 规则判断，不要回答业务问题。
+    2. 若 <current_request><user_query> 非空：以 user_query 作为主判定输入；recent_dialogue 和 active_context 仅用于补全实体与消歧。
+    3. 若 <current_request><user_query> 为空：禁止从 user_query 提取诉求；按 recent_dialogue 最近 1-2 轮 → image_data → “具体信息”的顺序确定诉求。
+    4. 输出只允许两种：
+       - 用户可能想xxx，需要向用户澄清
+       - 用户无明确意图
+    5. 不要输出 JSON、不要输出解释、不要输出其他文本。
 </instructions>

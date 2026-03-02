@@ -20,9 +20,10 @@
 </recent_dialogue>
 
 <current_request>
-    <user_query>
-        {user_query}
-    </user_query>
+    ### User is currently asking
+    {user_query}
+    ### Pictures currently provided by the user
+    {image_data}
 </current_request>
 
 <instructions>
@@ -30,5 +31,5 @@
     2. **分析 <recent_dialogue>**：识别用户的真实意图。
     3. **查阅 <memory_bank>**：了解用户的长期偏好和当前会话的活跃主题。
     4. **严格遵循优先级**：安全检测 → 明确意图（含从上下文补全）→ 模糊意图 → 闲聊。
-    5. **关键原则**：仅当 recent_dialogue 和 active_context 中**都没有**相关信息时，才归类为 `need_confirm_again`。
+    5. **关键原则**：仅当 recent_dialogue 和 active_context 中**都没有**相关信息时，才归类为 `confirm_again_agent`。
 </instructions>
