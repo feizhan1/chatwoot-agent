@@ -151,10 +151,51 @@ translate_with_openrouter() {
     echo "$TRANSLATED_CONTENT"
 }
 
+# 根据已跟踪/已存在文件，解析 .en.md 输出路径（忽略大小写匹配）
+resolve_output_file() {
+    local INPUT_FILE="$1"
+    local DEFAULT_OUTPUT_FILE="${INPUT_FILE%.md}.en.md"
+    local INPUT_DIR INPUT_BASENAME INPUT_BASENAME_LOWER
+    local TRACKED_FILE TRACKED_BASENAME TRACKED_BASENAME_LOWER
+    local EXISTING_FILE EXISTING_BASENAME EXISTING_BASENAME_LOWER
+
+    INPUT_DIR="$(dirname "$INPUT_FILE")"
+    INPUT_BASENAME="$(basename "$INPUT_FILE" .md)"
+    INPUT_BASENAME_LOWER="$(echo "$INPUT_BASENAME" | tr '[:upper:]' '[:lower:]')"
+
+    # 优先使用已跟踪文件路径（解决 SOP.md / sop.en.md 大小写不一致问题）
+    while IFS= read -r TRACKED_FILE; do
+        [ -z "$TRACKED_FILE" ] && continue
+        [ "$(dirname "$TRACKED_FILE")" != "$INPUT_DIR" ] && continue
+
+        TRACKED_BASENAME="$(basename "$TRACKED_FILE" .en.md)"
+        TRACKED_BASENAME_LOWER="$(echo "$TRACKED_BASENAME" | tr '[:upper:]' '[:lower:]')"
+        if [ "$TRACKED_BASENAME_LOWER" = "$INPUT_BASENAME_LOWER" ]; then
+            echo "$TRACKED_FILE"
+            return 0
+        fi
+    done < <(git ls-files "*.en.md" 2>/dev/null || true)
+
+    # 次选工作区中已存在的匹配文件
+    for EXISTING_FILE in "$INPUT_DIR"/*.en.md; do
+        [ ! -f "$EXISTING_FILE" ] && continue
+
+        EXISTING_BASENAME="$(basename "$EXISTING_FILE" .en.md)"
+        EXISTING_BASENAME_LOWER="$(echo "$EXISTING_BASENAME" | tr '[:upper:]' '[:lower:]')"
+        if [ "$EXISTING_BASENAME_LOWER" = "$INPUT_BASENAME_LOWER" ]; then
+            echo "$EXISTING_FILE"
+            return 0
+        fi
+    done
+
+    echo "$DEFAULT_OUTPUT_FILE"
+}
+
 # 翻译单个文件的函数
 translate_file() {
     local INPUT_FILE="$1"
-    local OUTPUT_FILE="${INPUT_FILE%.md}.en.md"
+    local OUTPUT_FILE
+    OUTPUT_FILE="$(resolve_output_file "$INPUT_FILE")"
 
     echo "   翻译: $INPUT_FILE → $OUTPUT_FILE"
 
