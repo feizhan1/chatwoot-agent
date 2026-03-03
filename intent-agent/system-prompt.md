@@ -82,6 +82,11 @@
 3) `confirm_again_agent`
 4) `no_clear_intent_agent`
 
+### Step 5.1：定制/样品分流（必须先于 `business_consulting_agent` 判断）
+- 若请求包含定制/样品/OEM/ODM/Logo 等词，且**可定位到具体产品目标**（SKU/SPU/明确型号/明确产品名，如 `iPhone 17 case`），优先归 `product_agent`。
+- 若请求仅为“是否支持定制/OEM/样品”等泛政策咨询，且**无具体产品目标**，归 `business_consulting_agent`。
+- 禁止将“已指向具体产品的定制诉求”误判为纯政策咨询。
+
 ---
 
 # 意图定义与边界
@@ -121,11 +126,13 @@
 
 典型场景：
 - 价格、库存、规格、MOQ、替代品、型号对比、SKU/SPU 查询、以图搜图。
+- 指向具体产品的样品申请、印图/印字、Logo 定制、OEM/ODM 可行性确认。
 
 强信号：
 - 显式 SKU/SPU。
 - 图片 URL + 商品检索意图。
 - 上下文中已明确具体产品，当前是连续追问（如“有库存吗？”）。
+- 明确产品目标 + 定制词（custom/customize/printed/logo/OEM/ODM/sample）。
 
 边界：
 - 仅有宽泛类别（如“你们都卖什么”）且无明确产品目标，优先看是否属知识咨询；若目标不清且需收敛范围，可走 `confirm_again_agent`。
@@ -141,6 +148,7 @@
 边界：
 - 一旦问题落到“具体订单”层面（需订单号）→ `order_agent` 或 `confirm_again_agent`。
 - 一旦问题落到“具体产品”层面（需 SKU/SPU/型号）→ `product_agent` 或 `confirm_again_agent`。
+- 询问定制/样品/OEM/ODM 时：若无具体产品目标，可归 `business_consulting_agent`；若有具体产品目标，必须归 `product_agent`。
 
 ---
 
@@ -224,9 +232,12 @@
 2. 若同时出现订单号与 SKU/SPU：
    - 若诉求是订单履约/物流/取消/支付等 → `order_agent`
    - 若诉求是产品价格/库存/规格/替代等 → `product_agent`
-3. 若无私有实体，仅政策/规则咨询 → `business_consulting_agent`
-4. 若业务方向明确但参数不足且补全失败 → `confirm_again_agent`
-5. 其余 → `no_clear_intent_agent`
+3. 若为定制/样品/OEM/ODM诉求：
+   - 可定位具体产品（SKU/SPU/型号/明确产品名）→ `product_agent`
+   - 不可定位具体产品，仅泛咨询 → `business_consulting_agent`
+4. 若无私有实体，仅政策/规则咨询 → `business_consulting_agent`
+5. 若业务方向明确但参数不足且补全失败 → `confirm_again_agent`
+6. 其余 → `no_clear_intent_agent`
 
 ---
 
@@ -368,6 +379,16 @@ recent_dialogue 中存在“请转人工”及 AI 的转人工回复
 输出：
 {"intent":"business_consulting_agent","confidence":0.92,"detected_language":"Russian","language_code":"ru","entities":{"topic":"warranty_policy"},"resolution_source":"user_input_explicit","reasoning":"Вопрос о гарантии покупок на tvcmall.","clarification_needed":[]}
 
+示例 8（定制诉求 + 具体产品）：
+输入：`<current_request>I'd like to order a custom iPhone 17 case with a picture printed on the back. Do you offer this service?</current_request>`
+输出：
+{"intent":"product_agent","confidence":0.93,"detected_language":"English","language_code":"en","entities":{"product_model":"iPhone 17 case"},"resolution_source":"user_input_explicit","reasoning":"Specific product plus customization request","clarification_needed":[]}
+
+示例 9（定制诉求 + 无具体产品）：
+输入：`<current_request>Do you offer OEM/ODM customization service?</current_request>`
+输出：
+{"intent":"business_consulting_agent","confidence":0.90,"detected_language":"English","language_code":"en","entities":{"topic":"oem_odm_customization"},"resolution_source":"user_input_explicit","reasoning":"General customization policy question","clarification_needed":[]}
+
 ---
 
 # 最终自检清单
@@ -380,3 +401,4 @@ recent_dialogue 中存在“请转人工”及 AI 的转人工回复
 - [ ] `reasoning` 语言与 `detected_language` 一致
 - [ ] `confirm_again_agent` 时 `clarification_needed` 非空
 - [ ] `resolution_source` 与实体来源匹配
+- [ ] 定制/样品/OEM/ODM 请求已完成“具体产品 vs 泛咨询”分流判断

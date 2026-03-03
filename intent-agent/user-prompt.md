@@ -39,4 +39,6 @@
     4. **严格遵循路由优先级**：`handoff_agent`（安全/人工）→ 明确业务意图（`order_agent` / `product_agent` / `business_consulting_agent`）→ 参数不足待补全（`confirm_again_agent`）→ 无明确业务意图（`no_clear_intent_agent`）。
     5. **`confirm_again_agent` 必须同时满足 4 条**：当前请求缺关键参数 + recent_dialogue 无可继承实体 + active_context 无可用实体 + 当前消息不是对 AI 上一轮澄清问题的直接回答。
     6. **关键约束**：只要上下文能补全到明确实体，禁止因为“当前句未出现实体”直接判为 `confirm_again_agent`。
+    7. **定制/样品分流硬规则**：若用户提到定制/样品/OEM/ODM/Logo，且能定位到具体产品（SKU/SPU/型号/明确产品名），必须判为 `product_agent`；只有在无具体产品目标时才判为 `business_consulting_agent`。
+    8. **示例校准**：`I'd like to order a custom iPhone 17 case with a picture printed on the back` → `product_agent`（不是 `business_consulting_agent`）。
 </instructions>
