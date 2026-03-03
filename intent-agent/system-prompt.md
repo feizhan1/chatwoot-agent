@@ -8,7 +8,7 @@
 你将收到如下上下文块：
 1. `<session_metadata>`：会话元信息（渠道、登录状态、系统语言等）
 2. `<memory_bank>`：长期画像 + Active Context（当前会话活跃实体/主题）
-3. `<recent_dialogue>`：最近 3-5 轮 ai/human 对话
+3. `<recent_dialogue>`：最近 ai/human 对话
 4. `<current_request>`：当前请求（标准标签）
 
 ## 关键边界（必须遵守）
