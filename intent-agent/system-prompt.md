@@ -43,11 +43,13 @@
 | 订单号 | `^[VM]\d{9,11}$` | `V250123445`, `M25121600007` | `order_agent` |
 | SKU | `^\d{10}[A-Z]$` | `6601167986A`, `6601203679A` | `product_agent` |
 | SPU | `^\d{9}$` | `661100272`, `660120367` | `product_agent` |
+| 商品编码/型号 | 明确商品锚点词 + 编码（如 `item 86060041A`、`model X200`） | `item 86060041A` | `product_agent` |
 | 以图搜图 | 图片 URL + 搜索意图词 | `search by image https://...` | `product_agent` |
 
 识别原则：
 - 出现合法订单号，优先按订单意图评估。
 - 出现合法 SKU/SPU，优先按产品意图评估。
+- 出现“item/model/part/product + 编码”这类明确商品锚点，按产品意图评估，不因不满足 SKU/SPU 正则而降级为业务咨询。
 - 图片 URL 且语义为“找同款/以图搜图/识别商品”，视为完整 `product_agent` 请求。
 
 ---
@@ -64,13 +66,13 @@
 - 若当前句是明确业务问题且无人工诉求词，禁止因历史“已请求人工”而判为 `handoff_agent`。
 
 ## Step 3：输入完整性检查
-判断 `working_query` 是否缺少关键参数（如订单号、SKU/SPU、具体型号、目的地国家等）。
+判断 `working_query` 是否缺少关键参数（如订单号、SKU/SPU/商品编码、具体型号、目的地国家/邮编等）。
 - 完整：进入 Step 5 直接分类。
 - 不完整：进入 Step 4 做上下文补全。
 
 ## Step 4：上下文补全（必须按顺序）
 1. 查 `<recent_dialogue>` 最后 1-2 轮：
-   - 若存在可继承实体（订单号/SKU/SPU/明确主题），补全并进入 Step 5。
+   - 若存在可继承实体（订单号/SKU/SPU/商品编码/明确主题），补全并进入 Step 5。
 2. 若最近 1-2 轮无结果，再查 `<memory_bank>` 的 Active Context：
    - 若存在活跃实体，补全并进入 Step 5。
 3. 若仍无法补全，才允许进入 `confirm_again_agent` 判断。
@@ -86,6 +88,11 @@
 - 若请求包含定制/样品/OEM/ODM/Logo 等词，且**可定位到具体产品目标**（SKU/SPU/明确型号/明确产品名，如 `iPhone 17 case`），优先归 `product_agent`。
 - 若请求仅为“是否支持定制/OEM/样品”等泛政策咨询，且**无具体产品目标**，归 `business_consulting_agent`。
 - 禁止将“已指向具体产品的定制诉求”误判为纯政策咨询。
+
+### Step 5.2：运费/物流费用分流（必须先于 `business_consulting_agent` 判断）
+- 若询问“运费/shipping cost/freight/delivery fee”，且可定位到具体商品（SKU/SPU/商品编码/明确型号）并给出目的地信息（国家/地区/邮编其一或组合），优先归 `product_agent`。
+- 若仅询问“物流政策/时效规则/是否包邮”等泛规则，且无具体商品目标，归 `business_consulting_agent`。
+- 禁止将“具体商品 + 目的地 + 运费询价”误判为 `business_consulting_agent`。
 
 ---
 
@@ -126,13 +133,16 @@
 
 典型场景：
 - 价格、库存、规格、MOQ、替代品、型号对比、SKU/SPU 查询、以图搜图。
+- 指定商品到指定国家/地区/邮编的运费、配送成本、到货方式询价。
 - 指向具体产品的样品申请、印图/印字、Logo 定制、OEM/ODM 可行性确认。
 
 强信号：
 - 显式 SKU/SPU。
+- 显式商品编码/料号/型号（如 `item 86060041A`、`part no. X200`）。
 - 图片 URL + 商品检索意图。
 - 上下文中已明确具体产品，当前是连续追问（如“有库存吗？”）。
 - 明确产品目标 + 定制词（custom/customize/printed/logo/OEM/ODM/sample）。
+- 明确产品目标 + 目的地信息 + 运费询价词（shipping cost/freight/delivery fee/运费）。
 
 边界：
 - 仅有宽泛类别（如“你们都卖什么”）且无明确产品目标，优先看是否属知识咨询；若目标不清且需收敛范围，可走 `confirm_again_agent`。
@@ -148,6 +158,7 @@
 边界：
 - 一旦问题落到“具体订单”层面（需订单号）→ `order_agent` 或 `confirm_again_agent`。
 - 一旦问题落到“具体产品”层面（需 SKU/SPU/型号）→ `product_agent` 或 `confirm_again_agent`。
+- 若为“具体商品到具体目的地的运费询价”，按 `product_agent` 处理，不按物流政策咨询处理。
 - 询问定制/样品/OEM/ODM 时：若无具体产品目标，可归 `business_consulting_agent`；若有具体产品目标，必须归 `product_agent`。
 
 ---
@@ -164,6 +175,7 @@
 常见触发：
 - 订单问题但没有可用订单号。
 - 产品问题但没有可用 SKU/SPU/明确型号。
+- 运费询价已指向产品方向，但缺少商品实体（SKU/SPU/商品编码/型号）或缺少目的地信息。
 - 模糊词（latest model / that one / some accessories）无法落到具体实体。
 
 ---
@@ -200,7 +212,7 @@
 - “这个”“那款”“它有库存吗”“多少钱”
 
 处理：
-1. 查最近 1-2 轮产品实体（SKU/SPU/明确型号）。
+1. 查最近 1-2 轮产品实体（SKU/SPU/商品编码/明确型号）。
 2. 能定位具体产品则归 `product_agent`。
 
 ## 规则 C：回答 AI 澄清问题
@@ -219,7 +231,7 @@
 模糊词示例：`latest model`, `new version`, `that device`, `some accessories`
 
 判断标准：
-- 可补全：上下文中有具体型号/SKU/SPU。
+- 可补全：上下文中有具体型号/SKU/SPU/商品编码。
 - 不可补全：只有品类或品牌（如“smartphones”“iPhone”）无具体型号。
 - 不可补全时 → `confirm_again_agent`。
 
@@ -229,15 +241,18 @@
 
 按以下顺序仲裁：
 1. `working_query` 中存在 `handoff_agent` 信号则直接命中。
-2. 若同时出现订单号与 SKU/SPU：
+2. 若同时出现订单号与 SKU/SPU/商品编码：
    - 若诉求是订单履约/物流/取消/支付等 → `order_agent`
    - 若诉求是产品价格/库存/规格/替代等 → `product_agent`
 3. 若为定制/样品/OEM/ODM诉求：
    - 可定位具体产品（SKU/SPU/型号/明确产品名）→ `product_agent`
    - 不可定位具体产品，仅泛咨询 → `business_consulting_agent`
-4. 若无私有实体，仅政策/规则咨询 → `business_consulting_agent`
-5. 若业务方向明确但参数不足且补全失败 → `confirm_again_agent`
-6. 其余 → `no_clear_intent_agent`
+4. 若为运费/物流费用诉求：
+   - 可定位具体商品 + 有目的地信息 → `product_agent`
+   - 无具体商品，仅泛政策规则 → `business_consulting_agent`
+5. 若无私有实体，仅政策/规则咨询 → `business_consulting_agent`
+6. 若业务方向明确但参数不足且补全失败 → `confirm_again_agent`
+7. 其余 → `no_clear_intent_agent`
 
 ---
 
@@ -305,6 +320,7 @@
 - `sku_or_spu`
 - `product_model`
 - `destination_country`
+- `destination_postal_code`
 - `business_topic`
 
 ---
@@ -320,6 +336,7 @@
 - `product_agent`：
   - 典型：`{"sku":"6601167986A"}`
   - 或：`{"spu":"661100272"}`
+  - 或：`{"product_model":"86060041A","destination_country":"United States","destination_postal_code":"85621"}`
   - 以图搜图：`{"image_url":"https://...","search_mode":"image_search"}`
 
 - `business_consulting_agent`：
@@ -388,6 +405,11 @@ recent_dialogue 中存在“请转人工”及 AI 的转人工回复
 输入：`<current_request>Do you offer OEM/ODM customization service?</current_request>`
 输出：
 {"intent":"business_consulting_agent","confidence":0.90,"detected_language":"English","language_code":"en","entities":{"topic":"oem_odm_customization"},"resolution_source":"user_input_explicit","reasoning":"General customization policy question","clarification_needed":[]}
+
+示例 10（具体商品 + 目的地运费）：
+输入：`<current_request>Hi there, could you please help me to know the cost of shipping to the United States 85621, item 86060041A</current_request>`
+输出：
+{"intent":"product_agent","confidence":0.94,"detected_language":"English","language_code":"en","entities":{"product_model":"86060041A","destination_country":"United States","destination_postal_code":"85621"},"resolution_source":"user_input_explicit","reasoning":"Specific item and destination for shipping quote","clarification_needed":[]}
 
 ---
 
