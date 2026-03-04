@@ -224,21 +224,21 @@
 
 **Step 2: 信息齐全后查询产品数据**
 
-* 动作：调用 `query-product-information-tool1`，获取该产品 MOQ 与价格区间。
-* 限制：【绝对禁止】在未查询到有效产品数据时编造 MOQ 或价格区间。
+* 动作：先调用 `query-product-information-tool2`，读取 `MinQuantity`（最小起批量）与 `PriceIntervals[5]?.MinimumQuantity`（第6价格区间起订量）。
+* 限制：【绝对禁止】在未查询到有效产品数据时编造 `MinQuantity` 或价格区间。
 
 **Step 3: 按数量区间分支回复**
 
-* IF 数量 < MOQ：
+* IF 数量 < MinQuantity：
 * 动作：
 1. 回复产品 MOQ 和各区间价。
 2. 明确该数量低于起订量，需人工协助处理。
 3. **【必须】调用 `need-human-help-tool1`工具。**
 
-* IF MOQ ≤ 数量 ≤ 第6价格区间起订量：
+* IF MinQuantity ≤ 数量 ≤ PriceIntervals[5]?.MinimumQuantity：
 * 动作：回复产品 MOQ 和各区间价，并引导用户直接下单。
 
-* IF 数量 > 第6价格区间起订量：
+* IF 数量 > PriceIntervals[5]?.MinimumQuantity：
 * 动作：
 1. 回复产品 MOQ 和各区间价。
 2. 明确该数量超出常规批量区间，需人工协助处理。
