@@ -111,10 +111,34 @@ translate_with_retry() {
             continue
         fi
 
-        # 检查是否有错误
-        if echo "$RESPONSE" | jq -e '.error' > /dev/null 2>&1; then
-            ERROR_TYPE=$(echo "$RESPONSE" | jq -r '.error.type // "unknown"')
-            ERROR_MSG=$(echo "$RESPONSE" | jq -r '.error.message // "未知错误"')
+        # 检查是否有错误（兼容 error 为对象或字符串）
+        ERROR_TYPE=$(echo "$RESPONSE" | jq -r '
+            if type == "object" and ((.error? != null) or (.type? == "error")) then
+                if (.error? | type) == "object" then
+                    (.error.type // "unknown")
+                else
+                    (.type // "unknown")
+                end
+            else
+                empty
+            end
+        ' 2>/dev/null)
+        ERROR_MSG=$(echo "$RESPONSE" | jq -r '
+            if type == "object" and ((.error? != null) or (.type? == "error")) then
+                if (.error? | type) == "object" then
+                    (.error.message // .error.type // (.error | tostring))
+                elif .error? != null then
+                    (.error | tostring)
+                else
+                    (.message // .detail // "未知错误")
+                end
+            else
+                empty
+            end
+        ' 2>/dev/null)
+
+        if [ -n "$ERROR_MSG" ] && [ "$ERROR_MSG" != "null" ]; then
+            [ -z "$ERROR_TYPE" ] && ERROR_TYPE="unknown"
 
             if [[ "$ERROR_TYPE" == "overloaded_error" ]]; then
                 echo "   ⚠️  API 过载，等待后重试..."
@@ -128,7 +152,24 @@ translate_with_retry() {
         fi
 
         # 检查响应格式
-        if ! echo "$RESPONSE" | jq -e '.content[0].text' > /dev/null 2>&1; then
+        TRANSLATED_CONTENT=$(echo "$RESPONSE" | jq -r '
+            if (.content? | type) == "array" and (.content[0].text? != null) then
+                .content[0].text
+            elif (.choices? | type) == "array" and (.choices[0].message.content? != null) then
+                if (.choices[0].message.content | type) == "array" then
+                    [
+                        .choices[0].message.content[]
+                        | if type == "string" then . else (.text // empty) end
+                    ] | join("\n")
+                else
+                    .choices[0].message.content
+                end
+            else
+                empty
+            end
+        ' 2>/dev/null)
+
+        if [ -z "$TRANSLATED_CONTENT" ] || [ "$TRANSLATED_CONTENT" = "null" ]; then
             echo "   ⚠️  响应格式异常"
             echo "   📋 响应内容（前 200 字符）:"
             echo "$RESPONSE" | head -c 200
@@ -141,15 +182,6 @@ translate_with_retry() {
                 continue
             fi
             return 1
-        fi
-
-        # 提取翻译内容
-        TRANSLATED_CONTENT=$(echo "$RESPONSE" | jq -r '.content[0].text')
-
-        if [ -z "$TRANSLATED_CONTENT" ] || [ "$TRANSLATED_CONTENT" = "null" ]; then
-            echo "   ⚠️  翻译内容为空，重试..."
-            ((RETRY_COUNT++))
-            continue
         fi
 
         # 成功：写入输出文件

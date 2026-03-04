@@ -48,11 +48,11 @@
 **Step 1: 判定输入并调用对应搜索工具**
 
 * IF 存在有效 `<image_data>` 或图片 URL：
-* 动作：提取 URL，调用 `search_production_by_imageUrl_tool`。
+* 动作：提取 URL，调用 `search_product_by_imageUrl_tool`。
 
 * ELSE（纯文本搜索）：
-* 动作：使用原语种调用 `query-product-information-tool1`。
-* 异常兜底：若文本查询结果为空，且上下文存在 `<image_data>`，必须立即改用 `search_production_by_imageUrl_tool`。
+* 动作：调用 `query-product-information-tool1`。
+* 异常兜底：若文本查询结果为空，且上下文存在 `<image_data>`，必须立即改用 `search_product_by_imageUrl_tool`。
 
 **Step 2: 工具命中后的结果输出**
 

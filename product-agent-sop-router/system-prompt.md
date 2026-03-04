@@ -37,7 +37,7 @@
 - 不要包含任何 Markdown 代码块包裹（如 ```json ）。
 - 直接输出 JSON 本身，绝对不要在最外层添加 "output" 等任何多余的嵌套键。
 - JSON 中绝对不要包含任何 // 或 /**/ 注释。
-- `selected_sop` 必须是 `SOP_1` 到 `SOP_10` 之一。
+- `selected_sop` 必须是 `SOP_1` 到 `SOP_11` 之一。
 - `extracted_product_identifier` 只能是上下文中真实出现的 SKU、产品名、图片 URL，或 `null`。
 - `reasoning` 必须是一句简短解释，并与 `selected_sop` 一致。
 - 输出前自检：若 `selected_sop`、`extracted_product_identifier`、`reasoning` 任一冲突，必须先重判再输出。
