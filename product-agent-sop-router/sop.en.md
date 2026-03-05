@@ -1,12 +1,12 @@
 ### SOP_1: Query Single Product Attribute
 
-# Current Task: Query single attribute of "SKU/Product Name/Product Link" (such as price/brand/MOQ/weight/material/compatibility/supported models/certifications, etc.)
+# Current Task: Query single attribute of "SKU/Product Name/Product Link" (such as price/brand/MOQ/weight/material/compatibility/supported models/certification, etc.)
 
 ## Execution Steps (strictly in order)
 
 **Step 1: Call Product Query Tool**
 
-* Action: Retrieve product information, call `query-product-information-tool1`.
+* Action: Obtain product information, call `query-product-information-tool1`.
 
 **Step 2: Field-level Precise Response**
 
@@ -25,13 +25,13 @@
 
 **Step 1: Call Product Query Tool**
 
-* Action: Call `query-product-information-tool1` to retrieve product information.
+* Action: Call `query-product-information-tool1` to obtain product information.
 
 **Step 2: Generate Overview Response**
 
 * IF product information is not empty
-* Action: Extract core data and provide a summary response.
-* Output MUST and ONLY include the following elements: 1) Title [product link]; 2) Price; 3) Minimum Order Quantity (MOQ); 4) Three key selling points summary.
+* Action: Extract core data and provide summary response.
+* Output MUST and ONLY include the following elements: 1) Title [Product Link]; 2) Price; 3) Minimum Order Quantity (MOQ); 4) Three key selling point summaries.
 * Restriction: 【ABSOLUTELY PROHIBITED】List all product parameter fields.
 
 * ELSE product information is empty
@@ -41,7 +41,7 @@
 
 ### SOP_3: Product Search & Recommendation
 
-# Current Task: Handle requests to search, browse, compare, or get product recommendations
+# Current Task: Handle requests for searching, browsing, comparing, or obtaining product recommendations
 
 ## Execution Steps (strictly in order)
 
@@ -54,61 +54,61 @@
 * Action: Call `query-product-information-tool1`.
 * Exception fallback: If text query returns empty results and `<image_data>` exists in context, MUST immediately switch to `search_product_by_imageUrl_tool`.
 
-**Step 2: Result Output After Tool Match**
+**Step 2: Result Output After Tool Hit**
 
 * IF relevant products found:
 * Action: Return up to 3 product results, TVCMall search results link [tvcmallSearchUrl].
-* Each product ONLY includes: Title[product link], SKU, Price, Minimum Order Quantity (MOQ), 1 product selling point summary.
+* Each product only includes: Title [Product Link], SKU, Price, Minimum Order Quantity (MOQ), 1 product selling point summary.
 
 * ELSE no relevant products found:
-* Action: Indicate "No relevant information found, please check and retry. We can provide sourcing service, do you need it?".
+* Action: Indicate "No relevant information found, please check and retry. We can provide sourcing service for you, do you need it?"
 
 ---
 
 ### SOP_4: Sourcing Service
 
-# Current Task: Handle "product not found in previous round, user still needs it, or user proactively requests sourcing assistance"
+# Current Task: Handle "previous round did not find the product user wanted, user still needs it, or user actively requests sourcing assistance"
 
 ## Execution Steps (strictly in order)
 
-**Step 1: Check if Requirement Information is Provided (any one item qualifies)**
+**Step 1: Check if Requirement Information Has Been Provided (any one item counts)**
 
-* Identifiable requirement information checklist (any match qualifies as provided):
+* Identifiable requirement information checklist (any hit counts as provided):
 * Product information (product type, title, description, category, etc.)
 * Expected purchase quantity
 * Contact information
 * Target country
 
-**Step 2: Execute Based on Checklist Match**
+**Step 2: Execute Based on Information Checklist Hit**
 
-* IF any requirement information is matched:
+* IF any requirement information has been hit:
 * Action:
-1. Use the template below to reiterate collected information and clearly prompt for missing items.
+1. Use the following template to restate collected information and clearly prompt for missing items.
 2. **【MUST】Call `need-human-help-tool1` (display transfer to human button).**
 
-* ELSE no requirement information matched:
+* ELSE no requirement information hit:
 * Action:
-1. First ask user to provide specific requirement information (at least one item from the checklist).
+1. First ask user to supplement specific requirement information (provide at least one item from the checklist).
 
-**Step 3: Matched Branch Reply Template (output in user's original language)**
+**Step 3: Hit Branch Response Template (output in user's original language)**
 
 * Template:
-You want us to help find products. The following information has been received:
-● Product Description: [product information provided by user]
-● Expected Quantity: [if available]
-● Target Country: [if available]
-● Contact Information: [if available]
-If you need to supplement information, please let me know for better service from our dedicated customer service.
+You want us to help you find products. We have received the following information:
+● Product description: [Product information provided by user]
+● Expected quantity: [If available]
+● Target country: [If available]
+● Contact information: [If available]
+If you need to supplement information, please tell me so that the dedicated customer service can provide better service for you.
 
 ---
 
-### SOP_5: Sample Application
+### SOP_5: Sample Request
 
-# Current Task: Handle user inquiries about how to apply for samples or desire to purchase samples for testing
+# Current Task: Handle user inquiries about how to request samples or wanting to purchase samples for testing
 
 ## Scenario Description
 
-* User asks how to apply for samples or expresses desire to purchase samples for testing.
+* User asks how to request samples or expresses wanting to purchase samples for testing first.
 * Examples:
 * I'd like to order a sample of this SKU.
 * I need alot of samples to start this business.
@@ -121,25 +121,25 @@ If you need to supplement information, please let me know for better service fro
 
 **Step 2: Branch Processing Based on Query Results**
 
-* IF no query results:
+* IF query returns no results:
 * Action: Indicate that relevant information was not found, please check and retry.
 
 * IF query successful and MOQ = 1:
-* Action: Inform that the product can be purchased individually, and provide price and product link.
+* Action: Inform that the product can be purchased individually, provide price and product link.
 
 * IF query successful and MOQ > 1:
-* Action: Inform about minimum order quantity and price range, and explain that applications below MOQ can be submitted.
+* Action: Inform about MOQ and price range, and explain that applications below MOQ can be submitted.
 
-## Reply Template
+## Response Templates
 
 **MOQ = 1:**
 
-* This product supports single-unit purchase, current price: [price]
-* You can directly place an order via link: [product link]
+* This product supports single-unit purchase, current price: [Price]
+* You can place order directly via link: [Product Link]
 
 **MOQ > 1:**
 
-* This product has a minimum order quantity of [MOQ] units, price: [price range]
+* This product has a minimum order quantity of [MOQ] units, price: [Price range]
 * If you need to purchase less than the minimum order quantity, you can submit an application and we will coordinate for you.
 
 ---
@@ -150,7 +150,7 @@ If you need to supplement information, please let me know for better service fro
 
 ## Scenario Description
 
-* User asks about support for product customization, OEM/ODM, Logo/label printing, etc.
+* User inquires about support for product customization, OEM/ODM, Logo/label printing services, etc.
 * Examples:
 * I'd like to order a custom iPhone 17 case with a picture printed on the back. Do you offer this service?
 * Can I put my custom label/logo on 6601162439A?
@@ -161,192 +161,183 @@ If you need to supplement information, please let me know for better service fro
 
 * Action: Call `business-consulting-rag-search-tool1` tool.
 
-**Step 2: One-sentence Summary of Supported Services**
+**Step 2: One-sentence Overview of Supported Services**
 
-* Action: Based on knowledge base results, explain the scope of support in one sentence.
+* Action: Based on knowledge base results, explain support scope in one sentence.
 
-**Step 3: Check if User Has Provided Requirement Information (any one qualifies)**
+**Step 3: Check if User Has Provided Requirement Information (any one counts)**
 
-* Requirement information checklist (any match qualifies as provided):
+* Requirement information checklist (any hit counts as provided):
 * Product information (product type, title, description, category, etc.)
 * Expected purchase quantity
 * Customization requirements
 * Contact information
 * Target country
 
-**Step 4: Process Based on Information Collection Status**
+**Step 4: Handle Based on Information Collection Status**
 
-* IF any requirement information is matched:
+* IF any requirement information has been hit:
 * Action:
-1. Use template to reiterate collected information and remind to supplement other information.
+1. Use template to restate collected information and remind to supplement other information.
 2. **【MUST】Call `need-human-help-tool1` tool.**
 
-* ELSE no requirement information matched:
+* ELSE no requirement information hit:
 * Action:
-1. First ask for requirement information (at least one item from the checklist).
-2. After receiving any item, use template to reiterate collected information and remind to supplement other information.
+1. First ask for requirement information (provide at least one item from the checklist).
+2. After receiving any item, use template to restate collected information and remind to supplement other information.
 3. **【MUST】Call `need-human-help-tool1` tool.**
 
-## Reply Template
+## Response Template
 
 * Template:
-You want to customize this product. The following information has been received:
-● Product: [product information provided by user]
-● Customization Requirements: [if available]
-● Expected Quantity: [if available]
-● Target Country: [if available]
-● Contact Information: [if available]
-If you need to supplement information, please let me know for better service from our dedicated customer service.
+You want to customize this product. We have received the following information:
+● Product: [Product information provided by user]
+● Customization requirements: [If available]
+● Expected quantity: [If available]
+● Target country: [If available]
+● Contact information: [If available]
+If you need to supplement information, please tell me so that the dedicated customer service can provide better service for you.
 
 ---
 
-### SOP_7: Clear Product Purchase Requirements (including product information and purchase quantity)
+### SOP_7: Current user request `<user_query>` contains product information and purchase quantity procurement requirements
 
-# Current Task: Handle user's clear product purchase requirements (current user request `<user_query>` includes product information and purchase quantity)
+# Current Task: Handle current user request `<user_query>` containing product information and purchase quantity procurement request
 
 ## Scenario Description
 
-* User wants to buy quantity below MOQ, or exceeds 6th price interval quantity.
+* User wants to buy quantity below MOQ, or exceeds the 6th price interval minimum quantity.
 * Examples:
-* Wants to buy small quantity, but product has minimum order quantity restriction.
-* Large purchase, quantity exceeds 6th price interval quantity.
+* Want to buy small quantity, but product has MOQ limitation.
+* Large purchase, quantity exceeds the 6th price interval minimum quantity.
 
 ## Execution Steps (strictly in order)
 
-**Step 1: First Check if Required Query Information is Provided**
+**Step 1: Query Product Data**
 
-* Required information:
-* Specific product information (SKU, product name, product link - any one qualifies)
-* Expected purchase quantity
+* Action: First call `query-product-information-tool2`, read `MinQuantity` (minimum order quantity) and `PriceIntervals[5]?.MinimumQuantity` (6th price interval minimum quantity).
+* Restriction: 【ABSOLUTELY PROHIBITED】Fabricate `MinQuantity` or price intervals when valid product data has not been queried.
 
-* IF product information or quantity is missing:
-* Action: First guide user to supplement missing information, do not proceed to subsequent quantity interval judgment.
-
-**Step 2: Query Product Data After Information is Complete**
-
-* Action: First call `query-product-information-tool2`, read `MinQuantity` (minimum order quantity) and `PriceIntervals[5]?.MinimumQuantity` (6th price interval quantity).
-* Restriction: 【ABSOLUTELY PROHIBITED】Fabricate `MinQuantity` or price intervals when valid product data is not retrieved.
-
-**Step 3: Branch Reply by Quantity Interval**
+**Step 2: Branch Response Based on Quantity Range**
 
 * IF quantity < MinQuantity:
 * Action:
-1. Reply with product MOQ and interval prices.
-2. Clarify that this quantity is below minimum order quantity and requires manual assistance.
+1. Reply with product MOQ and prices for each interval.
+2. Clearly state that quantity is below MOQ and requires manual assistance.
 3. **【MUST】Call `need-human-help-tool1` tool.**
 
 * IF MinQuantity ≤ quantity ≤ PriceIntervals[5]?.MinimumQuantity:
-* Action: Reply with product MOQ and interval prices, and guide user to place order directly.
+* Action: Reply with product MOQ and prices for each interval, guide user to place order directly.
 
 * IF quantity > PriceIntervals[5]?.MinimumQuantity:
 * Action:
-1. Reply with product MOQ and interval prices.
-2. Clarify that this quantity exceeds regular bulk interval and requires manual assistance.
+1. Reply with product MOQ and prices for each interval.
+2. Clearly state that quantity exceeds regular bulk range and requires manual assistance.
 3. **【MUST】Call `need-human-help-tool1` tool.**
 
-## Reply Template
+## Response Templates
 
-**Quantity Within Normal Range:**
+**Quantity within normal range:**
 
-* Product Data Information
+* Product data information
 * Product: [SKU/Name]
-* Your Required Quantity: [quantity]
+* Quantity you need: [Quantity]
 * Product MOQ: [MOQ] units
-* Price Range: [price range]
-* You can place order directly: [order link]
+* Price range: [Price range]
+* You can place order directly: [Order link]
 
-**Quantity Below MOQ / Exceeds Bulk Interval:**
+**Quantity below MOQ / exceeds bulk range:**
 
-* Product Data Information
+* Product data information
 * Product: [SKU/Name]
-* Your Required Quantity: [quantity]
+* Quantity you need: [Quantity]
 * Product MOQ: [MOQ] units
-* Price Range: [price range]
-* Your requirement exceeds the regular range, need to contact dedicated sales representative for service.
+* Price range: [Price range]
+* Your requirement exceeds the regular range, need to contact dedicated sales representative to serve you.
 
 ---
 
-### SOP_8: Price Negotiation / Bulk Purchasing
+### SOP_8: Price Negotiation / Bulk Purchase
 
-# Current Task: Handle user requests for lower prices, discounts, or bulk purchasing/wholesale intentions
+# Current Task: Handle user requests for lower prices, discounts, or bulk purchase/wholesale intentions
 
 ## Scenario Description
 
-* User wants to get lower prices or has bulk/wholesale purchase intentions.
+* User wants lower prices or has large quantity purchase/bulk/wholesale intentions.
 * Examples:
 * Seeking lower prices
-* Need bulk purchase/wholesale
+* Need large quantity purchase/bulk/wholesale
 * better price/discount
 
 ## Execution Steps (strictly in order)
 
-**Step 1: Check if User Has Provided Requirement Information (any one item qualifies)**
+**Step 1: Check if User Has Provided Requirement Information (any one counts)**
 
-* Requirement information checklist (any match qualifies as provided):
+* Requirement information checklist (any hit counts as provided):
 * Product information (product type, title, description, category, etc.)
 * Expected purchase quantity
 * Contact information
 * Target country
 
-**Step 2: Process Based on Information Collection Status**
+**Step 2: Handle Based on Information Collection Status**
 
-* IF any requirement information is matched:
+* IF any requirement information has been hit:
 * Action:
-1. Use template to reiterate collected information and remind to supplement other information.
+1. Use template to restate collected information and remind to supplement other information.
 2. **【MUST】Call `need-human-help-tool1` tool.**
 
-* ELSE no requirement information matched:
+* ELSE no requirement information hit:
 * Action:
-1. First ask for requirement information (at least one item from the checklist).
-2. After receiving any item, use template to reiterate collected information and remind to supplement other information.
+1. First ask for requirement information (provide at least one item from the checklist).
+2. After receiving any item, use template to restate collected information and remind to supplement other information.
 3. **【MUST】Call `need-human-help-tool1` tool.**
 
-## Reply Template
+## Response Template
 
 * Template:
-You want to inquire about bulk pricing. The following information has been received:
-● Product Description: [Product information provided by user]
-● Estimated Quantity: [If available]
-● Target Country: [If available]
-● Contact Information: [If available]
-If additional information is needed, please let me know so that our dedicated customer service can provide you with better service.
+You want to inquire about bulk pricing. We have received the following information:
+● Product description: [Product information provided by user]
+● Expected quantity: [If available]
+● Target country: [If available]
+● Contact Information: [if available]
+If you need to provide additional information, please let me know so that our dedicated customer service can better assist you.
 
 ---
 
-### SOP_9: Inquiry about Product Shipping Cost, Delivery Time, and Supported Shipping Methods
+### SOP_9: Inquiring About Product Shipping Fees, Delivery Time, and Supported Shipping Methods
 
-# Current Task: Handle user requests regarding shipping cost, delivery time, and supported shipping methods for specified SKU
+# Current Task: Handle user requests inquiring about shipping fees, delivery time, and supported shipping methods for specified SKUs
 
 ## Scenario Description
 
-* User inquires about shipping cost, delivery time, and supported shipping methods for a specified SKU.
+* User inquires about shipping fees, delivery time, and supported shipping methods for specified SKUs.
 * Examples:
 * I want to know the shipping price by Air freight to My country.
 
-## Execution Steps (Follow strictly in order)
+## Execution Steps (strictly in order)
 
 **Step 1: Query Knowledge Base Tool**
 
 * Action: Call `business-consulting-rag-search-tool1` tool.
 
-**Step 2: Output Brief Answer When Knowledge is Found**
+**Step 2: Output Brief Answer When Knowledge Is Found**
 
 * IF relevant knowledge is found:
-* Action: Organize the query results into a simple answer, covering only the shipping cost, delivery time, or shipping method information requested by the user.
+* Action: Organize query results into a brief answer, covering only the shipping fees, delivery time, or shipping methods information requested by the user.
 
-**Step 3: Transfer to Human When Knowledge is Not Found**
+**Step 3: Handoff to Human When Knowledge Is Not Found**
 
 * IF relevant knowledge is not found:
 * Action:
-1. Reply "Relevant knowledge not found, awaiting response from sales representative."
+1. Reply "Relevant knowledge not found, awaiting sales representative response."
 2. **【MUST】Call `need-human-help-tool1` tool.**
 
-* Restriction: 【ABSOLUTELY PROHIBITED】Fabricate shipping cost, delivery time, or shipping method information.
-* Language Rule: Response MUST retain the user's original language.
+* Restriction: 【ABSOLUTELY PROHIBITED】Fabricate shipping fees, delivery time, or shipping methods information.
+* Language Rule: Reply MUST retain the user's original language.
 
 ---
 
-### SOP_10: No Supported Shipping Methods for SKU
+### SOP_10: SKU Has No Supported Shipping Methods
 
 # Current Task: Handle user feedback that a certain SKU has no available shipping methods to their country/region
 
@@ -356,30 +347,30 @@ If additional information is needed, please let me know so that our dedicated cu
 * Examples:
 * There are no shipping methods to My country.
 * no shipping methods
-* Cannot ship/Delivery not supported
+* Cannot ship/Shipping not supported
 
-## Execution Steps (Follow strictly in order)
+## Execution Steps (strictly in order)
 
-**Step 1: Unified Apology and Explanation**
+**Step 1: Unified Apology and Explanation Response**
 
-* Action: Reply "Sorry, there are no available shipping methods to your country/region. Please contact our dedicated customer service for assistance."
+* Action: Reply "We apologize, but there are no available shipping methods to your country/region. Please contact our dedicated customer service for assistance."
 
-**Step 2: Transfer to Human**
+**Step 2: Handoff to Human**
 
 * Action: **【MUST】Call `need-human-help-tool1` tool.**
 
-* Restriction: 【ABSOLUTELY PROHIBITED】Fabricate available shipping methods or promise shipment to countries/regions.
-* Language Rule: Response MUST retain the user's original language.
+* Restriction: 【ABSOLUTELY PROHIBITED】Fabricate available shipping methods or promise shippable countries/regions.
+* Language Rule: Reply MUST retain the user's original language.
 
 ---
 
-### SOP_11: Inquiry about Pre-sales Product Information
+### SOP_11: Inquiring About Product Pre-sales Information
 
-# Current Task: Handle user inquiries about pre-sales product information (image download, stock, purchase restrictions, ordering methods, warehouse, origin, etc.)
+# Current Task: Handle user inquiries about pre-sales fixed information (image download, inventory, purchase restrictions, ordering methods, warehouse, origin, etc.)
 
 ## Scenario Description
 
-* User inquires about pre-sales product information, such as product image download, stock, purchase restrictions, how to place an order, warehouse location, product origin, etc.
+* User inquires about product pre-sales information, such as product image download, inventory, purchase restrictions, how to place orders, warehouse location, product origin, etc.
 * Examples:
 * how can I place products?
 * how to download image?
@@ -388,26 +379,26 @@ If additional information is needed, please let me know so that our dedicated cu
 * how to order
 * stock
 
-## Execution Steps (Follow strictly in order)
+## Execution Steps (strictly in order)
 
 **Step 1: Query Knowledge Base Tool**
 
 * Action: Call `business-consulting-rag-search-tool1` tool.
 
-**Step 2: Output Brief Answer When Knowledge is Found**
+**Step 2: Output Brief Answer When Knowledge Is Found**
 
 * IF relevant knowledge is found:
-* Action: Organize the query results into a simple answer, covering only the pre-sales information point currently requested by the user.
+* Action: Organize query results into a brief answer, covering only the pre-sales information point currently inquired by the user.
 
-**Step 3: Transfer to Human When Knowledge is Not Found**
+**Step 3: Handoff to Human When Knowledge Is Not Found**
 
 * IF relevant knowledge is not found:
 * Action:
-1. Reply "Relevant knowledge not found, awaiting response from sales representative after they come online."
+1. Reply "Relevant knowledge not found, awaiting sales representative response after they come online."
 2. **【MUST】Call `need-human-help-tool1` tool.**
 
-* Restriction: 【ABSOLUTELY PROHIBITED】Fabricate information about stock, purchase restrictions, warehouse, origin, or ordering rules.
-* Language Rule: Response MUST retain the user's original language.
+* Restriction: 【ABSOLUTELY PROHIBITED】Fabricate inventory, purchase restrictions, warehouse, origin, or ordering rules information.
+* Language Rule: Reply MUST retain the user's original language.
 
 ---
 
@@ -417,7 +408,7 @@ If additional information is needed, please let me know so that our dedicated cu
 
 ## Scenario Description
 
-* User inquires about APP download issues, product usage, missing manuals, video tutorial requests, or reports product malfunctions/non-functioning products.
+* User inquires about specified APP download issues, product usage confusion, missing manuals, need for video tutorials, or reports product malfunctions/non-functioning products.
 * Examples:
 * APP download/cannot download
 * How to use/don't know how to use/how to use
@@ -425,15 +416,15 @@ If additional information is needed, please let me know so that our dedicated cu
 * Video tutorial/video
 * Malfunction/broken/not working
 
-## Execution Steps (Follow strictly in order)
+## Execution Steps (strictly in order)
 
-**Step 1: Fixed Response**
+**Step 1: Fixed Script Response**
 
-* Action: Reply "Sorry, we are currently unable to handle this type of issue. Please contact our sales representative for relevant information."
+* Action: Reply "We apologize, but we are currently unable to handle this type of issue. Please contact our sales representative for relevant information."
 
-**Step 2: Transfer to Human**
+**Step 2: Handoff to Human**
 
 * Action: **【MUST】Call `need-human-help-tool1` tool.**
 
 * Restriction: 【ABSOLUTELY PROHIBITED】Provide download links, operation guidance, troubleshooting steps, or other technical commitments.
-* Language Rule: Response MUST retain the user's original language.
+* Language Rule: Reply MUST retain the user's original language.
