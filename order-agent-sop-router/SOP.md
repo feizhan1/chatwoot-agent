@@ -57,18 +57,18 @@
 * 回复：“您的订单尚未付款。付款后我们将处理订单。”
 
 * IF 状态为 `Paid / Awaiting`：
-* 使用 `<current_system_time>` 与订单支付时间比较（优先 `paymentOn`，缺失时回退 `createdOn`）。
-* IF 支付时间至今 <= 3 天：
+* 使用 `<current_system_time>` 与订单付款时间比较（`paymentOn`）。
+* IF 付款时间至今 <= 3 天：
 * 回复：“您的付款正在处理中。请耐心等待2-3个工作日以确认”
-* IF 支付时间至今 > 3 天：
+* IF 付款时间至今 > 3 天：
 * 回复：“您的付款正在处理中。感谢您的耐心等待，如超时未更新，请联系专属业务员邮箱为您处理。”
 * 并且【必须】调用 `need-human-help-tool`。
 
 * IF 状态为 `In Process / Processing / ReadyForShipment`：
-* 使用 `<current_system_time>` 与订单支付时间比较（优先 `paymentOn`，缺失时回退 `createdOn`）。
-* IF 处理时长 <= 7 天：
+* 使用 `<current_system_time>` 与订单付款时间比较（`paymentOn`）。
+* IF 付款时间至今 <= 7 天：
 * 回复：“您的订单正在处理中。预计发货周期为 3-7 天”
-* IF 处理时长 > 7 天：
+* IF 付款时间至今 > 7 天：
 * 回复：“您的订单处理时间已超过常规周期，建议联系专属业务员邮箱咨询。”
 * 并且【必须】调用 `need-human-help-tool`。
 
@@ -320,7 +320,7 @@ https://www.tvcmall.com/user/orders?status=V3All”
 * 引导至结算页查看，回复：“关于订单费用和支付相关信息，请进入订单结算页查看。”
 
 * IF 无订单号：
-* 调用知识库查询工具（RAG）针对用户问题检索答案。
+* 调用 `business-consulting-rag-search-tool2` 工具针对用户问题检索答案。
 * IF 知识库有结果：生成 1 条简要回答，直接回应用户问题。
 * IF 知识库无结果：
 * 回复：“关于订单费用和支付相关信息，请进入订单结算页查看。”
