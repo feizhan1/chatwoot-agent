@@ -38,7 +38,12 @@
     The following cases are all considered "no image input": null, empty string, empty array, invalid URL, placeholder text only (e.g., "N/A").
 
     ### Order number extraction hints
-    Prioritize recognition from <user_query> and <recent_dialogue>: order number/tracking number, order action words (check status/cancel/change address/refund/expedite), policy words (shipping fee/delivery time/payment/customs).
+    In order-related scenarios, prioritize extracting order numbers from <user_query>, then supplement with <recent_dialogue> and <active_context>.
+    Valid order number formats:
+    1) M/V/T/R/S + 11-14 digits
+    2) M/V/T/R/S + 6-12 alphanumeric characters
+    3) Pure 6-14 digits
+    When multiple numbers exist, prioritize using "most recently mentioned in current message > most recent user message > most recent agent-user interaction".
 </input_normalization>
 
 <current_system_time>
@@ -47,8 +52,18 @@
 </current_system_time>
 
 <instructions>
-    Strictly follow the rules in the system prompt and analyze the XML data context provided above.
-    Match the most appropriate SOP.
-    If an SOP requiring an order number is matched but no valid order number is detected, route to SOP_1 and output extracted_order_number = null.
-    Output JSON directly without adding any additional explanatory text.
+    Strictly follow the rules in the system prompt, analyze the above XML data and match the most appropriate SOP.
+
+    Channel priority rules:
+    1) If Channel = Channel::WebWidget and user is not logged in, and asking about any order-related data (order status, logistics, order details, cancel/modify, refund/return, invoice, shipping fee, etc.), MUST route to SOP_13.
+    2) If Channel = Channel:TwilioSms and asking about order-related scenarios, do not apply login interception, continue regular routing.
+
+    Order number rules:
+    - SOPs that MUST have order number: SOP_2 / SOP_4 / SOP_5 / SOP_7.
+    - Note: SOP_3 is fixed guidance to order list page, does not depend on order query tool, therefore does not mandate order number.
+    - If hitting above "MUST have order number" SOPs but no valid order number, or multiple numbers conflict with no way to determine current active order number, MUST route to SOP_1, with extracted_order_number = null.
+
+    Output requirements:
+    - Only output JSON.
+    - Do not output explanatory text.
 </instructions>

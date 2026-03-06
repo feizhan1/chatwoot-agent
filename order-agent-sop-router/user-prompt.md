@@ -38,7 +38,12 @@
     以下情况均视为“无图片输入”：null、空字符串、空数组、无效 URL、仅占位文本（如 "N/A"）。
 
     ### Order number extraction hints
-    从 <user_query> 与 <recent_dialogue> 中优先识别：订单号/追踪号、订单动作词（查状态/取消/改地址/退款/催单）、政策词（运费/时效/支付/关税）。
+    在订单相关场景下，优先从 <user_query> 提取订单号，再用 <recent_dialogue> 与 <active_context> 补充。
+    有效订单号格式：
+    1) M/V/T/R/S + 11-14 位数字
+    2) M/V/T/R/S + 6-12 位字母数字
+    3) 纯 6-14 位数字
+    多个号码时，优先使用“当前消息最新提及 > 最近一条用户消息 > 最近一次客服-用户互动”。
 </input_normalization>
 
 <current_system_time>
@@ -47,8 +52,18 @@
 </current_system_time>
 
 <instructions>
-    请严格遵循系统提示词中的规则，分析上述提供的 XML 数据上下文。
-    匹配最合适的 SOP。
-    若命中需要订单号的 SOP 但未检测到有效订单号，请路由到 SOP_1 并输出 extracted_order_number = null。
-    请直接输出 JSON，不要添加任何额外的解释性文字。
+    请严格遵循系统提示词中的规则，分析上述 XML 数据并匹配最合适的 SOP。
+
+    渠道优先规则：
+    1) 若 Channel = Channel::WebWidget 且用户未登录，并且在问任何订单相关数据（订单状态、物流、订单详情、取消/修改、退款退货、发票、运费等），必须路由到 SOP_13。
+    2) 若 Channel = Channel:TwilioSms 且在问订单相关场景，不做登录拦截，继续常规路由。
+
+    订单号规则：
+    - 必须订单号的 SOP：SOP_2 / SOP_4 / SOP_5 / SOP_7。
+    - 说明：SOP_3 为固定引导到订单列表页，不依赖订单查询工具，因此不强制订单号。
+    - 命中上述“必须订单号”SOP 但无有效订单号，或多号码冲突无法确定当前活跃订单号，必须路由 SOP_1，且 extracted_order_number = null。
+
+    输出要求：
+    - 只输出 JSON。
+    - 不要输出解释性文字。
 </instructions>
