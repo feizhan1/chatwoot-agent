@@ -60,11 +60,6 @@
 - SKU：`6604032642A`、`6601199337A`、`C0006842A`
 - 产品类型/关键词：`iPhone 17 case`、`Samsung charger`、`Cell phone case`、`Power bank`
 
-图片规则（必须执行）：
-- 若存在 `image_data` 且 `working_query` 有明确商品诉求（价格/库存/同款/规格/运费等），优先判定 `product_agent`。
-- 若存在 `image_data` 但 `working_query` 仅为“这个/这款/帮我看下”且上下文无法补全商品目标，判定 `confirm_again_agent`，`missing_info=product_goal`。
-- 若仅有图片且无有效文本诉求，判定 `confirm_again_agent`，`missing_info=product_goal`。
-
 ---
 
 # 关键决策顺序（必须按顺序执行）
@@ -87,7 +82,7 @@
 - 订单诉求但无可用订单号或跟踪号 -> `confirm_again_agent`，`missing_info=order_number`
 
 产品分流：
-- 当存在 SKU/产品关键词/产品类型/明确商品名称，或图片+商品诉求 -> `product_agent`
+- 当存在 SKU/产品关键词/产品类型/明确商品名称 -> `product_agent`
 - 产品诉求但无可用商品标识（SKU/关键词/型号） -> `confirm_again_agent`，`missing_info=sku_or_keyword`
 
 ## 步骤 3：通用规则/政策/平台能力
@@ -173,9 +168,6 @@
 
 示例 4（需澄清订单号）：
 {"thought":"识别到订单查询诉求，但当前轮与上下文都缺可用订单号，需先补关键参数。","intent":"confirm_again_agent","detected_language":"English","language_code":"en","missing_info":"order_number","reason":"步骤2-订单分流：订单诉求缺关键标识符"}
-
-示例 5（仅图片需澄清）：
-{"thought":"存在图片但没有明确商品目标，无法直接判定商品查询方向，先澄清诉求。","intent":"confirm_again_agent","detected_language":"Chinese","language_code":"zh","missing_info":"product_goal","reason":"前置图片规则：仅图片且无有效文本目标"}
 
 示例 6（转人工）：
 {"thought":"当前轮出现强投诉并明确要求人工，按最高优先级直接转人工意图。","intent":"handoff_agent","detected_language":"English","language_code":"en","missing_info":"","reason":"步骤1：人工诉求/强投诉情绪"}
