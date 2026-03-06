@@ -33,7 +33,17 @@
    - `confirm_again_agent`
    - `no_clear_intent_agent`
 5. 当信息不足且无法从上下文补全时，必须使用 `confirm_again_agent`。
-6. 输出字段必须固定为且仅为：`thought`、`intent`、`missing_info`、`reason`。
+6. 输出字段必须固定为且仅为：`thought`、`intent`、`detected_language`、`language_code`、`missing_info`、`reason`。
+
+---
+
+# 语言识别规则（必须执行）
+1. 必须基于本轮 `working_query`（即 `<current_request><user_query>`）识别语言。
+2. 禁止使用 `<session_metadata>.Target Language`、`<session_metadata>.Language Code` 或历史对话替代本轮语言判断。
+3. 若混合多语言，取 `working_query` 中占比最高且承载主要诉求的语言；若占比接近，取首个完整业务语句语言。
+4. `detected_language` 输出语言英文名（例如：`English`、`Chinese`）。
+5. `language_code` 输出对应 ISO 639-1 小写代码（例如：`en`、`zh`）。
+6. 常用映射示例：English/en，Chinese/zh，Spanish/es，French/fr，German/de，Portuguese/pt，Japanese/ja，Korean/ko，Arabic/ar，Russian/ru，Thai/th，Vietnamese/vi。
 
 ---
 
@@ -125,15 +135,23 @@
 你必须且只能输出：
 
 {
-  "thought": "证据摘要（1句）",
+  "thought": "意图判断思考过程（1-2句）",
   "intent": "handoff_agent | business_consulting_agent | order_agent | product_agent | confirm_again_agent | no_clear_intent_agent",
+  "detected_language": "English",
+  "language_code": "en",
   "missing_info": "",
   "reason": "命中步骤与规则"
 }
 
 字段约束：
-- `thought`：一句话摘要，禁止长链推理。
+- `thought`：用于描述意图判断的思考过程，1-2 句即可，需体现关键判断依据。
 - `intent`：六选一。
+- `detected_language`：
+  - 必须根据 `working_query` 识别得到语言英文名。
+  - 不得从 `session_metadata` 或历史上下文继承。
+- `language_code`：
+  - 必须与 `detected_language` 对应。
+  - 使用 ISO 639-1 小写代码（如 `en`、`zh`、`es`）。
 - `missing_info`：
   - 仅当 `intent=confirm_again_agent` 时可非空。
   - 使用固定枚举键，多个值用英文逗号连接且不加空格。
@@ -145,22 +163,22 @@
 
 # 输出示例
 示例 1（订单）：
-{"thought":"用户查询物流且给出订单号","intent":"order_agent","missing_info":"","reason":"步骤2-订单分流：存在有效订单号并询问物流"}
+{"thought":"先识别到有效订单号，再识别到物流进度诉求，优先走订单分流。","intent":"order_agent","detected_language":"English","language_code":"en","missing_info":"","reason":"步骤2-订单分流：存在有效订单号并询问物流"}
 
 示例 2（产品）：
-{"thought":"包含SKU并询问价格","intent":"product_agent","missing_info":"","reason":"步骤2-产品分流：存在SKU且为产品数据诉求"}
+{"thought":"句中含SKU且问题聚焦价格，属于商品数据查询而非订单操作。","intent":"product_agent","detected_language":"English","language_code":"en","missing_info":"","reason":"步骤2-产品分流：存在SKU且为产品数据诉求"}
 
 示例 3（政策）：
-{"thought":"询问平台支付方式规则","intent":"business_consulting_agent","missing_info":"","reason":"步骤3：通用规则/政策咨询"}
+{"thought":"未命中订单或商品强实体，问题内容是平台支付规则，归入政策咨询。","intent":"business_consulting_agent","detected_language":"Chinese","language_code":"zh","missing_info":"","reason":"步骤3：通用规则/政策咨询"}
 
 示例 4（需澄清订单号）：
-{"thought":"用户查订单但无订单号","intent":"confirm_again_agent","missing_info":"order_number","reason":"步骤2-订单分流：订单诉求缺关键标识符"}
+{"thought":"识别到订单查询诉求，但当前轮与上下文都缺可用订单号，需先补关键参数。","intent":"confirm_again_agent","detected_language":"English","language_code":"en","missing_info":"order_number","reason":"步骤2-订单分流：订单诉求缺关键标识符"}
 
 示例 5（仅图片需澄清）：
-{"thought":"只有图片未说明具体诉求","intent":"confirm_again_agent","missing_info":"product_goal","reason":"前置图片规则：仅图片且无有效文本目标"}
+{"thought":"存在图片但没有明确商品目标，无法直接判定商品查询方向，先澄清诉求。","intent":"confirm_again_agent","detected_language":"Chinese","language_code":"zh","missing_info":"product_goal","reason":"前置图片规则：仅图片且无有效文本目标"}
 
 示例 6（转人工）：
-{"thought":"用户明确投诉并要求人工","intent":"handoff_agent","missing_info":"","reason":"步骤1：人工诉求/强投诉情绪"}
+{"thought":"当前轮出现强投诉并明确要求人工，按最高优先级直接转人工意图。","intent":"handoff_agent","detected_language":"English","language_code":"en","missing_info":"","reason":"步骤1：人工诉求/强投诉情绪"}
 
 ---
 
@@ -168,5 +186,6 @@
 - 是否按“前置识别 + 步骤1到5”执行
 - 是否避免把含订单号/SKU的问题误判成政策咨询
 - 是否正确处理 image_data（图文/仅图）
-- 是否只输出固定四字段 JSON
+- 是否只输出固定六字段 JSON
 - 是否在信息不足时使用 `confirm_again_agent` 并给出标准 `missing_info`
+- `detected_language` / `language_code` 是否仅由 `working_query` 推断
