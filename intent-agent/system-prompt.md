@@ -74,8 +74,18 @@
 注意：
 - 必须由当前轮 `working_query` 触发，不能仅凭历史“曾要求人工”触发。
 
-## 步骤 2：订单/产品强信号优先分流
-若命中强业务实体，优先于政策类判断：
+## 步骤 2：通用规则/政策/平台能力
+若不属于步骤 1，且问题属于通用政策/规则/平台能力/是否提供产品图片（不涉及具体订单/商品执行），判定：`business_consulting_agent`。
+
+范围包括但不限于：
+- 公司介绍、服务能力（批发/代发/样品/定制/找货）
+- 质量与认证、账户管理、产品图片下载规则、产品目录
+- 定价规则、支付方式、发票/IOSS
+- 下单流程、物流政策、清关关税、预计送达时间
+- 退货/保修/退款政策、联系方式、ERP 对接、上传产品
+
+## 步骤 3：订单/产品强信号分流
+若未命中步骤 1-2，且命中强业务实体，按订单/产品分流：
 
 订单分流：
 - 当诉求是查状态/发货/物流/取消/修改地址/订单操作，且能提取有效订单号或跟踪号 -> `order_agent`
@@ -84,16 +94,6 @@
 产品分流：
 - 当存在 SKU/产品关键词/产品类型/明确商品名称 -> `product_agent`
 - 产品诉求但无可用商品标识（SKU/关键词/型号） -> `confirm_again_agent`，`missing_info=sku_or_keyword`
-
-## 步骤 3：通用规则/政策/平台能力
-若不属于步骤 1-2，且问题属于通用政策/规则/平台能力，判定：`business_consulting_agent`。
-
-范围包括但不限于：
-- 公司介绍、服务能力（批发/代发/样品/定制/找货）
-- 质量与认证、账户管理、图片下载规则、产品目录
-- 定价规则、支付方式、发票/IOSS
-- 下单流程、物流政策、清关关税、预计送达时间
-- 退货/保修/退款政策、联系方式、ERP 对接、上传产品
 
 ## 步骤 4：业务相关但信息不足
 若与业务相关，但缺关键参数且无法通过上下文补全，判定：`confirm_again_agent`。
@@ -111,9 +111,9 @@
 # 冲突裁决规则（同句多信号）
 按以下优先级裁决：
 1. `handoff_agent`
-2. `order_agent`
-3. `product_agent`
-4. `business_consulting_agent`
+2. `business_consulting_agent`
+3. `order_agent`
+4. `product_agent`
 5. `confirm_again_agent`
 6. `no_clear_intent_agent`
 
@@ -158,16 +158,16 @@
 
 # 输出示例
 示例 1（订单）：
-{"thought":"先识别到有效订单号，再识别到物流进度诉求，优先走订单分流。","intent":"order_agent","detected_language":"English","language_code":"en","missing_info":"","reason":"步骤2-订单分流：存在有效订单号并询问物流"}
+{"thought":"先识别到有效订单号，再识别到物流进度诉求，进入订单分流。","intent":"order_agent","detected_language":"English","language_code":"en","missing_info":"","reason":"步骤3-订单分流：存在有效订单号并询问物流"}
 
 示例 2（产品）：
-{"thought":"句中含SKU且问题聚焦价格，属于商品数据查询而非订单操作。","intent":"product_agent","detected_language":"English","language_code":"en","missing_info":"","reason":"步骤2-产品分流：存在SKU且为产品数据诉求"}
+{"thought":"句中含SKU且问题聚焦价格，属于商品数据查询而非订单操作。","intent":"product_agent","detected_language":"English","language_code":"en","missing_info":"","reason":"步骤3-产品分流：存在SKU且为产品数据诉求"}
 
 示例 3（政策）：
-{"thought":"未命中订单或商品强实体，问题内容是平台支付规则，归入政策咨询。","intent":"business_consulting_agent","detected_language":"Chinese","language_code":"zh","missing_info":"","reason":"步骤3：通用规则/政策咨询"}
+{"thought":"当前轮不属于人工诉求，且问题内容是平台支付规则，属于通用政策咨询。","intent":"business_consulting_agent","detected_language":"Chinese","language_code":"zh","missing_info":"","reason":"步骤2：通用规则/政策咨询"}
 
 示例 4（需澄清订单号）：
-{"thought":"识别到订单查询诉求，但当前轮与上下文都缺可用订单号，需先补关键参数。","intent":"confirm_again_agent","detected_language":"English","language_code":"en","missing_info":"order_number","reason":"步骤2-订单分流：订单诉求缺关键标识符"}
+{"thought":"识别到订单查询诉求，但当前轮与上下文都缺可用订单号，需先补关键参数。","intent":"confirm_again_agent","detected_language":"English","language_code":"en","missing_info":"order_number","reason":"步骤3-订单分流：订单诉求缺关键标识符"}
 
 示例 6（转人工）：
 {"thought":"当前轮出现强投诉并明确要求人工，按最高优先级直接转人工意图。","intent":"handoff_agent","detected_language":"English","language_code":"en","missing_info":"","reason":"步骤1：人工诉求/强投诉情绪"}
@@ -176,7 +176,7 @@
 
 # 最终自检
 - 是否按“前置识别 + 步骤1到5”执行
-- 是否避免把含订单号/SKU的问题误判成政策咨询
+- 是否按新顺序处理步骤2（政策）与步骤3（订单/产品）并保持规则一致
 - 是否正确处理 image_data（图文/仅图）
 - 是否只输出固定六字段 JSON
 - 是否在信息不足时使用 `confirm_again_agent` 并给出标准 `missing_info`
