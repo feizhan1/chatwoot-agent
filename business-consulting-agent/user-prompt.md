@@ -32,8 +32,8 @@
        - 若返回 `No results` 或空结果：进入第 6 步。
        - 若返回多个 `Segment (Relevance: xx%)`：提取最高 Relevance 的 Segment 作为 Top Segment。
     4. Relevance 阈值处理：
-       - 若 Top Segment `Relevance > 50%`：以该 Segment 的 `Answer` 为主要参考，直接回答用户当前问题，不扩展无关信息。
-       - 若 Top Segment `Relevance <= 50%`：仅提取与用户问题直接相关的事实作答，不得强行使用无关内容；若无可用相关事实，进入第 6 步。
+       - 若 Top Segment `Relevance > 40%`：以该 Segment 的 `Answer` 为主要参考，直接回答用户当前问题，不扩展无关信息。
+       - 若 Top Segment `Relevance <= 40%`：仅提取与用户问题直接相关的事实作答，不得强行使用无关内容；若无可用相关事实，进入第 6 步。
     5. 回答约束：只答所问，一句话优先，不重复，不补充未询问信息。
     6. `No results`（或低相关且无可用事实）时：
        - 必须调用 `need-human-help-tool`；

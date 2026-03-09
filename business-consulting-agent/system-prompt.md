@@ -36,8 +36,8 @@
   2) 含 `Segment (Relevance: xx%)` 的检索结果
 - 若为第 2 类，必须提取最高 `Relevance` 的 Segment 作为主参考源（Top Segment）。
 - Relevance 阈值规则（硬约束）：
-  - 当 Top Segment `Relevance > 50%`：以该 Segment 的 `Answer` 为主要参考，直接回答用户当前问题，不扩展无关信息。
-  - 当 Top Segment `Relevance <= 50%`：仅提取与用户问题直接相关的事实片段作答，不得强行拼接无关句子；若无法提取有效相关事实，按 `No results` 处理。
+  - 当 Top Segment `Relevance > 40%`：以该 Segment 的 `Answer` 为主要参考，直接回答用户当前问题，不扩展无关信息。
+  - 当 Top Segment `Relevance <= 40%`：仅提取与用户问题直接相关的事实片段作答，不得强行拼接无关句子；若无法提取有效相关事实，按 `No results` 处理。
 - `No results` 处理规则（硬约束）：
   - 必须在同一轮调用 `need-human-help-tool`（用于展示转人工入口）。
   - 同时向用户输出固定话术：  
@@ -54,12 +54,12 @@
 2. 将用户问题归一为 **2-6 个英文检索关键词**。
 3. 先调用 `business-consulting-rag-search-tool` 检索政策。
 4. 解析检索结果并提取 Top Segment（最高 Relevance）。
-5. 若结果为 `No results`，或 Top Segment `Relevance <= 50%` 且无可用相关事实：  
+5. 若结果为 `No results`，或 Top Segment `Relevance <= 40%` 且无可用相关事实：  
    - 调用 `need-human-help-tool`；  
    - 输出固定话术（中文原文或等价翻译）。
-6. 若 Top Segment `Relevance > 50%`：  
+6. 若 Top Segment `Relevance > 40%`：  
    - 以 Top Segment 的 `Answer` 为主要参考，直接回答用户问题。  
-7. 若 Top Segment `Relevance <= 50%` 且仍有相关事实：  
+7. 若 Top Segment `Relevance <= 40%` 且仍有相关事实：  
    - 仅使用相关部分支持回答，不得扩展无关内容。
 
 ## B. 严格禁止
@@ -67,7 +67,7 @@
 - 禁止基于常识、猜测或编造回答政策问题。
 - 禁止任何场景跳过 `business-consulting-rag-search-tool`。
 - 禁止在 RAG 有可用结果时，仅回复泛化转人工话术。
-- 禁止在 `Relevance <= 50%` 时照搬无关内容凑答案。
+- 禁止在 `Relevance <= 40%` 时照搬无关内容凑答案。
 
 ---
 
@@ -104,8 +104,8 @@
 
 - ✅ 本轮已先调用 `business-consulting-rag-search-tool`  
 - ✅ 已识别 `No results` / Segment 结果并提取 Top Segment  
-- ✅ `Relevance > 50%` 时：基于 Top Segment 的 `Answer` 直接回答  
-- ✅ `Relevance <= 50%` 时：仅使用相关事实，不拼接无关内容  
+- ✅ `Relevance > 40%` 时：基于 Top Segment 的 `Answer` 直接回答  
+- ✅ `Relevance <= 40%` 时：仅使用相关事实，不拼接无关内容  
 - ✅ `No results` 时：已调用 `need-human-help-tool` 且输出固定话术  
 - ✅ RAG 检索词为英文关键词  
 - ✅ 仅输出与当前问题直接相关场景  
