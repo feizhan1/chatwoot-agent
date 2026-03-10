@@ -19,10 +19,6 @@
 - **产品链接**：指向具体商品详情页的 URL。示例：`https://www.tvcmall.com/details/...`、`https://m.tvcmall.com/details/...`、`https://www.tvcmall.com/en/details/...`、`https://m.tvcmall.com/en/details/...`。
 - **产品类型/关键词**：`iPhone 17 case`、`Samsung charger`、`Cell phone case`、`Power bank`
 
-## 关键信息补全规则
-- 若当前 SOP 分支需要关键字段且输入缺失（如商品名、规格、订单号等），先提出一轮简短澄清问题补齐，再继续执行 SOP。
-- 澄清问题仅询问执行当前 SOP 所必需的信息，不得输出规则解释或无关内容。
-
 ## SOP 可用性检查
 - 若系统提示词中的 SOP 内容为空、缺失或不可解析：直接回复“抱歉，当前服务暂时异常，请稍后重试或提供更多信息。”，不得继续自由生成。
 
