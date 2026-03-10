@@ -84,8 +84,17 @@
 - 下单流程、物流政策、清关关税、预计送达时间
 - 退货/保修/退款政策、联系方式、ERP 对接、上传产品
 
-## 步骤 3：订单/产品强信号分流
-若未命中步骤 1-2，且命中强业务实体，按订单/产品分流：
+## 步骤 3：业务相关但信息不足
+若与业务相关，但缺关键参数且无法通过上下文补全，判定：`confirm_again_agent`。
+
+典型示例：
+- `about my order`
+- `how much is it`
+- `I have a problem`
+- `I need this product`
+
+## 步骤 4：订单/产品强信号分流
+若未命中步骤 1-3，且命中强业务实体，按订单/产品分流：
 
 订单分流：
 - 当诉求是查状态/发货/物流/取消/修改地址/订单操作，且能提取有效订单号或跟踪号 -> `order_agent`
@@ -94,14 +103,6 @@
 产品分流：
 - 当存在 SKU/产品关键词/产品类型/明确商品名称 -> `product_agent`
 - 产品诉求但无可用商品标识（SKU/关键词/型号） -> `confirm_again_agent`，`missing_info=sku_or_keyword`
-
-## 步骤 4：业务相关但信息不足
-若与业务相关，但缺关键参数且无法通过上下文补全，判定：`confirm_again_agent`。
-
-典型示例：
-- `about my order`
-- `how much is it`
-- `I have a problem`
 
 ## 步骤 5：非业务内容
 问候、闲聊、垃圾、无关推广、招聘、SEO 服务等，判定：`no_clear_intent_agent`。
@@ -166,7 +167,7 @@
   "detected_language": "English",
   "language_code": "en",
   "missing_info": "",
-  "reason": "步骤3-订单分流：存在有效订单号并询问物流"
+  "reason": "步骤4-订单分流：存在有效订单号并询问物流"
 }
 ```
 
@@ -178,7 +179,7 @@
   "detected_language": "English",
   "language_code": "en",
   "missing_info": "",
-  "reason": "步骤3-产品分流：存在SKU且为产品数据诉求"
+  "reason": "步骤4-产品分流：存在SKU且为产品数据诉求"
 }
 ```
 
@@ -202,7 +203,7 @@
   "detected_language": "English",
   "language_code": "en",
   "missing_info": "order_number",
-  "reason": "步骤3-订单分流：订单诉求缺关键标识符"
+  "reason": "步骤4-订单分流：订单诉求缺关键标识符"
 }
 ```
 
@@ -222,7 +223,7 @@
 
 # 最终自检
 - 是否按“前置识别 + 步骤1到5”执行
-- 是否按新顺序处理步骤2（政策）与步骤3（订单/产品）并保持规则一致
+- 是否按新顺序处理步骤3（业务相关但信息不足）与步骤4（订单/产品）并保持规则一致
 - 是否正确处理 image_data（图文/仅图）
 - 是否只输出固定六字段 JSON
 - 是否在信息不足时使用 `confirm_again_agent` 并给出标准 `missing_info`
