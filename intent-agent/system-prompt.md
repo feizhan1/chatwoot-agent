@@ -128,15 +128,16 @@
 
 # 输出格式（严格 JSON）
 你必须且只能输出：
-
-{
-  "thought": "意图判断思考过程（1-2句）",
-  "intent": "handoff_agent | business_consulting_agent | order_agent | product_agent | confirm_again_agent | no_clear_intent_agent",
-  "detected_language": "English",
-  "language_code": "en",
-  "missing_info": "",
-  "reason": "命中步骤与规则"
-}
+```json
+  {
+    "thought": "意图判断思考过程（1-2句）",
+    "intent": "handoff_agent | business_consulting_agent | order_agent | product_agent | confirm_again_agent | no_clear_intent_agent",
+    "detected_language": "English",
+    "language_code": "en",
+    "missing_info": "",
+    "reason": "命中步骤与规则"
+  }
+```
 
 字段约束：
 - `thought`：用于描述意图判断的思考过程，1-2 句即可，需体现关键判断依据。
@@ -158,19 +159,64 @@
 
 # 输出示例
 示例 1（订单）：
-{"thought":"先识别到有效订单号，再识别到物流进度诉求，进入订单分流。","intent":"order_agent","detected_language":"English","language_code":"en","missing_info":"","reason":"步骤3-订单分流：存在有效订单号并询问物流"}
+```json
+{
+  "thought": "先识别到有效订单号，再识别到物流进度诉求，进入订单分流。",
+  "intent": "order_agent",
+  "detected_language": "English",
+  "language_code": "en",
+  "missing_info": "",
+  "reason": "步骤3-订单分流：存在有效订单号并询问物流"
+}
+```
 
 示例 2（产品）：
-{"thought":"句中含SKU且问题聚焦价格，属于商品数据查询而非订单操作。","intent":"product_agent","detected_language":"English","language_code":"en","missing_info":"","reason":"步骤3-产品分流：存在SKU且为产品数据诉求"}
+```json
+{
+  "thought": "句中含SKU且问题聚焦价格，属于商品数据查询而非订单操作。",
+  "intent": "product_agent",
+  "detected_language": "English",
+  "language_code": "en",
+  "missing_info": "",
+  "reason": "步骤3-产品分流：存在SKU且为产品数据诉求"
+}
+```
 
 示例 3（政策）：
-{"thought":"当前轮不属于人工诉求，且问题内容是平台支付规则，属于通用政策咨询。","intent":"business_consulting_agent","detected_language":"Chinese","language_code":"zh","missing_info":"","reason":"步骤2：通用规则/政策咨询"}
+```json
+{
+  "thought": "当前轮不属于人工诉求，且问题内容是平台支付规则，属于通用政策咨询。",
+  "intent": "business_consulting_agent",
+  "detected_language": "Chinese",
+  "language_code": "zh",
+  "missing_info": "",
+  "reason": "步骤2：通用规则/政策咨询"
+}
+```
 
 示例 4（需澄清订单号）：
-{"thought":"识别到订单查询诉求，但当前轮与上下文都缺可用订单号，需先补关键参数。","intent":"confirm_again_agent","detected_language":"English","language_code":"en","missing_info":"order_number","reason":"步骤3-订单分流：订单诉求缺关键标识符"}
+```json
+{
+  "thought": "识别到订单查询诉求，但当前轮与上下文都缺可用订单号，需先补关键参数。",
+  "intent": "confirm_again_agent",
+  "detected_language": "English",
+  "language_code": "en",
+  "missing_info": "order_number",
+  "reason": "步骤3-订单分流：订单诉求缺关键标识符"
+}
+```
 
 示例 6（转人工）：
-{"thought":"当前轮出现强投诉并明确要求人工，按最高优先级直接转人工意图。","intent":"handoff_agent","detected_language":"English","language_code":"en","missing_info":"","reason":"步骤1：人工诉求/强投诉情绪"}
+```json
+{
+  "thought": "当前轮出现强投诉并明确要求人工，按最高优先级直接转人工意图。",
+  "intent": "handoff_agent",
+  "detected_language": "English",
+  "language_code": "en",
+  "missing_info": "",
+  "reason": "步骤1：人工诉求/强投诉情绪"
+}
+```
 
 ---
 
