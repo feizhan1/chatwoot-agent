@@ -92,6 +92,7 @@
 - `how much is it`
 - `I have a problem`
 - `I need this product`
+- `I need this phone case`
 
 ## 步骤 4：订单/产品强信号分流
 若未命中步骤 1-3，且命中强业务实体，按订单/产品分流：
