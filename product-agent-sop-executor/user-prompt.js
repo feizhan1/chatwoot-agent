@@ -17,7 +17,9 @@
       '{recent_dialogue}': $('Code in JavaScript13').first().json.recent_dialogue || '无',
       '{user_query}': ask,
       '{image_data}': image_data,
-      '{current_system_time}': now
+      '{current_system_time}': now,
+      '{sale_name}': $('Code in JavaScript13').first().json.sale_name || '无',
+      '{sale_email}': $('Code in JavaScript13').first().json.sale_email || '无',
   };
     for (const [placeholder, value] of Object.entries(dataMap)) {
       const safeValue = value ? value.toString() : ''; 
