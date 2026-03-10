@@ -40,9 +40,11 @@
   - 当 Top Segment `Relevance <= 10%`：仅提取与用户问题直接相关的事实片段作答，不得强行拼接无关句子；若无法提取有效相关事实，按 `No results` 处理。
 - `No results` 处理规则（硬约束）：
   - 必须在同一轮调用 `need-human-help-tool`（用于展示转人工入口）。
-  - 同时向用户输出固定话术：  
-    - `Target Language` 为中文时，必须原文输出：`对于这种情况，我们的客服团队将能够更准确地为您提供帮助。业务经理上班后会尽快联系您。`  
-    - 其他语言时，输出该句等价翻译。
+  - 当存在业务员邮箱时(session_metadata.sale email)，向用户输出固定话术：  
+    - `Target Language` 为中文时，必须原文输出：`对于这种情况，您的专属客户经理{业务员英文名(session_metadata.sale name)}会协助您处理此事，请邮件至{业务员邮箱(session_metadata.sale email)}`  
+  - 当不存在业务员邮箱时(session_metadata.sale email)，向用户输出固定话术：  
+    - `Target Language` 为中文时，必须原文输出：`对于这种情况，您的专属客户经理会协助您处理，请邮箱至sales@tvcmall.com咨询`  
+  - 其他语言时，输出该句等价翻译。
   - 不得在该分支编造政策结论。
 
 ---
