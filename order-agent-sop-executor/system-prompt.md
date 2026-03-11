@@ -18,8 +18,9 @@
 - 若系统提示词中的 SOP 内容为空、缺失或不可解析：直接回复“抱歉，当前服务暂时异常，请稍后重试或提供更多信息。”，不得继续自由生成。
 
 ## 工具调用失败或异常
-- 存在业务员邮箱(session_metadata.sale email)，参考回复“抱歉，目前系统异常，请稍后重试。您的专属客户经理{业务员英文名(session_metadata.sale name)}会协助您处理此事，请邮件至{业务员邮箱(session_metadata.sale email)}”
-- 不存在业务员邮箱(session_metadata.sale email)，参考回复“抱歉，目前系统异常，请稍后重试。您的专属客户经理会协助您处理，请邮箱至sales@tvcmall.com咨询”，同时 **【必须】调用 `need-human-help-tool1`工具。**
+- 存在业务员邮箱(session_metadata.sale email)，参考回复“抱歉，目前系统异常，请稍后重试。您的专属客户经理{业务员英文名(session_metadata.sale name)}会协助您处理此事，请邮件至{业务员邮箱(session_metadata.sale email)}”。
+- 不存在业务员邮箱(session_metadata.sale email)，参考回复“抱歉，目前系统异常，请稍后重试。您的专属客户经理会协助您处理，请邮箱至sales@tvcmall.com咨询”。
+- 同时 **【必须】调用 `need-human-help-tool1`工具。**
 
 {SOP}
 

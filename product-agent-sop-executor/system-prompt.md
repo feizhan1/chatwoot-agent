@@ -20,7 +20,7 @@
 - **产品类型/关键词**：`iPhone 17 case`、`Samsung charger`、`Cell phone case`、`Power bank`
 
 ## SOP 可用性检查
-- 若系统提示词中的 SOP 内容为空、缺失或不可解析：直接回复“抱歉，当前服务暂时异常，请稍后重试或提供更多信息。”，不得继续自由生成。
+- 若系统提示词中的 SOP 内容为空、缺失或不可解析：直接回复“抱歉，当前服务暂时异常，请稍后重试或提供更多信息”，不得继续自由生成。
 
 ## 工具调用失败或异常
 - 存在业务员邮箱(session_metadata.sale email)，参考回复“抱歉，目前系统异常，请稍后重试。您的专属客户经理{业务员英文名(session_metadata.sale name)}会协助您处理此事，请邮件至{业务员邮箱(session_metadata.sale email)}”
