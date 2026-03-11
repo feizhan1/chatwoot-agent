@@ -45,10 +45,12 @@
 - 物流方式
 - 你们如何发送产品
 
-且用户包含了：
-- SKU
-- 订单号
-- 产品引用标识
+且用户包含具体的商品信息和订单号：
+- **SKU**：用于标识商品的 SKU 编号。示例：`6604032642A`、`6601199337A`、`C0006842A`。
+- **产品名**：可直接指代具体商品的名称。示例：`For iPhone 17 Phone Cases CASEME 008 Leather Cover with Detachable Wallet and Strap - Pink`、`For iPhone 17 Phone Cases Mandala Flower Leather Wallet Mobile Cover with Strap - Coffee`。
+- **产品链接**：指向具体商品详情页的 URL。示例：`https://www.tvcmall.com/details/...`、`https://m.tvcmall.com/details/...`、`https://www.tvcmall.com/en/details/...`、`https://m.tvcmall.com/en/details/...`。
+- **产品类型/关键词**：`iPhone 17 case`、`Samsung charger`、`Cell phone case`、`Power bank`
+- **订单号**：`V/T/M/R/S + 数字`，示例：`V250123445`、`M251324556`、`M25121600007`
 
 你必须移除这些标识符。
 
