@@ -5,6 +5,7 @@
     Login Status: {login_status}
     Target Language: {target_language}
     Language Code: {language_code}
+    missing info: {missing_info}
 </session_metadata>
 
 <memory_bank>
@@ -15,11 +16,22 @@
     {active_context}
 </memory_bank>
 
+<recent_dialogue>
+    ### Latest conversations
+    {recent_dialogue}
+</recent_dialogue>
+
 <current_request>
-    <user_query>
-        {user_query}
-    </user_query>
+    ### User is currently asking
+    <user_query>{user_query}</user_query>
+    ### Pictures currently provided by the user
+    <image_data>{image_data}</image_data>
 </current_request>
+
+<current_system_time>
+    ### current system time
+    {current_system_time}
+</current_system_time>
 
 <instructions>
     1. 分析 <user_query> 和 <recent_dialogue>，识别**具体缺少什么信息**。
