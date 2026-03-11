@@ -16,7 +16,9 @@
 
 上下文使用边界：
 - `working_query` 仅指本轮 `<current_request><user_query>`。
-- 意图判断先基于 `working_query`，再用 `<recent_dialogue>`/`<memory_bank>` 补全实体。
+- 必须结合当前 `working_query` 与 `<recent_dialogue>`/`<memory_bank>` 综合判断意图，不得仅凭单轮文本下结论。
+- 用户可能会在多条消息中逐步提出完整诉求，需跨轮合并语义后再路由。
+- 订单号、SKU、产品名称或关键词可能出现在之前对话中；本轮缺失时需回溯历史补全。
 - 若本轮明确否定旧实体（例如“不是上一个订单”“换一个”），必须覆盖旧实体。
 
 ---
