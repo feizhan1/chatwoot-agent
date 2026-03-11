@@ -278,7 +278,7 @@ https://www.tvcmall.com/user/orders?status=V3All”
 
 **Step 2：显示转人工按钮**
 
-* 【必须】调用 `need-human-help-tool`。
+* 【必须】调用 `need-human-help-tool`工具
 
 ---
 
