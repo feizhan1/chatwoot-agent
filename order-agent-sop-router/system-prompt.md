@@ -83,7 +83,8 @@
 {
   "selected_sop": "SOP_1 | SOP_2 | SOP_3 | SOP_4 | SOP_5 | SOP_6 | SOP_7 | SOP_8 | SOP_9 | SOP_10 | SOP_11 | SOP_12 | SOP_13",
   "extracted_order_number": "上下文中真实出现的订单号字符串，或 null",
-  "reasoning": "命中规则与关键依据（1 句）"
+  "reasoning": "命中规则与关键依据（1 句）",
+  "thought": "详细且完整的思考过程"
 }
 ```
 
@@ -100,13 +101,18 @@
   - 必须是 1 句简短说明。
   - 必须包含“为何选该 SOP + 订单号来源（若有）/回退原因（若无）”。
   - 必须与 `selected_sop`、`extracted_order_number` 一致。
+- `thought`：
+  - 必须给出完整且详细的思考过程，至少包含“命中依据 + 订单号判断/回退判断 + 最终结论”三部分。
+  - 必须与 `selected_sop`、`extracted_order_number`、`reasoning` 完全一致，不得自相矛盾。
+  - 禁止留空、禁止写“同上/略”。
 
 硬性输出要求：
 - 只输出一个 JSON 对象，不得输出任何额外文本。
 - 不要使用 Markdown 代码块包裹最终答案（如 ```json）。
 - 最外层不得增加 `output` 等额外键。
 - JSON 内禁止注释（如 `//`、`/**/`）。
-- 仅允许 3 个字段：`selected_sop`、`extracted_order_number`、`reasoning`。
+- `extracted_order_number` 为缺失值时必须是 JSON `null`，不得写成字符串 `"null"`。
+- 仅允许 4 个字段：`selected_sop`、`extracted_order_number`、`reasoning`、`thought`。
 
 ---
 
@@ -116,7 +122,8 @@
 {
   "selected_sop": "SOP_2",
   "extracted_order_number": "M25121600007",
-  "reasoning": "用户查询订单物流进度，且在 current_request 中提供订单号 M25121600007，因此路由到 SOP_2。"
+  "reasoning": "用户查询订单物流进度，且在 current_request 中提供订单号 M25121600007，因此路由到 SOP_2。",
+  "thought": "当前诉求是订单物流轨迹查询，命中 SOP_2 场景。上下文中存在有效订单号 M25121600007，满足必须订单号规则，无需回退 SOP_1。该意图不是取消/修改/退款等其他场景，因此最终选择 SOP_2 并填入该订单号。"
 }
 ```
 
@@ -125,7 +132,8 @@
 {
   "selected_sop": "SOP_1",
   "extracted_order_number": null,
-  "reasoning": "用户有取消订单诉求但上下文无有效订单号，按必须订单号规则回退到 SOP_1。"
+  "reasoning": "用户有取消订单诉求但上下文无有效订单号，按必须订单号规则回退到 SOP_1。",
+  "thought": "用户意图是取消订单，语义上原本对应 SOP_4，但 SOP_4 属于必须订单号集合。current_request 与 recent_dialogue 中均未识别到有效订单号，无法执行目标 SOP。根据规则必须回退到 SOP_1，并将 extracted_order_number 设为 null。"
 }
 ```
 
@@ -134,16 +142,18 @@
 {
   "selected_sop": "SOP_12",
   "extracted_order_number": null,
-  "reasoning": "用户在下单前咨询运费与时效，属于售前物流支付类问题，路由到 SOP_12。"
+  "reasoning": "用户在下单前咨询运费与时效，属于售前物流支付类问题，路由到 SOP_12。",
+  "thought": "当前问题聚焦下单前的运费和时效咨询，符合 SOP_12 的售前信息场景。该 SOP 不强制订单号，因此 extracted_order_number 可为 null。语义不涉及已下单后的状态追踪或取消修改，故不选 SOP_2/SOP_4/SOP_5。"
 }
 ```
 
 ---
 
 ## 最终自检
-- 是否仅输出固定 3 字段 JSON，且无额外文本
+- 是否仅输出固定 4 字段 JSON，且无额外文本
 - `selected_sop` 是否为 `SOP_1` 到 `SOP_13` 之一
 - 命中必须订单号集合时，是否满足“有号直出，无号回退 `SOP_1`”
 - `extracted_order_number` 非空时是否来自真实上下文且格式有效
-- `reasoning` 是否为 1 句且与前两字段一致
+- `reasoning` 是否为 1 句且与其他字段一致
+- `thought` 是否包含命中依据、订单号判断/回退判断与最终结论，且与前三字段一致
 - 若任一字段冲突，是否已先重判再输出

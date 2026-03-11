@@ -42,7 +42,8 @@
 {
   "selected_sop": "SOP_1 | SOP_2 | SOP_3 | SOP_4 | SOP_5 | SOP_6 | SOP_7 | SOP_8 | SOP_9 | SOP_10 | SOP_11",
   "extracted_product_identifier": "上下文中真实出现的 SKU/产品名/产品链接/图片 URL，或 null",
-  "reasoning": "命中规则与关键依据（1 句）"
+  "reasoning": "命中规则与关键依据（1 句）",
+  "thought": "详细且完整的思考过程"
 }
 ```
 
@@ -57,6 +58,17 @@
 - `reasoning`：
   - 必须是 1 句简短解释。
   - 必须明确体现“为何命中该 SOP”的关键依据，并与前两字段一致。
+- `thought`：
+  - 必须给出完整且详细的思考过程，至少包含“命中依据 + 排除理由 + 最终结论”三部分。
+  - 必须与 `selected_sop`、`extracted_product_identifier`、`reasoning` 完全一致，不得自相矛盾。
+  - 禁止留空、禁止写“同上/略”。
+
+硬性输出要求：
+- 只输出一个 JSON 对象，不得输出任何额外文本。
+- 不要使用 Markdown 代码块包裹最终答案（如 ```json）。
+- JSON 内禁止注释（如 `//`、`/**/`）。
+- 仅允许 4 个字段：`selected_sop`、`extracted_product_identifier`、`reasoning`、`thought`。
+- `extracted_product_identifier` 为缺失值时必须是 JSON `null`，不得写成字符串 `"null"`。
 
 ---
 
@@ -66,24 +78,37 @@
 {
   "selected_sop": "SOP_1",
   "extracted_product_identifier": "6601162439A",
-  "reasoning": "用户基于明确 SKU 询问价格，属于单一属性查询。"
+  "reasoning": "用户基于明确 SKU 询问价格，属于单一属性查询。",
+  "thought": "当前请求中出现明确 SKU 6601162439A，问题聚焦价格这一单一属性，满足规则 5 的单字段属性查询条件。该诉求不是产品概述（排除 SOP_2），也不是找货/搜索（排除 SOP_3），因此路由 SOP_1。"
 }
 ```
 
-示例 2（产品使用问题）：
+示例 2（找货诉求且无法定位具体产品）：
+```json
+{
+  "selected_sop": "SOP_3",
+  "extracted_product_identifier": null,
+  "reasoning": "用户提出找货诉求且上下文无可识别产品标识，应走搜索路由。",
+  "thought": "current_request 表达“帮我找一款带支架的手机壳”，recent_dialogue 中也未出现可复用的 SKU、产品名、产品链接或图片 URL。根据规则 4，在无法定位产品时应路由 SOP_3 且 extracted_product_identifier 必须为 null。该场景不属于指定商品属性或详情询问，因此不选 SOP_1/SOP_2。"
+}
+```
+
+示例 3（产品使用问题）：
 ```json
 {
   "selected_sop": "SOP_11",
   "extracted_product_identifier": "https://www.tvcmall.com/details/...",
-  "reasoning": "用户反馈该商品不会使用，属于使用说明/故障处理场景。"
+  "reasoning": "用户反馈指定商品不会使用，属于使用说明/故障处理场景。",
+  "thought": "上下文中有明确产品链接，用户意图是咨询使用方式而非价格、MOQ、材质等单一属性。根据 SOP 列表定义，使用说明、教程或使用故障应路由 SOP_11。由于可定位到具体商品，extracted_product_identifier 保留该真实链接。"
 }
 ```
 
 ---
 
 ## 最终自检
-- 是否仅输出固定 3 字段 JSON，且无额外文本
+- 是否仅输出固定 4 字段 JSON，且无额外文本
 - `selected_sop` 是否为 `SOP_1` 到 `SOP_11` 之一
 - `extracted_product_identifier` 是否来自真实上下文，或在规则 4 下为 `null`
-- `reasoning` 是否为 1 句且与 `selected_sop`、`extracted_product_identifier` 一致
-- 若三字段任一冲突，是否已先重判再输出
+- `reasoning` 是否为 1 句且与其他字段一致
+- `thought` 是否包含命中依据、排除理由和最终结论，且与前三字段一致
+- 若四字段任一冲突，是否已先重判再输出
