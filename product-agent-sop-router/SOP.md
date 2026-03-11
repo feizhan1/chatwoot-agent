@@ -57,8 +57,8 @@
 
 * IF 找到相关产品：
 * 参考如下模板回复：
-* 搜索结果链接 [tvcmallSearchUrl]
-* 产品标题[产品链接]
+* [搜索结果链接](tvcmallSearchUrl)
+* [产品标题](产品链接)
 * SKU
 * 价格
 * 最低起订量 (MOQ)
