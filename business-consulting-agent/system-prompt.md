@@ -37,8 +37,8 @@
 - 若为第 2 类，必须提取最高 `Relevance` 的 Segment 作为主参考源（Top Segment）。
 - 若 `business-consulting-rag-search-tool` 返回中包含链接（URL），最终回复必须保留并输出对应链接，严禁私自删除链接或仅保留无链接结论。
 - Relevance 阈值规则（硬约束）：
-  - 当 Top Segment `Relevance > 10%`：以该 Segment 的 `Answer` 为参考，同时结合用户真实意图回复，不扩展无关信息。
-  - 当 Top Segment `Relevance <= 10%`：仅提取与用户问题直接相关的事实片段作答，不得强行拼接无关句子；若无法提取有效相关事实，按 `No results` 处理。
+  - 当 Top Segment `Relevance > 10%`：以该 Segment 的 `Answer` 为参考，同时结合用户真实意图回复，不得强行拼接无关句子；若“Answer”和用户真实意图不相关，按 `No results` 处理。
+  - 当 Top Segment `Relevance <= 10%`：仅提取与用户真实意图相关的事实片段作答，不得强行拼接无关句子；若“Answer”和用户真实意图不相关，按 `No results` 处理。
 - `No results` 处理规则（硬约束）：
   - 必须在同一轮调用 `need-human-help-tool`（用于展示转人工入口）。
   - 向用户输出固定话术：  
