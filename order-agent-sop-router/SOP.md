@@ -115,12 +115,11 @@
 
 ## 执行步骤（严格按顺序）
 
-**Step 1：固定引导回复**
+**Step 1：调用订单查询工具**
 
-* 直接回复：
-“您可以在这里查看所有订单详情：
-https://www.tvcmall.com/user/orders?status=V3All”
-* 不输出具体字段明细。
+* 调用 `query-order-info-tool` 获取订单信息。
+* IF 存在订单信息
+* 动作：参考回复“[您可以在这里查看所有订单详情]({tvcmall_web_baseUrl}/order/orderdetail/{OrderNumber}?status=V3All)”
 
 ---
 

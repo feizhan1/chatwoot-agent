@@ -15,6 +15,7 @@
       '{user_profile}': $('Code in JavaScript13').first().json.user_profile || '无',
       '{active_context}': $('Code in JavaScript13').first().json.active_context || '无',
       '{recent_dialogue}': $('Code in JavaScript13').first().json.recent_dialogue || '无',
+      '{tvcmall_web_baseUrl}': $('Code in JavaScript13').first().json.tvcmall_web_baseUrl || '无',
       '{user_query}': ask,
       '{current_system_time}': now
   };

@@ -6,6 +6,7 @@
     Language Code: {language_code}
     sale name: {sale_name}
     sale email: {sale_email}
+    tvcmall_web_baseUrl: {tvcmall_web_baseUrl}
 </session_metadata>
 
 <memory_bank>
