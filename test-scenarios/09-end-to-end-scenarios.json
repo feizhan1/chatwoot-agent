@@ -1,0 +1,203 @@
+{
+  "scenario": "端到端场景测试",
+  "description": "模拟真实用户完整对话流程",
+  "scenarios": [
+    {
+      "name": "新用户完整购物流程",
+      "description": "从打招呼到准备下单的完整流程",
+      "steps": [
+        {
+          "step": 1,
+          "case_id": "TC001",
+          "action": "用户打招呼"
+        },
+        {
+          "step": 2,
+          "case_id": "TC010",
+          "action": "咨询代发货服务"
+        },
+        {
+          "step": 3,
+          "case_id": "TC024",
+          "action": "请求产品推荐"
+        },
+        {
+          "step": 4,
+          "case_id": "TC026",
+          "action": "咨询样品订单"
+        },
+        {
+          "step": 5,
+          "case_id": "TC020",
+          "action": "查询产品价格"
+        },
+        {
+          "step": 6,
+          "case_id": "TC017",
+          "action": "咨询下单流程"
+        }
+      ],
+      "expected_flow": "general_chat → query_knowledge_base → query_product_data → query_product_data → query_product_data → query_knowledge_base",
+      "total_steps": 6
+    },
+    {
+      "name": "已登录用户订单查询与操作",
+      "description": "查询订单并进行操作的完整流程",
+      "steps": [
+        {
+          "step": 1,
+          "case_id": "TC029",
+          "action": "查询包裹（无订单号）"
+        },
+        {
+          "step": 2,
+          "case_id": "TC030",
+          "action": "提供订单号"
+        },
+        {
+          "step": 3,
+          "case_id": "TC031",
+          "action": "查询订单状态"
+        },
+        {
+          "step": 4,
+          "case_id": "TC037",
+          "action": "修改订单地址"
+        },
+        {
+          "step": 5,
+          "case_id": "TC038",
+          "action": "取消订单"
+        },
+        {
+          "step": 6,
+          "case_id": "TC039",
+          "action": "提供取消原因"
+        }
+      ],
+      "expected_flow": "need_confirm_again → query_user_order → query_user_order → query_user_order → query_user_order → query_user_order",
+      "total_steps": 6
+    },
+    {
+      "name": "产品查询深入流程",
+      "description": "深入查询单个产品的完整信息",
+      "steps": [
+        {
+          "step": 1,
+          "case_id": "TC019",
+          "action": "查询产品基本信息"
+        },
+        {
+          "step": 2,
+          "case_id": "TC020",
+          "action": "查询产品价格"
+        },
+        {
+          "step": 3,
+          "case_id": "TC022",
+          "action": "查询产品重量（指代消解）"
+        },
+        {
+          "step": 4,
+          "case_id": "TC023",
+          "action": "查询产品规格（memory_bank）"
+        },
+        {
+          "step": 5,
+          "case_id": "TC046",
+          "action": "查询其他颜色（it 指代）"
+        }
+      ],
+      "expected_flow": "query_product_data → query_product_data → query_product_data → query_product_data → query_product_data",
+      "total_steps": 5,
+      "note": "⚠️ 测试上下文延续和指代消解"
+    },
+    {
+      "name": "投诉升级流程",
+      "description": "从普通查询到投诉升级的流程",
+      "steps": [
+        {
+          "step": 1,
+          "case_id": "TC034",
+          "action": "订单延迟投诉"
+        },
+        {
+          "step": 2,
+          "case_id": "TC035",
+          "action": "订单显示已送达但未收到"
+        },
+        {
+          "step": 3,
+          "case_id": "TC042",
+          "action": "表达强烈不满"
+        },
+        {
+          "step": 4,
+          "case_id": "TC043",
+          "action": "投诉产品质量"
+        }
+      ],
+      "expected_flow": "query_user_order → query_user_order → handoff → handoff",
+      "total_steps": 4,
+      "note": "⚠️ 检测情绪升级，及时转人工"
+    },
+    {
+      "name": "指代消解测试流程",
+      "description": "测试各种指代消解场景",
+      "steps": [
+        {
+          "step": 1,
+          "case_id": "TC022",
+          "action": "隐式指代（What's the weight?）"
+        },
+        {
+          "step": 2,
+          "case_id": "TC023",
+          "action": "从 memory_bank 推断"
+        },
+        {
+          "step": 3,
+          "case_id": "TC044",
+          "action": "yes 确认"
+        },
+        {
+          "step": 4,
+          "case_id": "TC045",
+          "action": "no 拒绝"
+        },
+        {
+          "step": 5,
+          "case_id": "TC046",
+          "action": "it 指代"
+        }
+      ],
+      "expected_flow": "各种上下文消解场景",
+      "total_steps": 5,
+      "note": "⚠️ 核心能力测试"
+    },
+    {
+      "name": "多语言用户流程",
+      "description": "测试中文用户的完整交互",
+      "steps": [
+        {
+          "step": 1,
+          "case_id": "TC005",
+          "action": "咨询支付方式（中文）"
+        },
+        {
+          "step": 2,
+          "case_id": "TC018",
+          "action": "咨询下单流程（中文）"
+        },
+        {
+          "step": 3,
+          "case_id": "TC050",
+          "action": "产品查询（中英混合）"
+        }
+      ],
+      "expected_flow": "query_knowledge_base → query_knowledge_base → query_product_data",
+      "total_steps": 3,
+      "note": "⚠️ 所有回复必须是中文"
+    }
+  ]
+}

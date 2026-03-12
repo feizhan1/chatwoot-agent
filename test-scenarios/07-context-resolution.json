@@ -1,0 +1,112 @@
+{
+  "scenario": "上下文理解与指代消解",
+  "description": "测试 AI 从上下文、memory_bank 推断信息的能力",
+  "cases": [
+    {
+      "id": "TC044",
+      "name": "单词确认 - yes",
+      "priority": "high",
+      "intent": "query_user_order",
+      "input": {
+        "query": "yes",
+        "login": true,
+        "user": "John",
+        "language": "en",
+        "context": [
+          {"role": "user", "content": "Cancel order M26011500001"},
+          {"role": "ai", "content": "Are you sure you want to cancel order M26011500001?"}
+        ]
+      },
+      "expect": {
+        "resolution": "确认取消订单",
+        "entity": {"order_number": "M26011500001", "action": "cancel", "confirmed": true}
+      },
+      "note": "⚠️ 测试 yes 确认的上下文理解"
+    },
+    {
+      "id": "TC045",
+      "name": "单词确认 - no",
+      "priority": "high",
+      "intent": "general_chat",
+      "input": {
+        "query": "no",
+        "login": true,
+        "user": "John",
+        "language": "en",
+        "context": [
+          {"role": "user", "content": "Cancel order M26011500001"},
+          {"role": "ai", "content": "Are you sure you want to cancel order M26011500001?"}
+        ]
+      },
+      "expect": {
+        "resolution": "取消操作",
+        "keywords": ["keep", "maintain", "anything else"]
+      },
+      "note": "⚠️ 测试 no 拒绝的上下文理解"
+    },
+    {
+      "id": "TC046",
+      "name": "指代 - it",
+      "priority": "high",
+      "intent": "query_product_data",
+      "input": {
+        "query": "Does it come in black?",
+        "login": false,
+        "language": "en",
+        "context": [
+          {"role": "user", "content": "Tell me about product 6604028714A"},
+          {"role": "ai", "content": "Product 6604028714A is an orange camera lens protector..."}
+        ]
+      },
+      "expect": {
+        "tool": "query_production_xx",
+        "keywords": ["6604028714A", "black", "color"],
+        "resolution": "it = 6604028714A"
+      },
+      "note": "⚠️ 测试指代词 it 的消解"
+    },
+    {
+      "id": "TC022",
+      "name": "查询产品重量（this product）",
+      "priority": "high",
+      "intent": "query_product_data",
+      "input": {
+        "query": "What's the weight?",
+        "login": false,
+        "language": "en",
+        "context": [
+          {"role": "user", "content": "Tell me about product 6604028714A"},
+          {"role": "ai", "content": "Product 6604028714A is priced at $3.13..."}
+        ]
+      },
+      "expect": {
+        "tool": "query_production_xx",
+        "keywords": ["6604028714A", "kg", "weight"],
+        "resolution": "从 recent_dialogue 推断 SKU"
+      },
+      "note": "⚠️ 测试隐式指代消解"
+    },
+    {
+      "id": "TC023",
+      "name": "查询产品规格（memory_bank）",
+      "priority": "high",
+      "intent": "query_product_data",
+      "input": {
+        "query": "What are the specs for this product?",
+        "login": false,
+        "language": "en",
+        "memory": "User inquired about product 6604028714A",
+        "context": [
+          {"role": "user", "content": "What's the weight?"},
+          {"role": "ai", "content": "The weight of 6604028714A is 0.05 kg"}
+        ]
+      },
+      "expect": {
+        "tool": "query_production_xx",
+        "keywords": ["6604028714A", "specifications"],
+        "resolution": "从 memory_bank 推断 SKU"
+      },
+      "note": "⚠️ 测试从 memory_bank 提取信息"
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "scenario": "转人工",
+  "description": "测试主动转人工、情绪检测、投诉升级等场景",
+  "cases": [
+    {
+      "id": "TC041",
+      "name": "用户主动请求转人工",
+      "priority": "critical",
+      "intent": "handoff",
+      "input": {
+        "query": "I want to speak to a human",
+        "login": true,
+        "user": "John",
+        "language": "en"
+      },
+      "expect": {
+        "tool": "handoff.tool2",
+        "keywords": ["transfer", "human", "agent"]
+      },
+      "note": "⚠️ 必须立即转人工"
+    },
+    {
+      "id": "TC042",
+      "name": "强烈不满情绪",
+      "priority": "critical",
+      "intent": "handoff",
+      "input": {
+        "query": "This is unacceptable! I want a refund NOW!",
+        "login": true,
+        "user": "John",
+        "language": "en"
+      },
+      "expect": {
+        "tool": "handoff.tool2",
+        "keywords": ["transfer", "manager"],
+        "emotion": "angry"
+      },
+      "note": "⚠️ 检测强烈情绪，立即转人工"
+    },
+    {
+      "id": "TC043",
+      "name": "投诉产品质量",
+      "priority": "critical",
+      "intent": "handoff",
+      "input": {
+        "query": "The product is defective, I want to complain",
+        "login": true,
+        "user": "John",
+        "language": "en"
+      },
+      "expect": {
+        "tool": "handoff.tool2",
+        "keywords": ["complaint", "transfer"]
+      },
+      "note": "⚠️ 质量投诉，必须转人工"
+    }
+  ]
+}

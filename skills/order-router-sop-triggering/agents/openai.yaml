@@ -1,0 +1,4 @@
+interface:
+  display_name: "Order Router SOP Triggering"
+  short_description: "Refine order-agent SOP list triggers and keep zh/en in sync"
+  default_prompt: "Use $order-router-sop-triggering to rewrite the Order Router SOP list so each entry states when it should trigger and matches zh/en."

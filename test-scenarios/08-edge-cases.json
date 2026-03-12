@@ -1,0 +1,80 @@
+{
+  "scenario": "边缘情况与异常处理",
+  "description": "测试空输入、无关问题、多语言混合、混合意图等边缘情况",
+  "cases": [
+    {
+      "id": "TC047",
+      "name": "产品+订单混合意图",
+      "intent": "need_confirm_again",
+      "input": {
+        "query": "I want to buy 6604028714A but also check my order status",
+        "login": true,
+        "user": "John",
+        "language": "en"
+      },
+      "expect": {
+        "keywords": ["which", "first", "order number"],
+        "clarification": true
+      },
+      "note": "多意图混合，需要二次确认"
+    },
+    {
+      "id": "TC048",
+      "name": "空输入",
+      "intent": "general_chat",
+      "input": {
+        "query": "",
+        "login": false,
+        "language": "en"
+      },
+      "expect": {
+        "keywords": ["help", "how can I assist"]
+      }
+    },
+    {
+      "id": "TC049",
+      "name": "无关问题",
+      "intent": "general_chat",
+      "input": {
+        "query": "What's the weather today?",
+        "login": false,
+        "language": "en"
+      },
+      "expect": {
+        "keywords": ["sorry", "help with", "product", "order"]
+      },
+      "note": "AI 应礼貌拒绝并引导回主题"
+    },
+    {
+      "id": "TC050",
+      "name": "多语言混合",
+      "intent": "query_product_data",
+      "input": {
+        "query": "我想要 iPhone case，transparent 的",
+        "login": false,
+        "language": "zh"
+      },
+      "expect": {
+        "tool": "相似度查询-rag推荐",
+        "keywords": ["iPhone", "case", "transparent"],
+        "language": "zh"
+      },
+      "note": "输入是中英混合，但回复必须是中文"
+    },
+    {
+      "id": "TC027",
+      "name": "错误的 SKU",
+      "intent": "query_product_data",
+      "input": {
+        "query": "Show me product ABC123XYZ",
+        "login": false,
+        "language": "en"
+      },
+      "expect": {
+        "tool": "query_production_xx",
+        "keywords": ["not found", "cannot find", "invalid"]
+      },
+      "note": "处理不存在的产品编号"
+    }
+  ]
+}

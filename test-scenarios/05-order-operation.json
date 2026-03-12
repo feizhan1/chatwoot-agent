@@ -1,0 +1,85 @@
+{
+  "scenario": "订单操作",
+  "description": "测试修改订单地址、取消订单、修改数量等操作",
+  "cases": [
+    {
+      "id": "TC036",
+      "name": "修改订单地址（无订单号）",
+      "intent": "need_confirm_again",
+      "input": {
+        "query": "I need to change my shipping address",
+        "login": true,
+        "user": "John",
+        "language": "en"
+      },
+      "expect": {
+        "keywords": ["order number", "which order"],
+        "clarification": true
+      }
+    },
+    {
+      "id": "TC037",
+      "name": "修改订单地址（有订单号）",
+      "intent": "query_user_order",
+      "input": {
+        "query": "Change shipping address for M26011500001",
+        "login": true,
+        "user": "John",
+        "language": "en"
+      },
+      "expect": {
+        "tool": "query_order_data",
+        "keywords": ["M26011500001", "address", "update"]
+      }
+    },
+    {
+      "id": "TC038",
+      "name": "取消订单",
+      "intent": "query_user_order",
+      "input": {
+        "query": "Cancel order M26011500001",
+        "login": true,
+        "user": "John",
+        "language": "en"
+      },
+      "expect": {
+        "tool": "query_order_data",
+        "keywords": ["M26011500001", "cancel"]
+      }
+    },
+    {
+      "id": "TC039",
+      "name": "取消订单原因询问",
+      "intent": "query_user_order",
+      "input": {
+        "query": "I don't want it anymore",
+        "login": true,
+        "user": "John",
+        "language": "en",
+        "context": [
+          {"role": "user", "content": "Cancel order M26011500001"},
+          {"role": "ai", "content": "Could you please tell us the reason for cancellation?"}
+        ]
+      },
+      "expect": {
+        "keywords": ["cancel", "reason"],
+        "resolution": "提供取消原因"
+      }
+    },
+    {
+      "id": "TC040",
+      "name": "修改订单数量",
+      "intent": "query_user_order",
+      "input": {
+        "query": "We ordered 1 but meant to order 100, can we change it?",
+        "login": true,
+        "user": "John",
+        "language": "en"
+      },
+      "expect": {
+        "keywords": ["quantity", "change", "order number"],
+        "clarification": true
+      }
+    }
+  ]
+}

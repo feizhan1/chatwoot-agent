@@ -1,0 +1,232 @@
+{
+  "scenario": "业务咨询",
+  "description": "测试支付、运输、退货、代发货、批发、VIP、定制、清关、图片下载等业务政策查询",
+  "cases": [
+    {
+      "id": "TC004",
+      "name": "支付方式咨询",
+      "intent": "query_knowledge_base",
+      "input": {
+        "query": "What payment methods do you accept?",
+        "login": false,
+        "language": "en"
+      },
+      "expect": {
+        "tool": "相似度查询-rag咨询",
+        "keywords": ["PayPal", "Credit Card", "T/T"]
+      }
+    },
+    {
+      "id": "TC005",
+      "name": "支付方式咨询（中文）",
+      "intent": "query_knowledge_base",
+      "input": {
+        "query": "你们支持哪些支付方式？",
+        "login": false,
+        "language": "zh"
+      },
+      "expect": {
+        "tool": "相似度查询-rag咨询",
+        "keywords": ["PayPal", "信用卡", "银行转账"],
+        "language": "zh"
+      }
+    },
+    {
+      "id": "TC006",
+      "name": "运输时间咨询（无国家）",
+      "intent": "need_confirm_again",
+      "input": {
+        "query": "How long does shipping take?",
+        "login": false,
+        "language": "en"
+      },
+      "expect": {
+        "keywords": ["country", "destination", "specify"],
+        "clarification": true
+      }
+    },
+    {
+      "id": "TC007",
+      "name": "运输时间咨询（指定美国）",
+      "intent": "query_knowledge_base",
+      "input": {
+        "query": "USA",
+        "login": false,
+        "language": "en",
+        "context": [
+          {"role": "user", "content": "How long does shipping take?"},
+          {"role": "ai", "content": "Could you please specify which country?"}
+        ]
+      },
+      "expect": {
+        "tool": "相似度查询-rag咨询",
+        "keywords": ["USA", "United States", "days"]
+      }
+    },
+    {
+      "id": "TC008",
+      "name": "运输时间咨询（直接指定国家）",
+      "intent": "query_knowledge_base",
+      "input": {
+        "query": "How long does shipping to Germany take?",
+        "login": false,
+        "language": "en"
+      },
+      "expect": {
+        "tool": "相似度查询-rag咨询",
+        "keywords": ["Germany", "shipping"]
+      }
+    },
+    {
+      "id": "TC009",
+      "name": "退货政策咨询",
+      "intent": "query_knowledge_base",
+      "input": {
+        "query": "What is your return policy?",
+        "login": false,
+        "language": "en"
+      },
+      "expect": {
+        "tool": "相似度查询-rag咨询",
+        "keywords": ["return", "policy", "days"]
+      }
+    },
+    {
+      "id": "TC010",
+      "name": "代发货服务咨询",
+      "intent": "query_knowledge_base",
+      "input": {
+        "query": "Do you support dropshipping?",
+        "login": false,
+        "language": "en"
+      },
+      "expect": {
+        "tool": "相似度查询-rag咨询",
+        "keywords": ["dropshipping", "API", "MOQ"]
+      }
+    },
+    {
+      "id": "TC011",
+      "name": "代发货深入咨询（上下文延续）",
+      "intent": "query_knowledge_base",
+      "input": {
+        "query": "Can you tell me more about the API?",
+        "login": false,
+        "language": "en",
+        "memory": "User wants to learn more about dropshipping services",
+        "context": [
+          {"role": "user", "content": "Do you support dropshipping?"},
+          {"role": "ai", "content": "Yes, we support dropshipping with API integration..."}
+        ]
+      },
+      "expect": {
+        "tool": "相似度查询-rag咨询",
+        "keywords": ["API", "integration", "documentation"]
+      }
+    },
+    {
+      "id": "TC012",
+      "name": "批发服务咨询",
+      "intent": "query_knowledge_base",
+      "input": {
+        "query": "What are the wholesale options?",
+        "login": false,
+        "language": "en"
+      },
+      "expect": {
+        "tool": "相似度查询-rag咨询",
+        "keywords": ["wholesale", "bulk", "discount"]
+      }
+    },
+    {
+      "id": "TC013",
+      "name": "VIP 会员咨询",
+      "intent": "query_knowledge_base",
+      "input": {
+        "query": "How do I become a VIP member?",
+        "login": false,
+        "language": "en"
+      },
+      "expect": {
+        "tool": "相似度查询-rag咨询",
+        "keywords": ["VIP", "member", "benefits"]
+      }
+    },
+    {
+      "id": "TC014",
+      "name": "定制服务咨询",
+      "intent": "query_knowledge_base",
+      "input": {
+        "query": "Can you customize products with my logo?",
+        "login": false,
+        "language": "en"
+      },
+      "expect": {
+        "tool": "相似度查询-rag咨询",
+        "keywords": ["OEM", "ODM", "customize", "logo"]
+      }
+    },
+    {
+      "id": "TC015",
+      "name": "清关文件咨询",
+      "intent": "query_knowledge_base",
+      "input": {
+        "query": "Can you provide invoice for customs?",
+        "login": false,
+        "language": "en"
+      },
+      "expect": {
+        "tool": "相似度查询-rag咨询",
+        "keywords": ["invoice", "packing list", "customs", "sales manager"]
+      }
+    },
+    {
+      "id": "TC016",
+      "name": "产品图片下载",
+      "intent": "query_knowledge_base",
+      "input": {
+        "query": "Can I download product images?",
+        "login": false,
+        "language": "en"
+      },
+      "expect": {
+        "tool": "相似度查询-rag咨询",
+        "keywords": ["images", "My account", "login"]
+      }
+    },
+    {
+      "id": "TC017",
+      "name": "下单流程咨询（英文）- 关键测试",
+      "priority": "high",
+      "intent": "query_knowledge_base",
+      "input": {
+        "query": "How do I place an order?",
+        "login": false,
+        "language": "en"
+      },
+      "expect": {
+        "tool": "相似度查询-rag咨询",
+        "language": "en",
+        "fallback_keywords": ["Sorry", "knowledge base", "sales manager", "contact"]
+      },
+      "note": "⚠️ 关键测试：如果知识库无结果，必须用英语回复"
+    },
+    {
+      "id": "TC018",
+      "name": "下单流程咨询（中文）",
+      "priority": "high",
+      "intent": "query_knowledge_base",
+      "input": {
+        "query": "怎么下单？",
+        "login": false,
+        "language": "zh"
+      },
+      "expect": {
+        "tool": "相似度查询-rag咨询",
+        "language": "zh",
+        "fallback_keywords": ["抱歉", "知识库", "销售经理"]
+      },
+      "note": "⚠️ 关键测试：如果知识库无结果，必须用中文回复"
+    }
+  ]
+}
