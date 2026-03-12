@@ -1,23 +1,23 @@
 ### SOP_1: Missing Order Number Handling
 
-# Current Task: User inquiring about order-related issues, but no valid order number detected in context
+# Current Task: User inquires about order-related issues, but no valid order number is detected in the context
 
 ## Execution Steps (strictly in order)
 
 **Step 1: Random Reply Guidance**
 
-* Randomly select 1 response from the following:
-1. "What is your order number?"
+* Randomly select 1 reply from the following:
+1. "May I have your order number?"
 2. "Please provide your order number."
-3. "What's your order number?"
+3. "What is your order number?"
 
 ---
 
 ### SOP_2: Order Status / Logistics Tracking Query
 
-# Current Task: Handle user queries about order status, payment review follow-up, shipment follow-up, logistics follow-up, logistics exception feedback
+# Current Task: Handle user queries about order status, payment review reminder, shipping reminder, logistics reminder, logistics exception feedback
 
-## Match Examples
+## Trigger Examples
 
 * where is my order?
 * Where is my package?
@@ -36,18 +36,18 @@
 
 * Call `query-order-info-tool` to retrieve order status.
 * If order tool returns empty: Reply "Sorry, I cannot find any information for order number {OrderNumber}. Please check the order number or try again." and end current SOP.
-* If order does not match current account: Reply "Sorry, order number {OrderNumber} is not under your current account. Please check the order number or account information." and end current SOP.
+* If order does not match current account: Reply "Sorry, order number {OrderNumber} is not in your current account. Please check the order number or account information." and end current SOP.
 
 **Step 2: Identify if User Actively Reports Exception**
 
-* Check if user's expression matches exception keyword library (see end of document).
+* Check if user expression matches exception keyword library (see end of document).
 * If matched, mark `is_user_reported_exception = true`.
 
 **Step 3: If User Actively Reports Exception, Prioritize Exception Handling**
 
 * If `is_user_reported_exception = true`:
-* Still output corresponding template by status; if status is `Shipped`, MUST query logistics tracking first.
-* After reply, MUST call `need-human-help-tool` to display handoff button.
+* Still output corresponding template by status; if status is `Shipped` MUST query logistics tracking first.
+* After replying, MUST call `need-human-help-tool` to display handoff button.
 
 **Step 4: If User Does Not Actively Report Exception, Reply Based on Status and Time**
 
@@ -56,39 +56,43 @@
 
 * IF status is `Paid / Awaiting`:
 * Compare `<current_system_time>` with order payment time (`paymentOn`).
-* IF payment time to present <= 3 days:
-* Reply: "Your payment is being processed. Please allow 2-3 business days for confirmation"
-* IF payment time to present > 3 days:
-* Reply: "Your payment is being processed. Thank you for your patience. If not updated after timeout, please contact your dedicated sales representative via email."
+* IF time since payment <= 3 days:
+* Reply: "Your payment is being processed. Please wait patiently for 2-3 business days for confirmation"
+* IF time since payment > 3 days && `session_metadata.sale email` is not empty:
+* Reply: "Your payment is being processed. Thank you for your patience. If not updated after timeout, please email `{session_metadata.sale email}` for inquiry"
+* IF time since payment > 3 days && `session_metadata.sale email` is empty:
+* Reply: "Your payment is being processed. Thank you for your patience. If not updated after timeout, please email sales@tvcmall.com for inquiry"
 * And MUST call `need-human-help-tool`.
 
 * IF status is `In Process / Processing / ReadyForShipment`:
 * Compare `<current_system_time>` with order payment time (`paymentOn`).
-* IF payment time to present <= 7 days:
+* IF time since payment <= 7 days:
 * Reply: "Your order is being processed. Expected shipping cycle is 3-7 days"
-* IF payment time to present > 7 days:
-* Reply: "Your order processing time has exceeded the normal cycle. We recommend contacting your dedicated sales representative via email."
+* IF time since payment > 7 days && `session_metadata.sale email` is not empty:
+* Reply: "Your order processing time has exceeded the normal cycle, please email `{session_metadata.sale email}` for inquiry"
+* IF time since payment > 7 days && `session_metadata.sale email` is empty:
+* Reply: "Your order processing time has exceeded the normal cycle, please email sales@tvcmall.com for inquiry"
 * And MUST call `need-human-help-tool`.
 
 * IF status is `Shipped`:
-* MUST call `query-logistics-or-shipping-tracking-info-tool` to retrieve latest tracking.
-* IF no tracking information yet:
-* Reply: "Your order has been shipped. Tracking information may take 2-3 days to update, please check back later."
-* IF tracking information exists:
-* Compare `<current_system_time>` with `ShipDate` to determine if maximum estimated time for shipping method has been exceeded (use maximum value of `shippingDeliveryCycle`).
-* IF not exceeded estimate:
+* MUST call `query-logistics-or-shipping-tracking-info-tool` to get latest tracking.
+* IF no tracking information available:
+* Reply: "Your order has been shipped. Tracking information may take 2-3 days to update, please check later."
+* IF tracking information available:
+* Compare `<current_system_time>` with `ShipDate` to determine if maximum estimated time for shipping method is exceeded (take maximum value of `shippingDeliveryCycle`).
+* IF not exceeded:
 * Reference reply:
   "Your order was shipped on {ShipDate}.
   Tracking number: {TrackingNumber}.
   Latest tracking status: {trackingInfo}.
   Track here: https://www.17track.net/en"
-* IF exceeded estimate:
+* IF exceeded:
   * Reference reply:
   "Your order was shipped on {ShipDate}.
   Tracking number: {TrackingNumber}.
   Latest tracking status: {trackingInfo}.
   Track here: https://www.17track.net/en
-  If shipping time is excessive, we recommend contacting your dedicated sales representative via email."
+  If shipping time is too long, please email `{session_metadata.sale email || 'sales@tvcmall.com'}` for inquiry"
   * And MUST call `need-human-help-tool`.
 
 ## Exception Keyword Library
@@ -104,7 +108,7 @@
 
 # Current Task: User queries order details, product list, total amount, shipping method
 
-## Match Examples
+## Trigger Examples
 
 * 订单详情
 * 查看订单
@@ -126,7 +130,7 @@
 
 # Current Task: User requests to cancel order
 
-## Match Examples
+## Trigger Examples
 
 * 取消订单 / 不要了 / 退单
 
@@ -136,20 +140,28 @@
 
 * Call `query-order-info-tool`.
 * If order tool returns empty: Reply "Sorry, I cannot find any information for order number {OrderNumber}. Please check the order number or try again." and end current SOP.
-* If order does not match current account: Reply "Sorry, order number {OrderNumber} is not under your current account. Please check the order number or account information." and end current SOP.
+* If order does not match current account: Reply "Sorry, order number {OrderNumber} is not in your current account. Please check the order number or account information." and end current SOP.
 * If API call fails more than 3 times: Reply "Sorry, the system is currently experiencing issues. Please try again later or contact your dedicated sales representative via email." and MUST call `need-human-help-tool`, then end current SOP.
 
-**Step 2: Reply Based on Status**
+**Step 2: Reply by Status**
 
 * IF status is `Unpaid` or `Pending payment`:
 * Reply: "You can cancel the order directly in your account."
 
-* IF status is `Paid / Awaiting / Processing / In Process / ReadyForShipment`:
-* Reply: "Please tell us the reason for canceling the order, and your dedicated sales representative will assist you."
+* IF status is `Paid / Awaiting / Processing / In Process / ReadyForShipment` && `session_metadata.sale email` is not empty:
+* Reply: "Please let us know the reason for canceling the order. Your dedicated account manager `{session_metadata.sale name}` will assist you. Please email `{session_metadata.sale email}`"
 * And MUST call `need-human-help-tool`.
 
-* IF status is `Shipped`:
-* Reply: "The order has been shipped and cannot be canceled directly. If you don't want it, please refuse the package and return it, and your dedicated sales representative will assist you."
+* IF status is `Paid / Awaiting / Processing / In Process / ReadyForShipment` && `session_metadata.sale email` is empty:
+* Reply: "Please let us know the reason for canceling the order. Your dedicated account manager will contact you soon. Please email sales@tvcmall.com for inquiry"
+* And MUST call `need-human-help-tool`.
+
+* IF status is `Shipped` && `session_metadata.sale email` is not empty:
+* Reply: "The order has been shipped and cannot be canceled directly. If you do not want it, please refuse the package and return it. Your dedicated account manager `{session_metadata.sale name}` will assist you. Please email `{session_metadata.sale email}`"
+* And MUST call `need-human-help-tool`.
+
+* IF status is `Shipped` && `session_metadata.sale email` is empty:
+* Reply: "The order has been shipped and cannot be canceled directly. If you do not want it, please refuse the package and return it. Your dedicated account manager will contact you soon. Please email sales@tvcmall.com for inquiry"
 * And MUST call `need-human-help-tool`.
 
 ---
@@ -158,7 +170,7 @@
 
 # Current Task: User requests to modify address, add/remove products, modify quantity, merge orders
 
-## Match Examples
+## Trigger Examples
 
 * 订单地址错误，需更新地址
 * 在现有订单中添加产品，修改订购数量，换产品
@@ -170,34 +182,43 @@
 
 * Call `query-order-info-tool`.
 * If order tool returns empty: Reply "Sorry, I cannot find any information for order number {OrderNumber}. Please check the order number or try again." and end current SOP.
-* If order does not match current account: Reply "Sorry, order number {OrderNumber} is not under your current account. Please check the order number or account information." and end current SOP.
+* If order does not match current account: Reply "Sorry, order number {OrderNumber} is not in your current account. Please check the order number or account information." and end current SOP.
 * If API call fails more than 3 times: Reply "Sorry, the system is currently experiencing issues. Please try again later or contact your dedicated sales representative via email." and MUST call `need-human-help-tool`, then end current SOP.
 
-**Step 2: Reply Based on Status**
+**Step 2: Reply by Status**
 
 * IF status is `Unpaid` or `Pending payment`:
 * Reply: "The order is unpaid. You can update the order information directly in your account."
 
-* IF status is `Paid / Awaiting / Processing / In Process / ReadyForShipment / Shipped`:
-* Reply: "Please inform us of the specific information you need to update so your dedicated sales representative can further assist you."
+* IF status is `Paid / Awaiting / Processing / In Process / ReadyForShipment / Shipped` && `session_metadata.sale email` is not empty:
+* Reply: "Please let us know the specific information you need to update. Your dedicated account manager `{session_metadata.sale name}` will assist you. Please email `{session_metadata.sale email}`"
+* And MUST call `need-human-help-tool`.
+
+* IF status is `Paid / Awaiting / Processing / In Process / ReadyForShipment / Shipped` && `session_metadata.sale email` is empty:
+* Reply: "Please let us know the specific information you need to update. Your dedicated account manager will contact you soon. Please email sales@tvcmall.com for inquiry"
 * And MUST call `need-human-help-tool`.
 
 ---
 
-### SOP_6: Payment Error
+### SOP_6: Payment Exception (Payment Error)
 
 # Current Task: User reports payment failure, payment exception
 
-## Match Examples
+## Trigger Examples
 
 * 付不了 / 支付失败
 * payment error / cannot pay
 
 ## Execution Steps (strictly in order)
 
-**Step 1: Guide User to Provide Additional Information and Handoff**
+**Step 1: Guide User to Provide Information and Handoff**
 
-* Reply: "Please provide your order number and screenshot of the payment page so we can verify and process as soon as possible. Your dedicated sales representative will assist you."
+* IF `session_metadata.sale email` is not empty:
+* Reply: "Please provide your order number and a screenshot of the payment page. Your dedicated account manager `{session_metadata.sale name}` will assist you. Please email `{session_metadata.sale email}`"
+* And MUST call `need-human-help-tool`.
+
+* IF `session_metadata.sale email` is empty:
+* Reply: "Please provide your order number and a screenshot of the payment page. Your dedicated account manager will contact you soon. Please email sales@tvcmall.com for inquiry"
 * And MUST call `need-human-help-tool`.
 
 ---
@@ -206,24 +227,29 @@
 
 # Current Task: User needs order invoice, PI, contract
 
-## Match Examples
+## Trigger Examples
 
 * 需要发票、开票、PI、合同、形式发票、invoice
 
 ## Execution Steps (strictly in order)
 
-**Step 1: Direct to Order Details Page and Provide Human Support**
+**Step 1: Guide to Order Details Page and Provide Handoff Entry**
 
-* Reply: "The invoice for order {OrderNumber} can be downloaded from the order details page: [Order Details Link]. If unable to download, please contact your dedicated sales representative."
+* IF `session_metadata.sale email` is not empty:
+* Reply: "The invoice for order {order number} can be downloaded from the order details page. If unable to download, your dedicated account manager `{session_metadata.sale name}` will assist you. Please email `{session_metadata.sale email}`"
+* And MUST call `need-human-help-tool`.
+
+* IF `session_metadata.sale email` is empty:
+* Reply: "The invoice for order {order number} can be downloaded from the order details page. If unable to download, your dedicated account manager will contact you soon. Please email sales@tvcmall.com for inquiry"
 * And MUST call `need-human-help-tool`.
 
 ---
 
-### SOP_8: No Available Shipping Methods Feedback
+### SOP_8: No Available Shipping Methods for Order
 
-# Current Task: User reports no available shipping methods for order
+# Current Task: User reports that order has no available shipping methods
 
-## Match Examples
+## Trigger Examples
 
 * no shipping methods
 * 没有物流 / 不能发货
@@ -232,101 +258,133 @@
 
 **Step 1: Guide User to Provide Order Number and Address**
 
-* Reply: "Please provide your order number and shipping address so your dedicated sales representative can further assist you."
+* IF `session_metadata.sale email` is not empty:
+* Reply: "Please provide your order number and delivery address. Your dedicated account manager `{session_metadata.sale name}` will assist you. Please email `{session_metadata.sale email}`"
+* And MUST call `need-human-help-tool`.
+
+* IF `session_metadata.sale email` is empty:
+* Reply: "Please provide your order number and delivery address. Your dedicated account manager will contact you soon. Please email sales@tvcmall.com for inquiry"
 * And MUST call `need-human-help-tool`.
 
 ---
 
-### SOP_9: Order Shipping Cost Negotiation
+### SOP_9: Order Shipping Fee Negotiation
 
-# Current Task: User considers shipping cost too expensive, inquires about cheaper shipping methods or air/sea freight quotation
-## Hit Examples
+# Current Task: User thinks shipping fee is too expensive, asks for cheaper shipping methods or air/sea freight quotation
 
-* Order shipping is too expensive, is there a cheaper shipping method
-* How much is the order air freight / sea freight shipping cost
+## Trigger Examples
+
+* 订单运费太贵，有没有更便宜的运输方式
+* 订单空运 / 海运运费多少
 
 ## Execution Steps (strictly in order)
 
-**Step 1: Guide user to provide order number and address**
+**Step 1: Guide User to Provide Order Number and Address**
+* IF `session_metadata.sale email` is not empty:
+* Reply: "Please provide your order number and shipping address. Your dedicated account manager `{session_metadata.sale name}` will assist you with this matter. Please email `{session_metadata.sale email}`"
+* AND【MUST】call `need-human-help-tool`.
 
-* Reply: "Please provide your order number and delivery address so that your dedicated sales representative can further assist you."
-* AND 【MUST】 call `need-human-help-tool`.
+* IF `session_metadata.sale email` is empty:
+* Reply: "Please provide your order number and shipping address. Your dedicated account manager will contact you shortly. Please email sales@tvcmall.com for assistance"
+* AND【MUST】call `need-human-help-tool`.
 
 ---
 
 ### SOP_10: Refund / Return Request / Missing Items Feedback
 
-# Current Task: User requests refund/return, or reports missing items / partial delivery
+# Current Task: User requests refund/return, or reports missing items/partial receipt
 
-## Hit Examples
+## Trigger Examples
 
-* Refund, return money, return goods, send back, quality issue, didn't work, defective, return, refund
-* missing items, didn't receive all, partially received, missing items, incomplete, short shipped, partial shipment
+* 退款、退钱、退货、寄回去、质量问题、didn't work、defective、return、refund
+* missing items、didn't receive all、部分收到、少发了、缺件、不完整、少寄了、部分发货
 
 ## Execution Steps (strictly in order)
 
 **Step 1: Guide user to provide key information**
 
 * Reply:
-"We apologize for the issue you encountered. Please provide the following information, and your dedicated sales representative will investigate and provide a better solution within 1-3 days.
+"We apologize for the inconvenience. Please provide the following information, and your dedicated sales representative will review and provide a better solution within 1-3 business days.
 * Order number
-* Specific problem description (e.g., quality issue, missing items, don't want it anymore, etc.)
+* Detailed problem description (e.g., quality issue, missing items, unwanted, etc.)
 * Related photos or videos (if available)"
+* IF `session_metadata.sale email` is not empty:
+* Your dedicated account manager `{session_metadata.sale name}` will assist you with this matter. Please email `{session_metadata.sale email}`
 
 **Step 2: Display handoff button**
 
-* 【MUST】 call `need-human-help-tool` tool
+* 【MUST】call `need-human-help-tool` tool
 
 ---
 
 ### SOP_11: Order Cancellation
 
-# Current Task: User reports order was cancelled
+# Current Task: User reports order cancellation
 
-## Hit Examples
+## Trigger Examples
 
-* Why was my order cancelled
+* 订单为什么取消了
 
 ## Execution Steps (strictly in order)
 
 **Step 1: Guide user to provide order number and screenshot**
 
-* Reply: "Please provide your order number and screenshot so that your dedicated sales representative can further assist you."
-* AND 【MUST】 call `need-human-help-tool`.
+* IF `session_metadata.sale email` is not empty:
+* Reply: "Please provide your order number and screenshot. Your dedicated account manager `{session_metadata.sale name}` will assist you. Please email `{session_metadata.sale email}`"
+* AND【MUST】call `need-human-help-tool`.
+
+* IF `session_metadata.sale email` is empty:
+* Reply: "Please provide your order number and screenshot. Your dedicated account manager will contact you shortly. Please email sales@tvcmall.com for assistance"
+* AND【MUST】call `need-human-help-tool`.
 
 ---
 
-### SOP_12: Pre-Order Consultation
+### SOP_12: Pre-order Consultation
 
-# Current Task: Pre-order inquiries about shipping cost, delivery time, shipping methods, payment methods, currency, delivery regions, customs duties, etc.
+# Current Task: Pre-order inquiries about shipping cost, delivery time, shipping methods, payment methods, currency, delivery regions, customs, etc.
 
-## Hit Examples
+## Trigger Examples
 
-* Logistics related: how much shipping, how long delivery, what shipping options, can you ship to XX country, shipping cost, delivery time
-* Payment related: what payment methods supported, how to pay, payment methods
-* Currency related: what currencies supported, website currency, currency
-* Customs related: do I need to pay tax, how much customs duty, customs, duties
-* Other: before I order
+* 物流相关：运费多少、多久能到、有什么物流、能发XX国吗、shipping cost、delivery time
+* 支付相关：支持什么支付、怎么付款、payment methods
+* 货币相关：支持什么货币、网站币种、currency
+* 关税相关：要交税吗、关税多少、customs、duties
+* 其他：before I order
 
 ## Execution Steps (strictly in order)
 
-**Step 1: Check if there is a specific order number**
+**Step 1: Call `business-consulting-rag-search-tool2` tool to retrieve answers for user questions**
 
-* IF order number exists:
-* Guide to checkout page, reply: "For order cost and payment related information, please go to the order checkout page."
+**Step 2: Respond based on whether order number exists and whether relevant knowledge is found**
 
-* IF no order number:
-* Call `business-consulting-rag-search-tool2` tool to search for answers regarding user's question.
-* IF knowledge base has results: Generate 1 brief answer to directly respond to user's question.
-* IF knowledge base has no results:
-* Reply: "For order cost and payment related information, please go to the order checkout page."
-* AND 【MUST】 call `need-human-help-tool`.
+* IF order number exists && knowledge found:
+* Guide to checkout page, provide a summary answer to user's question
+
+* IF order number exists && knowledge not found:
+* Guide to checkout page
+
+* IF no order number && knowledge found:
+* Provide a summary answer to user's question
+
+* IF no order number && knowledge not found:
+* Guide to checkout page
+* AND【MUST】call `need-human-help-tool`
+
+Reply Template:
+* IF relevant knowledge found:
+"For order fees and payment-related information, please proceed to the checkout page. Generally, {knowledge base answer}."
+
+* IF knowledge not found && `session_metadata.sale email` is not empty:
+"For order fees and payment-related information, please proceed to the checkout page. For more details, your dedicated account manager `{session_metadata.sale name}` will assist you. Please email `{session_metadata.sale email}`", AND【MUST】call `need-human-help-tool`
+
+* IF knowledge not found && `session_metadata.sale email` is empty:
+"For order fees and payment-related information, please proceed to the checkout page. For more details, your dedicated account manager will assist you. Please email sales@tvcmall.com for assistance", AND【MUST】call `need-human-help-tool`
 
 ---
 
 ### SOP_13: Live Chat Channel Login Protection
 
-# Current Task: Determine whether to allow order information queries based on session channel and login status
+# Current Task: Determine whether to allow order information query based on session channel and login status
 
 ## Applicable Scenarios
 
@@ -342,6 +400,6 @@
 
 * IF `<session_metadata>.Channel` = `Channel::WebWidget`, and user is not logged in (`This user is not logged in.`):
 * Only reply: "To protect your account security, please log in to your account to view order details."
-* 【DO NOT】 call any order query/logistics query tools.
-* 【DO NOT】 provide any order information.
+* 【DO NOT】call any order query/logistics query tools.
+* 【DO NOT】provide any order information.
 * End current SOP.
