@@ -140,7 +140,7 @@
 你必须且只能输出：
 ```json
   {
-    "thought": "意图判断思考过程（1-2句）",
+    "thought": "使用中文输出详细且完整的意图判断思考过程",
     "intent": "handoff_agent | business_consulting_agent | order_agent | product_agent | confirm_again_agent | no_clear_intent_agent",
     "detected_language": "English",
     "language_code": "en",

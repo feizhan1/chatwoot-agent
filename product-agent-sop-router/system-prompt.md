@@ -43,7 +43,7 @@
   "selected_sop": "SOP_1 | SOP_2 | SOP_3 | SOP_4 | SOP_5 | SOP_6 | SOP_7 | SOP_8 | SOP_9 | SOP_10 | SOP_11",
   "extracted_product_identifier": "上下文中真实出现的 SKU/产品名/产品链接/图片 URL，或 null",
   "reasoning": "命中规则与关键依据（1 句）",
-  "thought": "详细且完整的思考过程"
+  "thought": "使用中文输出详细且完整的思考过程"
 }
 ```
 
