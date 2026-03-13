@@ -5,6 +5,17 @@ This tool supports the following search methods:
 - Specific SKU code (e.g., "6601167986A")
 - Specific SPU code (e.g., "661100272")
 
+query parameter extraction hard constraints (MUST comply):
+- When user input contains product detail links (such as tvcmall/sunsky details pages), prioritize extracting query from the link.
+- When link matches `sku`+code (e.g., `...-sku6601207046a.html`), query MUST only output the code itself (`6601207046a`), DO NOT output the entire sentence, full URL, or `sku` prefix.
+- When link does not match SKU, use product name or product type keywords from URL slug.
+- query only allows outputting one search clue: SKU / product name / product type keyword.
+
+Examples:
+- Input: "I'd like to learn more about this product: https://www.tvcmall.com/details/...-sku6601207046a.html"
+- query correct output: "6601207046a"
+- query incorrect output: "I'd like to learn more about this product: https://..."
+
 Usage scenarios:
 - User asks: "Show me iPhone 17 cases"
 - User asks: "Find Samsung phone chargers"
@@ -22,22 +33,22 @@ Return value (JSON object):
       "Url": "string - Product detail page URL",
       "Price": "number - Unit price",
       "PriceFormat": "string - Formatted original price",
-      "MinQuantity": "number - Minimum order quantity (MOQ), product MOQ is based on this value",
+      "MinQuantity": "number - Minimum order quantity (MOQ), product's MOQ is based on this value",
       "CatalogUrl": "string - Category URL",
       "LeadTime": "string - Lead time (e.g., '1 - 3 days')",
       "Properties": {
         "Brand": "string - Brand name",
         "Material": "string - Product material",
         "Color": "string - Product color",
-        "Gross Weight": "string - Product gross weight, three decimal places, unit kg",
-        "Length": "number - Product length, two decimal places",
-        "Width": "number - Product width, two decimal places",
-        "Height": "number - Product height, two decimal places",
-        "PackageLength": "number - Package length, two decimal places",
-        "PackageWidth": "number - Package width, two decimal places",
-        "PackageHeight": "number - Package height, two decimal places",
+        "Gross Weight": "string - Product gross weight, rounded to three decimal places, unit kg",
+        "Length": "number - Product length, rounded to two decimal places",
+        "Width": "number - Product width, rounded to two decimal places",
+        "Height": "number - Product height, rounded to two decimal places",
+        "PackageLength": "number - Package length, rounded to two decimal places",
+        "PackageWidth": "number - Package width, rounded to two decimal places",
+        "PackageHeight": "number - Package height, rounded to two decimal places",
         "PackageQuantity": "string - Quantity per package",
-        "Volume Weight": "number - Product volume weight, three decimal places",
+        "Volume Weight": "number - Product volume weight, rounded to three decimal places",
         "... more properties": "Other product specification parameters"
       },
       "PriceIntervals": [
@@ -50,7 +61,7 @@ Return value (JSON object):
       ]
     }
   ],
-  "page": "number - Current page number (starting from 0)",
+  "page": "number - Current page number (starts from 0)",
   "pageSize": "number - Number of results per page",
   "total": "number - Total number of results",
   "query": "string - Search query used",

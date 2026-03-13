@@ -6,6 +6,17 @@
 - 特定 SKU 代码（例如："6601167986A"）
 - 特定 SPU 代码（例如："661100272"）
 
+query 参数提取硬约束（必须遵守）：
+- 当用户输入包含商品详情链接（如 tvcmall/sunsky 的 details 页面）时，优先从链接提取 query。
+- 链接命中 `sku`+编号（如 `...-sku6601207046a.html`）时，query 只能输出编号本体（`6601207046a`），禁止输出整句、整条 URL 或 `sku` 前缀。
+- 链接未命中 SKU 时，才使用 URL slug 中的产品名称或产品类型关键词。
+- query 只允许输出一个检索线索：SKU / 产品名称 / 产品类型关键词。
+
+示例：
+- 输入："I'd like to learn more about this product: https://www.tvcmall.com/details/...-sku6601207046a.html"
+- query 正确输出："6601207046a"
+- query 错误输出："I'd like to learn more about this product: https://..."
+
 使用场景：
 - 用户询问："给我看看 iPhone 17 手机壳"
 - 用户询问："找三星手机充电器"
