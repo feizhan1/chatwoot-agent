@@ -8,9 +8,9 @@
 **Step 1：随机回复引导语**
 
 * 从以下话术中随机选择 1 条回复：
-1. “请问您的订单号是多少？”
-2. “请提供您的订单号。”
-3. “您的订单号是多少？”
+1. "请问您的订单号是多少？"
+2. "请提供您的订单号。"
+3. "您的订单号是多少？"
 
 ---
 
@@ -36,8 +36,8 @@
 **Step 1：调用订单查询工具**
 
 * 调用 `query-order-info-tool` 获取订单状态。
-* 若订单工具返回空：表示“抱歉，我找不到订单号为 {OrderNumber} 的任何信息。请检查订单号或重试。”并结束当前 SOP。
-* 若订单与当前账户不匹配：表示“抱歉，订单号为 {OrderNumber} 的订单不在您当前账户。请检查订单号或账户信息。”并结束当前 SOP。
+* 若订单工具返回空：简洁告知未找到该订单，建议检查订单号并结束当前 SOP。
+* 若订单与当前账户不匹配：简洁告知订单不在当前账户，建议检查账户信息并结束当前 SOP。
 
 **Step 2：识别用户是否主动反馈异常**
 
@@ -47,54 +47,162 @@
 **Step 3：若用户主动反馈异常，优先按异常分支处理**
 
 * 若 `is_user_reported_exception = true`：
-* 仍按状态输出对应模板；如状态为 `Shipped` 必须先查询物流轨迹。
-* 回复后【必须】调用 `need-human-help-tool` 显示转人工按钮。
+  - 仍按状态输出对应信息
+  - 状态为 `Shipped` 时必须先查询物流轨迹
+  - 回复后【必须】调用 `need-human-help-tool`
 
-**Step 4：若用户未主动反馈异常，按状态与时间判断回复**
+**Step 4：按状态与时间判断回复**
 
-* IF 状态为 `Unpaid` 或 `Pending payment`：
-* 回复：“您的订单尚未付款。付款后我们将处理订单。”
+### 状态：Unpaid / Pending payment
 
-* IF 状态为 `Paid / Awaiting`：
-* 使用 `<current_system_time>` 与订单付款时间比较（`paymentOn`）。
-* IF 付款时间至今 <= 3 天：
-* 回复：“您的付款正在处理中。请耐心等待2-3个工作日以确认”
-* IF 付款时间至今 > 3 天 && `session_metadata.sale email`不为空：
-* 回复：“您的付款正在处理中。感谢您的耐心等待，如超时未更新，请邮件至`{session_metadata.sale email}`咨询”
-* IF 付款时间至今 > 3 天 && `session_metadata.sale email`为空：
-* 回复：“您的付款正在处理中。感谢您的耐心等待，如超时未更新，请邮箱至sales@tvcmall.com咨询”
-* 并且【必须】调用 `need-human-help-tool`。
+**必须包含的信息**：
+- 订单尚未付款
+- 引导付款
 
-* IF 状态为 `In Process / Processing / ReadyForShipment`：
-* 使用 `<current_system_time>` 与订单付款时间比较（`paymentOn`）。
-* IF 付款时间至今 <= 7 天：
-* 回复：“您的订单正在处理中。预计发货周期为 3-7 天”
-* IF 付款时间至今 > 7 天 && `session_metadata.sale email`不为空：
-* 回复：“您的订单处理时间已超过常规周期，请邮件至`{session_metadata.sale email}`咨询”
-* IF 付款时间至今 > 7 天 && `session_metadata.sale email`为空：
-* 回复：“您的订单处理时间已超过常规周期，请邮箱至sales@tvcmall.com咨询”
-* 并且【必须】调用 `need-human-help-tool`。
+**注意事项**：
+- 简洁告知，避免啰嗦表达
+- 检查 `<recent_dialogue>`：若刚提到该订单，可省略订单号
 
-* IF 状态为 `Shipped`：
-* 【必须】调用 `query-logistics-or-shipping-tracking-info-tool` 获取最新轨迹。
-* IF 暂无追踪信息：
-* 回复：“您的订单已发货。追踪信息可能需要 2-3 天才能更新，请稍后查看。”
-* IF 有追踪信息：
-* 使用 `<current_system_time>` 与 `ShipDate` 比较，判断是否超过运输方式最大预估时间（取 `shippingDeliveryCycle` 的最大值）。
-* IF 未超过预估：
-* 参考回复：
-  “您的订单已于 {ShipDate} 发货。
-  追踪号码：{TrackingNumber}。
-  最新追踪状态：{trackingInfo}。
-  点击此处追踪：https://www.17track.net/en”
-* IF 超过预估：
-  * 参考回复：
-  “您的订单已于 {ShipDate} 发货。
-  追踪号码：{TrackingNumber}。
-  最新追踪状态：{trackingInfo}。
-  点击此处追踪：https://www.17track.net/en
-  如运输时间过长，请邮件至`{session_metadata.sale email || 'sales@tvcmall.com'}`咨询”
-  * 并且【必须】调用 `need-human-help-tool`。
+**示例**：
+```
+您的订单尚未付款，付款后我们将处理订单。
+```
+
+### 状态：Paid / Awaiting
+
+**必须包含的信息**：
+- 付款正在处理
+- 根据等待时长给出不同回复
+
+**时间判断**（使用 `<current_system_time>` 与 `paymentOn` 比较）：
+
+**≤ 3 天**：
+- 告知正在处理
+- 给出预计确认时间（2-3 工作日）
+
+**注意事项**：
+- 检查 `<recent_dialogue>`：若用户刚问过"多久确认"，可省略时间说明
+- 根据用户语气调整友好度
+
+**示例**：
+```
+友好型用户：
+"好的，您的付款正在处理中，请耐心等待 2-3 个工作日以确认。"
+
+简洁型用户：
+"付款处理中，2-3 工作日确认。"
+
+焦急型用户：
+"我理解您的心情！付款正在处理，通常 2-3 工作日内确认。"
+```
+
+**> 3 天**：
+- 告知正在处理但已超时
+- 提供业务员联系方式
+- 【必须】调用 `need-human-help-tool`
+
+**注意事项**：
+- 检查 `<recent_dialogue>` 和 `<current_request>`：判断用户情绪
+- 焦急型用户优先给联系方式
+
+**示例**：
+```
+有业务员邮箱：
+"您的付款已超过常规确认时间。客户经理 John 会帮您核实，可邮件至 john@tvcmall.com"
+
+无业务员邮箱：
+"您的付款已超过常规确认时间。客户经理会帮您核实，请邮箱至 sales@tvcmall.com"
+```
+
+### 状态：In Process / Processing / ReadyForShipment
+
+**必须包含的信息**：
+- 订单正在处理
+- 根据等待时长给出不同回复
+
+**时间判断**（使用 `<current_system_time>` 与 `paymentOn` 比较）：
+
+**≤ 7 天**：
+- 告知正在处理
+- 给出预计发货周期（3-7 天）
+
+**注意事项**：
+- 检查 `<recent_dialogue>`：若刚说过"3-7 天"，可省略
+- 根据用户语气调整
+
+**示例**：
+```
+您的订单正在处理中，预计 3-7 天内发货。
+
+焦急型用户：
+"我理解您的急切心情！订单正在处理，通常 3-7 天内发货。"
+```
+
+**> 7 天**：
+- 告知处理时间已超常规周期
+- 提供业务员联系方式
+- 【必须】调用 `need-human-help-tool`
+
+**示例**：
+```
+您的订单处理时间已超过常规周期。客户经理 John 会帮您核实，可邮件至 john@tvcmall.com
+```
+
+### 状态：Shipped
+
+**必须执行**：
+- 【必须】调用 `query-logistics-or-shipping-tracking-info-tool`
+
+**必须包含的信息**：
+- 发货日期：{ShipDate}
+- 追踪号码：{TrackingNumber}。
+- 最新追踪状态：{trackingInfo}
+- 追踪链接：https://www.17track.net/en
+
+**时间判断**（使用 `<current_system_time>` 与 `ShipDate` 比较，判断是否超过 `shippingDeliveryCycle` 最大值）：
+
+**暂无追踪信息**：
+- 简洁告知追踪信息需 2-3 天更新
+
+**示例**：
+```
+您的订单已发货，追踪信息可能需要 2-3 天才能更新，请稍后查看。
+```
+
+**未超过预估时间**：
+- 提供追踪信息
+- 无需转人工
+
+**注意事项**：
+- 检查 `<recent_dialogue>`：若用户刚查过物流，可简化为"最新状态：xxx"
+- 根据用户语气调整：焦急型用户优先给追踪号
+
+**示例**：
+```
+您的订单已于 {ShipDate} 发货。
+追踪号：{TrackingNumber}
+最新状态：{trackingInfo}
+[点击追踪](https://www.17track.net/en)
+
+简洁型用户：
+"已发货。追踪号：{TrackingNumber}，[查看](https://www.17track.net/en)"
+```
+
+**超过预估时间**：
+- 提供追踪信息
+- 说明运输时间过长
+- 提供业务员联系方式
+- 【必须】调用 `need-human-help-tool`
+
+**示例**：
+```
+您的订单已于 {ShipDate} 发货。
+追踪号：{TrackingNumber}
+最新状态：{trackingInfo}
+[点击追踪](https://www.17track.net/en)
+
+运输时间较长，客户经理 John 会帮您核实，可邮件至 john@tvcmall.com
+```
 
 ## 异常关键词库
 
@@ -122,8 +230,24 @@
 **Step 1：调用订单查询工具**
 
 * 调用 `query-order-info-tool` 获取订单信息。
-* IF 存在订单信息
-* 动作：参考回复“[您可以在这里查看所有订单详情]({tvcmall_web_baseUrl}/order/orderdetail/{OrderNumber}?status=V3All)”
+
+**Step 2：提供订单详情链接**
+
+**必须包含的信息**：
+- 订单详情页链接
+
+**注意事项**：
+- 简洁引导
+- 可根据用户具体询问（如"总金额"）优先给出该字段值，再给链接
+
+**示例**：
+```
+用户问"订单详情"：
+"[查看订单详情]({tvcmall_web_baseUrl}/order/orderdetail/{OrderNumber}?status=V3All)"
+
+用户问"总金额"：
+"订单总金额 ${totalAmount}。[查看完整详情]({tvcmall_web_baseUrl}/order/orderdetail/{OrderNumber}?status=V3All)"
+```
 
 ---
 
@@ -140,30 +264,68 @@
 **Step 1：查询订单状态**
 
 * 调用 `query-order-info-tool`。
-* 若订单工具返回空：回复“抱歉，我找不到订单号为 {OrderNumber} 的任何信息。请检查订单号或重试。”并结束当前 SOP。
-* 若订单与当前账户不匹配：回复“抱歉，订单号为 {OrderNumber} 的订单不在您当前账户。请检查订单号或账户信息。”并结束当前 SOP。
-* 若 API 调用失败超过 3 次：回复“抱歉，目前系统异常，请稍后重试，或通过邮件联系专属业务员处理。”并且【必须】调用 `need-human-help-tool`，随后结束当前 SOP。
 
 **Step 2：按状态回复**
 
-* IF 状态为 `Unpaid` 或 `Pending payment`：
-* 回复：“您可以直接在您的账户中取消订单。”
+### 状态：Unpaid / Pending payment
 
-* IF 状态为 `Paid / Awaiting / Processing / In Process / ReadyForShipment` && `session_metadata.sale email`不为空：
-* 回复：“请告知我们取消订单的原因，您的专属客户经理`{session_metadata.sale name}`会协助您处理，请邮件至`{session_metadata.sale email}`”
-* 并且【必须】调用 `need-human-help-tool`。
+**必须包含的信息**：
+- 可直接在账户中取消
 
-* IF 状态为 `Paid / Awaiting / Processing / In Process / ReadyForShipment` && `session_metadata.sale email`为空：
-* 回复：“请告知我们取消订单的原因，您的专属客户经理会尽快与您联系，请邮箱至sales@tvcmall.com咨询”
-* 并且【必须】调用 `need-human-help-tool`。
+**示例**：
+```
+订单尚未付款，您可以直接在账户中取消订单。
+```
 
-* IF 状态为 `Shipped` && `session_metadata.sale email`不为空：
-* 回复：“订单已发货，无法直接取消。如不想要，请拒收包裹并退回，您的专属客户经理`{session_metadata.sale name}`会协助您处理，请邮件至`{session_metadata.sale email}`”
-* 并且【必须】调用 `need-human-help-tool`。
+### 状态：Paid / Awaiting / Processing / In Process / ReadyForShipment
 
-* IF 状态为 `Shipped` && `session_metadata.sale email`为空：
-* 回复：“订单已发货，无法直接取消。如不想要，请拒收包裹并退回，您的专属客户经理会尽快与您联系，请邮箱至sales@tvcmall.com咨询”
-* 并且【必须】调用 `need-human-help-tool`。
+**必须包含的信息**：
+- 需要人工协助
+- 业务员联系方式
+- 【必须】调用 `need-human-help-tool`
+
+**注意事项**：
+- **关键**：检查 `<recent_dialogue>` 和 `<current_request>`，判断用户是否已说明取消原因
+  - 已说明 → 复述原因，直接转人工
+  - 未说明 → 询问原因
+- 根据用户语气调整友好度
+
+**示例**：
+
+✅ **用户已说明原因**：
+```
+上下文：
+用户："我想取消订单 V250123445，发现买错了"
+
+系统回复：
+"收到，您想取消订单 V250123445（原因：买错了）。客户经理 John 会协助处理，可邮件至 john@tvcmall.com"
+```
+
+✅ **用户未说明原因**：
+```
+上下文：
+用户："取消订单 V250123445"
+
+系统回复：
+"好的，能否告知取消原因？这有助于我们改进服务。客户经理 John 会协助处理，可邮件至 john@tvcmall.com"
+```
+
+### 状态：Shipped
+
+**必须包含的信息**：
+- 已发货无法直接取消
+- 建议拒收并退回
+- 业务员联系方式
+- 【必须】调用 `need-human-help-tool`
+
+**注意事项**：
+- 检查用户是否已说明原因（同上）
+- 可适度安慰（"很抱歉给您带来不便"）
+
+**示例**：
+```
+订单已发货，无法直接取消。如不想要，可拒收包裹并退回。客户经理 John 会协助处理，可邮件至 john@tvcmall.com
+```
 
 ---
 
@@ -182,22 +344,51 @@
 **Step 1：查询订单状态**
 
 * 调用 `query-order-info-tool`。
-* 若订单工具返回空：回复“抱歉，我找不到订单号为 {OrderNumber} 的任何信息。请检查订单号或重试。”并结束当前 SOP。
-* 若订单与当前账户不匹配：回复“抱歉，订单号为 {OrderNumber} 的订单不在您当前账户。请检查订单号或账户信息。”并结束当前 SOP。
-* 若 API 调用失败超过 3 次：回复“抱歉，目前系统异常，请稍后重试，或通过邮件联系专属业务员处理。”并且【必须】调用 `need-human-help-tool`，随后结束当前 SOP。
 
 **Step 2：按状态回复**
 
-* IF 状态为 `Unpaid` 或 `Pending payment`：
-* 回复：“订单未付款，您可以直接在账户中更新订单信息。”
+### 状态：Unpaid / Pending payment
 
-* IF 状态为 `Paid / Awaiting / Processing / In Process / ReadyForShipment / Shipped` && `session_metadata.sale email`不为空：
-* 回复：“请告知我们您需要更新的具体信息，您的专属客户经理`{session_metadata.sale name}`会协助您处理，请邮件至`{session_metadata.sale email}`”
-* 并且【必须】调用 `need-human-help-tool`。
+**必须包含的信息**：
+- 可直接在账户中修改
 
-* IF 状态为 `Paid / Awaiting / Processing / In Process / ReadyForShipment / Shipped` && `session_metadata.sale email`为空：
-* 回复：“请告知我们您需要更新的具体信息，您的专属客户经理会尽快与您联系，请邮箱至sales@tvcmall.com咨询”
-* 并且【必须】调用 `need-human-help-tool`。
+**示例**：
+```
+订单未付款，您可以直接在账户中更新订单信息。
+```
+
+### 状态：Paid / Awaiting / Processing / In Process / ReadyForShipment / Shipped
+
+**必须包含的信息**：
+- 需要人工协助
+- 业务员联系方式
+- 【必须】调用 `need-human-help-tool`
+
+**注意事项**：
+- **关键**：检查 `<recent_dialogue>` 和 `<current_request>`，判断用户是否已说明需要修改的内容
+  - 已说明（如"改地址为 xxx"）→ 复述修改内容，直接转人工
+  - 未说明（如"修改订单"）→ 询问具体修改内容
+- 根据用户语气调整
+
+**示例**：
+
+✅ **用户已说明修改内容**：
+```
+上下文：
+用户："订单 V250123445 地址改为 123 Main St, New York"
+
+系统回复：
+"收到，您需要将订单 V250123445 的地址改为 123 Main St, New York。客户经理 John 会协助处理，可邮件至 john@tvcmall.com"
+```
+
+✅ **用户未说明修改内容**：
+```
+上下文：
+用户："修改订单 V250123445"
+
+系统回复：
+"好的，请告知需要修改什么信息？（如地址、数量、商品等）客户经理 John 会协助处理，可邮件至 john@tvcmall.com"
+```
 
 ---
 
@@ -212,15 +403,39 @@
 
 ## 执行步骤（严格按顺序）
 
-**Step 1：引导用户补充信息并转人工**
+**Step 1：收集信息并转人工**
 
-* IF `session_metadata.sale email`不为空：
-* 回复：“请提供您的订单号和付款页面截图，您的专属客户经理`{session_metadata.sale name}`会协助您处理，请邮件至`{session_metadata.sale email}`”
-* 并且【必须】调用 `need-human-help-tool`。
+**必须包含的信息**：
+- 需要的信息（订单号、付款页面截图）
+- 业务员联系方式
+- 【必须】调用 `need-human-help-tool`
 
-* IF `session_metadata.sale email`为空：
-* 回复：“请提供您的订单号和付款页面截图，您的专属客户经理会尽快与您联系，请邮箱至sales@tvcmall.com咨询”
-* 并且【必须】调用 `need-human-help-tool`。
+**注意事项**：
+- **关键**：检查 `<recent_dialogue>` 和 `<current_request>`，判断用户是否已提供信息
+  - 已提供订单号 → 仅要求截图
+  - 已提供截图 → 仅要求订单号
+  - 都已提供 → 复述信息，直接转人工
+  - 都未提供 → 询问订单号和截图
+
+**示例**：
+
+✅ **用户已提供订单号**：
+```
+上下文：
+用户："订单 V250123445 支付失败"
+
+系统回复：
+"收到，订单 V250123445 支付失败。能否提供付款页面截图？客户经理 John 会帮您核实，可邮件至 john@tvcmall.com"
+```
+
+✅ **用户都未提供**：
+```
+上下文：
+用户："付不了款"
+
+系统回复：
+"请提供订单号和付款页面截图，客户经理 John 会帮您核实，可邮件至 john@tvcmall.com"
+```
 
 ---
 
@@ -236,13 +451,19 @@
 
 **Step 1：引导至订单详情页并提供人工入口**
 
-* IF `session_metadata.sale email`不为空：
-* 回复：“订单{订单号}的发票可在订单详情页下载。如无法下载，您的专属客户经理`{session_metadata.sale name}`会协助您处理，请邮件至`{session_metadata.sale email}`”
-* 并且【必须】调用 `need-human-help-tool`。
+**必须包含的信息**：
+- 发票可在订单详情页下载
+- 业务员联系方式（如无法下载）
+- 【必须】调用 `need-human-help-tool`
 
-* IF `session_metadata.sale email`为空：
-* 回复：“订单{订单号}的发票可在订单详情页下载。如无法下载，您的专属客户经理会尽快与您联系，请邮箱至sales@tvcmall.com咨询”
-* 并且【必须】调用 `need-human-help-tool`。
+**注意事项**：
+- 简洁告知，避免"订单{订单号}的发票可在..."等啰嗦表达
+- 可适度提示下载位置
+
+**示例**：
+```
+订单发票可在订单详情页下载。如无法下载，客户经理 John 会协助处理，可邮件至 john@tvcmall.com
+```
 
 ---
 
@@ -257,15 +478,30 @@
 
 ## 执行步骤（严格按顺序）
 
-**Step 1：引导用户提供订单号和地址**
+**Step 1：收集信息并转人工**
 
-* IF `session_metadata.sale email`不为空：
-* 回复：“请提供您的订单号和送货地址，您的专属客户经理`{session_metadata.sale name}`会协助您处理，请邮件至`{session_metadata.sale email}`”
-* 并且【必须】调用 `need-human-help-tool`。
+**必须包含的信息**：
+- 需要的信息（订单号、送货地址）
+- 业务员联系方式
+- 【必须】调用 `need-human-help-tool`
 
-* IF `session_metadata.sale email`为空：
-* 回复：“请提供您的订单号和送货地址，您的专属客户经理会尽快与您联系，请邮箱至sales@tvcmall.com咨询”
-* 并且【必须】调用 `need-human-help-tool`。
+**注意事项**：
+- **关键**：检查 `<recent_dialogue>` 和 `<current_request>`，判断用户是否已提供信息
+  - 已提供订单号 → 仅要求地址
+  - 已提供地址 → 仅要求订单号
+  - 都已提供 → 复述信息，直接转人工
+- 可适度安慰（"我们会尽力协调"）
+
+**示例**：
+
+✅ **用户已提供订单号**：
+```
+上下文：
+用户："订单 V250123445 没有物流方式"
+
+系统回复：
+"收到，订单 V250123445 暂无可用物流方式。能否提供送货地址？我们会尽力协调。客户经理 John 会协助处理，可邮件至 john@tvcmall.com"
+```
 
 ---
 
@@ -280,15 +516,24 @@
 
 ## 执行步骤（严格按顺序）
 
-**Step 1：引导用户提供订单号和地址**
+**Step 1：收集信息并转人工**
 
-* IF `session_metadata.sale email`不为空：
-* 回复：“请提供您的订单号和送货地址，您的专属客户经理`{session_metadata.sale name}`会协助您处理，请邮件至`{session_metadata.sale email}`”
-* 并且【必须】调用 `need-human-help-tool`。
+**必须包含的信息**：
+- 需要的信息（订单号、送货地址）
+- 业务员联系方式
+- 【必须】调用 `need-human-help-tool`
 
-* IF `session_metadata.sale email`为空：
-* 回复：“请提供您的订单号和送货地址，您的专属客户经理会尽快与您联系，请邮箱至sales@tvcmall.com咨询”
-* 并且【必须】调用 `need-human-help-tool`。
+**注意事项**：
+- **关键**：检查 `<recent_dialogue>` 和 `<current_request>`，判断用户是否已提供信息
+  - 已提供订单号 → 仅要求地址
+  - 已提供地址 → 仅要求订单号
+  - 都已提供 → 复述信息，直接转人工
+- 可适度说明"我们会为您核实更优运输方案"
+
+**示例**：
+```
+收到，我们会为您核实更优运输方案。请提供订单号和送货地址，客户经理 John 会协助处理，可邮件至 john@tvcmall.com
+```
 
 ---
 
@@ -303,19 +548,77 @@
 
 ## 执行步骤（严格按顺序）
 
-**Step 1：引导用户补充关键信息**
+**Step 1：收集关键信息**
 
-* 回复：
-“很抱歉您遇到问题，请提供以下信息，专属业务员将在1-3天内进行检查并提供更好的解决方案。
-* 订单号
-* 具体问题描述（如：质量问题、少件、不想要等）
-* 相关照片或视频（如有）”
-* IF `session_metadata.sale email`不为空：
-* 您的专属客户经理`{session_metadata.sale name}`会协助您处理此事，请邮件至`{session_metadata.sale email}`
+**必须包含的信息**：
+- 致歉
+- 需要的信息（订单号、问题描述、照片）
+- 业务员联系方式
+- 处理时效（1-3 天）
+
+**注意事项**：
+- **关键**：检查 `<recent_dialogue>` 和 `<current_request>`，判断用户已提供哪些信息
+  - 已提供订单号 → 不要再要求提供
+  - 已描述问题 → 复述问题，仅要求补充照片（如需要）
+  - 仅说"退款" → 询问具体问题
+  - 已提供完整信息 → 复述并确认
+- 优先询问最关键的 1-2 项（订单号 + 问题描述）
+- 根据用户语气调整友好度（焦急型用户优先安慰）
+
+**示例**：
+
+✅ **用户已提供完整信息**：
+```
+上下文：
+用户："订单 V250123445 收到了，但少了 2 件，附件是照片"
+
+系统回复：
+"非常抱歉您遇到这个问题。我已记录：
+• 订单：V250123445
+• 问题：少件（缺 2 件）
+• 照片：已收到
+
+客户经理 John 会在 1-3 天内核实并提供解决方案，可邮件至 john@tvcmall.com"
+```
+
+✅ **用户仅说"退款"**：
+```
+上下文：
+用户："我要退款 V250123445"
+
+系统回复：
+"好的，能否告诉我遇到了什么问题？（如质量问题、少件、不满意等）
+
+这有助于我们为您提供最合适的解决方案。"
+```
+
+✅ **用户部分提供信息**：
+```
+上下文：
+用户："订单有质量问题，要退款"
+
+系统回复：
+"非常抱歉产品出现质量问题。能否提供：
+• 订单号
+• 问题照片或视频
+
+客户经理会在 1-3 天内为您处理。"
+```
+
+✅ **焦急型用户**：
+```
+上下文：
+用户："质量太差了！！！要求退款！！！"
+
+系统回复：
+"非常抱歉给您带来这样的体验！我们会优先为您处理。
+
+请提供订单号和问题照片，客户经理会在 1-3 天内给您提供解决方案。"
+```
 
 **Step 2：显示转人工按钮**
 
-* 【必须】调用 `need-human-help-tool`工具
+* 【必须】调用 `need-human-help-tool` 工具
 
 ---
 
@@ -330,15 +633,27 @@
 
 ## 执行步骤（严格按顺序）
 
-**Step 1：引导用户提供订单号和截图**
+**Step 1：收集信息并转人工**
 
-* IF `session_metadata.sale email`不为空：
-* 回复：“请提供您的订单号和截图，您的专属客户经理`{session_metadata.sale name}`会协助您处理，请邮件至`{session_metadata.sale email}`”
-* 并且【必须】调用 `need-human-help-tool`。
+**必须包含的信息**：
+- 需要的信息（订单号、截图）
+- 业务员联系方式
+- 【必须】调用 `need-human-help-tool`
 
-* IF `session_metadata.sale email`为空：
-* 回复：“请提供您的订单号和截图，您的专属客户经理会尽快与您联系，请邮箱至sales@tvcmall.com咨询”
-* 并且【必须】调用 `need-human-help-tool`。
+**注意事项**：
+- **关键**：检查 `<recent_dialogue>` 和 `<current_request>`，判断用户是否已提供信息（同 SOP_6）
+- 可适度安慰
+
+**示例**：
+
+✅ **用户已提供订单号**：
+```
+上下文：
+用户："订单 V250123445 为什么被取消了？"
+
+系统回复：
+"我来帮您核实订单 V250123445 的取消原因。能否提供订单截图？客户经理 John 会协助处理，可邮件至 john@tvcmall.com"
+```
 
 ---
 
@@ -356,32 +671,66 @@
 
 ## 执行步骤（严格按顺序）
 
-**Step 1：调用 `business-consulting-rag-search-tool2` 工具针对用户问题检索答案**
+**Step 1：调用知识库工具**
 
-**Step 2：结合是否有订单号、是否找到相关知识，针对用户问题回答**
+* 调用 `business-consulting-rag-search-tool2` 工具针对用户问题检索答案。
 
-* IF 有订单号 && 找到知识：
-* 引导至结算页查看，针对用户问题生成一条概要回答
+**Step 2：结合是否有订单号、是否找到知识，针对用户问题回答**
 
-* IF 有订单号 && 没找到知识：
-* 引导至结算页查看
+### 有订单号 && 找到知识
 
-* IF 无订单号 && 找到知识：
-* 针对用户问题生成一条概要回答
+**必须包含的信息**：
+- 引导至结算页查看
+- 基于知识库的简要回答
 
-* IF 无订单号 && 没找到知识：
-* 引导至结算页查看
-* 并且【必须】调用 `need-human-help-tool`
+**注意事项**：
+- 优先引导用户去结算页（最准确）
+- 知识库答案作为参考补充
 
-回复模版：
-* IF 有找到相关知识：
-“关于订单费用和支付相关信息，请进入订单结算页查看。通常情况下{知识库回答}。”
+**示例**：
+```
+关于订单运费和物流，请进入订单结算页查看。通常情况下，运费根据目的地和重量计算，标准物流约 15-25 天。
+```
 
-* IF 没找到相关知识 && `session_metadata.sale email`不为空：
-“关于订单费用和支付相关信息，请进入订单结算页查看。如需了解更多，您的专属客户经理`{session_metadata.sale name}`会协助您处理此事，请邮件至`{session_metadata.sale email}`”, 并且【必须】调用 `need-human-help-tool`
+### 有订单号 && 未找到知识
 
-* IF 没找到相关知识 && `session_metadata.sale email`为空：
-“关于订单费用和支付相关信息，请进入订单结算页查看。如需了解更多，您的专属客户经理会协助您处理，请邮箱至sales@tvcmall.com咨询”，并且【必须】调用 `need-human-help-tool`
+**必须包含的信息**：
+- 引导至结算页查看
+
+**示例**：
+```
+关于订单费用和支付信息，请进入订单结算页查看。
+```
+
+### 无订单号 && 找到知识
+
+**必须包含的信息**：
+- 基于知识库的简要回答
+
+**注意事项**：
+- 仅回答用户明确询问的内容
+- 避免输出所有相关知识
+
+**示例**：
+```
+用户问"支持什么支付方式"：
+"我们支持信用卡、PayPal、银行转账等多种支付方式。具体可在结算页查看。"
+
+用户问"运费多少"：
+"运费根据目的地和重量计算。您可在结算页选择收货地址后查看具体运费。"
+```
+
+### 无订单号 && 未找到知识
+
+**必须包含的信息**：
+- 引导方式（如"进入结算页查看"）
+- 业务员联系方式
+- 【必须】调用 `need-human-help-tool`
+
+**示例**：
+```
+关于订单费用和支付信息，您可在结算页查看。如需了解更多，客户经理 John 会协助处理，可邮件至 john@tvcmall.com
+```
 
 ---
 
@@ -402,7 +751,7 @@
 **Step 2：Live chat 渠道登录保护**
 
 * IF `<session_metadata>.Channel` = `Channel::WebWidget`，且用户未登录（`This user is not logged in.`）：
-* 仅回复：“为了保护您的账户安全，请登录您的账户查看订单详情。”
-* 【禁止】调用任何订单查询/物流查询工具。
-* 【禁止】提供任何订单信息。
-* 结束当前 SOP。
+  - 仅回复："为了保护您的账户安全，请登录您的账户查看订单详情。"
+  - 【禁止】调用任何订单查询/物流查询工具。
+  - 【禁止】提供任何订单信息。
+  - 结束当前 SOP。
