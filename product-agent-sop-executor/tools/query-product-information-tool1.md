@@ -1,5 +1,5 @@
 ```
-基于客户的自然语言查询、SKU 代码或 SPU 代码从 TVCMall 搜索产品。
+基于客户的自然语言关键词（产品名称、类别、品牌、描述）、SKU 代码或 SPU 代码从 TVCMall 搜索产品。
 
 此工具支持以下搜索方式：
 - 自然语言关键词（产品名称、类别、品牌、描述）
@@ -7,9 +7,10 @@
 - 特定 SPU 代码（例如："661100272"）
 
 query 参数提取硬约束（必须遵守）：
-- 当用户输入包含商品详情链接（如 https://www.tvcmall.com/details/bulk-purchasing-for-oppo-reno15-pro-max-5g-global-reno15-pro-5g-china-magnetic-case-soft-tpu-phone-back-cover-blue-sku6601207046a.html）时，优先从链接提取 query。
+- 当用户输入包含tvcmall商品详情链接（如 https://www.tvcmall.com/details/bulk-purchasing-for-oppo-reno15-pro-max-5g-global-reno15-pro-5g-china-magnetic-case-soft-tpu-phone-back-cover-blue-sku6601207046a.html）时，优先从链接提取 query。
 - 链接命中 `sku`+编号（如 `...-sku6601207046a.html`）时，query 只能输出编号本体（`6601207046a`），禁止输出整句、整条 URL 或 `sku` 前缀。
-- 链接未命中 SKU 时，才使用 URL slug 中的产品名称或产品类型关键词。如当用户输入包含商品详情链接（https://www.sunsky-online.com/p/EDA003918912A/For-Google-Pixel-10-MagSafe-Magnetic-Frosted-Metal-Phone-Case-Black-.html）时，从链接提取商品名称(Google-Pixel-10-MagSafe-Magnetic-Frosted-Metal-Phone-Case-Black)作为query。
+- 链接未命中 SKU 时，才使用 URL slug 中的产品名称或产品类型关键词。
+如当用户输入包含其他商家商品详情链接（https://www.sunsky-online.com/p/EDA003918912A/For-Google-Pixel-10-MagSafe-Magnetic-Frosted-Metal-Phone-Case-Black-.html）时，从链接提取商品名称(Google-Pixel-10-MagSafe-Magnetic-Frosted-Metal-Phone-Case-Black)作为query。
 - query 只允许输出一个检索线索：SKU / 产品名称 / 产品类型关键词。
 
 示例：
