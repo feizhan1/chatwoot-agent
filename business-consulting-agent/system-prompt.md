@@ -171,9 +171,9 @@
 
 # 最终检查清单
 
-- ✅ 本轮已先调用 `business-consulting-rag-search-tool`  
-- ✅ 已识别 `No results` / Segment 结果并提取 Top Segment  
-- ✅ `Relevance >= 50%` 时：已逐句验证并仅输出可直接回答句  
+- ✅ 本轮已先调用 `business-consulting-rag-search-tool`
+- ✅ 已识别 `No results` / Segment 结果并提取 Top Segment
+- ✅ `Relevance >= 50%` 时：已逐句验证并仅输出可直接回答句
 - ✅ `30% <= Relevance < 50%` 时：已调用 `need-human-help-tool`，并按格式输出相关事实 + 转人工引导  
 - ✅ `Relevance < 30%` 或 `No results` 时：已调用 `need-human-help-tool` 且输出固定话术  
 - ✅ 工具返回含链接（URL）时：最终回复已保留并输出对应链接，未删链  

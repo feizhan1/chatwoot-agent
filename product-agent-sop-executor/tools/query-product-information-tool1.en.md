@@ -5,23 +5,27 @@ This tool supports the following search methods:
 - Specific SKU code (e.g., "6601167986A")
 - Specific SPU code (e.g., "661100272")
 
-query parameter extraction hard constraints (MUST comply):
-- When user input contains product detail links (such as tvcmall/sunsky details pages), prioritize extracting query from the link.
-- When link matches `sku`+code (e.g., `...-sku6601207046a.html`), query MUST only output the code itself (`6601207046a`), DO NOT output the entire sentence, full URL, or `sku` prefix.
-- When link does not match SKU, use product name or product type keywords from URL slug.
-- query only allows outputting one search clue: SKU / product name / product type keyword.
+query parameter extraction hard constraints (MUST follow):
+- When user input contains a product detail link (e.g., https://www.tvcmall.com/details/bulk-purchasing-for-oppo-reno15-pro-max-5g-global-reno15-pro-5g-china-magnetic-case-soft-tpu-phone-back-cover-blue-sku6601207046a.html), prioritize extracting query from the link.
+- When link matches `sku`+code (e.g., `...-sku6601207046a.html`), query can only output the code itself (`6601207046a`), DO NOT output full sentence, entire URL, or `sku` prefix.
+- When link does not match SKU, only then use product name or product type keywords from URL slug. For example, when user input contains a product detail link (https://www.sunsky-online.com/p/EDA003918912A/For-Google-Pixel-10-MagSafe-Magnetic-Frosted-Metal-Phone-Case-Black-.html), extract product name (Google-Pixel-10-MagSafe-Magnetic-Frosted-Metal-Phone-Case-Black) from link as query.
+- query can only output one search clue: SKU / product name / product type keyword.
 
 Examples:
 - Input: "I'd like to learn more about this product: https://www.tvcmall.com/details/...-sku6601207046a.html"
 - query correct output: "6601207046a"
 - query incorrect output: "I'd like to learn more about this product: https://..."
 
-Usage scenarios:
-- User asks: "Show me iPhone 17 cases"
+- Input: "I saw this product on Google. Do you have the same product? The product is https://www.sunsky-online.com/p/EDA003918912A/For-Google-Pixel-10-MagSafe-Magnetic-Frosted-Metal-Phone-Case-Black-.html"
+- query correct output: "Google-Pixel-10-MagSafe-Magnetic-Frosted-Metal-Phone-Case-Black"
+- query incorrect output: "https://www.sunsky-online.com/p/EDA003918912A/For-Google-Pixel-10-MagSafe-Magnetic-Frosted-Metal-Phone-Case-Black-.html"
+
+Use cases:
+- User asks: "Show me iPhone 17 phone cases"
 - User asks: "Find Samsung phone chargers"
 - User asks: "Do you have laptop screen protectors?"
 - User provides SKU: "Query SKU 6601167986A"
-- User provides SPU: "Show all products for SPU 661100272"
+- User provides SPU: "Display all products for SPU 661100272"
 
 Return value (JSON object):
 {
@@ -40,15 +44,15 @@ Return value (JSON object):
         "Brand": "string - Brand name",
         "Material": "string - Product material",
         "Color": "string - Product color",
-        "Gross Weight": "string - Product gross weight, rounded to three decimal places, unit kg",
-        "Length": "number - Product length, rounded to two decimal places",
-        "Width": "number - Product width, rounded to two decimal places",
-        "Height": "number - Product height, rounded to two decimal places",
-        "PackageLength": "number - Package length, rounded to two decimal places",
-        "PackageWidth": "number - Package width, rounded to two decimal places",
-        "PackageHeight": "number - Package height, rounded to two decimal places",
-        "PackageQuantity": "string - Quantity per package",
-        "Volume Weight": "number - Product volume weight, rounded to three decimal places",
+        "Gross Weight": "string - Product gross weight, keep three decimal places, unit kg",
+        "Length": "number - Product length, keep two decimal places",
+        "Width": "number - Product width, keep two decimal places",
+        "Height": "number - Product height, keep two decimal places",
+        "PackageLength": "number - Carton length, keep two decimal places",
+        "PackageWidth": "number - Carton width, keep two decimal places",
+        "PackageHeight": "number - Carton height, keep two decimal places",
+        "PackageQuantity": "string - Quantity per carton",
+        "Volume Weight": "number - Product volume weight, keep three decimal places",
         "... more properties": "Other product specification parameters"
       },
       "PriceIntervals": [
@@ -61,7 +65,7 @@ Return value (JSON object):
       ]
     }
   ],
-  "page": "number - Current page number (starts from 0)",
+  "page": "number - Current page number (starting from 0)",
   "pageSize": "number - Number of results per page",
   "total": "number - Total number of results",
   "query": "string - Search query used",
