@@ -139,21 +139,45 @@
 
 若与业务相关，但缺关键参数且无法通过上下文补全，判定：`confirm_again_agent`。
 
-典型示例：
+### 场景 1：有指代词但无明确标识
 
-- `about my order`
-- `my order has a problem`
-- `my order payment failed`
-- `how much is it`
-- `I have a problem`
-- `I need this product`
-- `I need this phone case`
+若 `working_query` 包含指代词（`this`、`that`、`这个`、`那个`、`它`、`questo`、`quello` 等）：
 
-**关键判断**：
+**尝试指代消解**：
+- **订单指代**（my order、这个订单）→ 从 `<recent_dialogue>` 查找最近的订单号
+- **商品指代**（this product、这个充电器）→ 从 `<recent_dialogue>` 查找最近的 SKU/产品链接/完整产品名称
 
-- 用户明确指向具体订单/产品（`my order`、`this product`）
-- 但缺少订单号/SKU 等关键标识
-- 无法从上下文补全
+**结果**：
+- ✅ 找到 → 继续步骤 4
+- ❌ 未找到 → `confirm_again_agent`
+
+**示例**：
+上下文：无商品标识
+当前："这个充电器支持快充吗？"
+→ confirm_again_agent
+
+### 场景 2：明确业务意图但缺关键参数
+
+虽然没有指代词，但用户明确表达了业务诉求，却缺少必要信息：
+
+**订单相关**：
+- `"我想了解我的订单"`（缺订单号）→ `confirm_again_agent`
+
+**商品相关**：
+- `"how much is it"`（缺商品标识）→ `confirm_again_agent`
+
+**问题类型不明**：
+- `"I have a problem"`（不知道订单问题还是产品问题）→ `confirm_again_agent`
+
+### 场景 3：仅有标识符但无明确意图
+
+若用户仅发送了订单号/SKU/产品链接，但**未表达任何业务诉求**（无动词、无疑问词、无业务关键词）:
+
+**路由决策**：
+- 纯订单号（`V250123445`、`订单 M25121600007`）→ `confirm_again_agent`
+- 纯商品标识（`6601162439A`、`https://www.tvcmall.com/details/xxx`）→ `confirm_again_agent`
+
+**注意**：若 `<recent_dialogue>`中有明确意图可复用（如上一轮是"请提供订单号"），则可直接路由到对应 agent。
 
 ## 步骤 4：订单/商品强信号分流
 
@@ -229,8 +253,8 @@
   - 使用 ISO 639-1 小写代码（如 `en`、`zh`、`es`）。
 - `missing_info`：
   - 仅当 `intent=confirm_again_agent` 时可非空。
-  - 使用固定枚举键，多个值用英文逗号连接且不加空格。
-  - 可选键：`order_number`、`tracking_number`、`sku_or_keyword`、`product_goal`、`destination_country`、`business_topic`。
+  - 使用简短的中文描述缺失的关键信息（5-15字）。
+  - 示例：`"缺少订单号"`、`"缺少SKU或商品关键词"`、`"缺少目的地国家"`、`"用户未明确具体问题"`。
   - 非 `confirm_again_agent` 必须是 `""`。
 - `reason`：必须明确写出命中“步骤X + 触发规则”。
 
