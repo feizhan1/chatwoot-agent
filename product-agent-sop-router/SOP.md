@@ -215,11 +215,12 @@
 **必须包含的信息**：
 
 * SKU、MOQ、价格区间
+* 价格表达规则：当 `PriceIntervals` 存在时，仅使用区间价（优先 `CurrentInterval=true` 的 `UnitPriceFormat`，否则取首个有效阶梯）；不要额外输出 `PriceFormat` 的单件价描述（如 `for 1 unit`）
 * 说明低于起订量可申请样品
 * 业务员联系方式（`session_metadata.sale email` 或 <sales@tvcmall.com>）
 
 **示例**：
-6601162439A 起订量为 100 件，价格 $10.50-$12.50。
+6601207108A 起订量为 20 件，区间价从 $2.70/pc 起。
 
 您需要的数量少于起订量，可提交样品申请。客户经理会协助处理，请邮件至 <john@tvcmall.com>
 
