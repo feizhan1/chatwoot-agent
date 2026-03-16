@@ -17,6 +17,10 @@
     {recent_dialogue}
 </recent_dialogue>
 
+<draft_message>
+    {draft_message}
+</draft_message>
+
 <event_type>
     {event_type}
 </event_type>
