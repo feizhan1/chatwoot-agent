@@ -1,1 +1,1 @@
-Unable to process at this time.
+Sorry, this query is not currently supported and requires manual assistance.
