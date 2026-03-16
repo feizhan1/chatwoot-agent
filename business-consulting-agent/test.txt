@@ -1,5 +1,0 @@
-我期望AI根据知识库工具返回结果做对应回复：
-1.当返回"No results"时，回复“对于这种情况，我们的客服团队将能够更准确地为您提供帮助。业务经理上班后会尽快联系您。”。并且同时调用need-human-help-tool工具
-2.当有结果时，如："---Segment (Relevance: 96%)---\nQuestion: Can I put my custom label/logo on each product?\nAnswer: Yes, we can! We offer custom label/logo services to personalize each product with your brand.\r\nTo get started, simply click here （https://www.tvcmall.com/oem-odm-custom-products）to learn more about our customization options. Our team will guide you through the process to ensure your logo or label is applied exactly as you want it.\n:\n------"。
-当Segment中Relevance的超过10%, 直接使用Segment中的Answer内容作为参考源，只回答用户的直接问题，不扩展非必要信息。
-当Segment中Relevance的不超过10%, 仅使用Segment中的Answer内容相关部分作为支持信息，不强行使用无关的内容。

@@ -1,11 +1,8 @@
 {{ 
   (() => {
-    let template = $('env').first().json.prompt['product-agent-sop-executor']['system-prompt'];
+    let template = $('env').first().json.prompt['business-consulting-agent']['system-prompt'];
     const { is_ai_suggest, out_template } = $('Code in JavaScript13').first().json || {};
-    const dataMap = {
-      '{SOP}': $json.executor_system_prompt,
-      '{target_language}': $('Code in JavaScript13').first().json.target_language
-    };
+    const dataMap = {};
     if (!is_ai_suggest) {
       dataMap['{out_template}'] = out_template;
     };

@@ -34,15 +34,18 @@ parse_env_to_json() {
 # ============================================
 read_prompt_file_en() {
     local agent_dir="$1"
-    local prompt_type="$2"  # "user-prompt" or "system-prompt"
+    local prompt_type="$2"  # "user-prompt" / "system-prompt" / "struct-output"
 
     local en_file="${agent_dir}${prompt_type}.en.md"
     local zh_file="${agent_dir}${prompt_type}.md"
 
-    if [ -f "$en_file" ]; then
+    if [ -s "$en_file" ]; then
         cat "$en_file"
     elif [ -f "$zh_file" ]; then
         cat "$zh_file"
+    elif [ -f "$en_file" ]; then
+        # 英文文件存在但为空且无中文回退时，保留其原样内容
+        cat "$en_file"
     else
         echo ""
     fi
@@ -53,7 +56,7 @@ read_prompt_file_en() {
 # ============================================
 read_prompt_file_zh() {
     local agent_dir="$1"
-    local prompt_type="$2"  # "user-prompt" or "system-prompt"
+    local prompt_type="$2"  # "user-prompt" / "system-prompt" / "struct-output"
 
     local zh_file="${agent_dir}${prompt_type}.md"
 
@@ -77,7 +80,8 @@ build_prompt_section_en() {
 
         # 检查是否包含prompt文件（至少有一个.md或.en.md文件）
         if [ ! -f "${agent_dir}user-prompt.md" ] && [ ! -f "${agent_dir}user-prompt.en.md" ] && \
-           [ ! -f "${agent_dir}system-prompt.md" ] && [ ! -f "${agent_dir}system-prompt.en.md" ]; then
+           [ ! -f "${agent_dir}system-prompt.md" ] && [ ! -f "${agent_dir}system-prompt.en.md" ] && \
+           [ ! -f "${agent_dir}struct-output.md" ] && [ ! -f "${agent_dir}struct-output.en.md" ]; then
             continue
         fi
 
@@ -88,6 +92,7 @@ build_prompt_section_en() {
         # 读取英文版本
         local user_prompt_en=$(read_prompt_file_en "$agent_dir" "user-prompt")
         local system_prompt_en=$(read_prompt_file_en "$agent_dir" "system-prompt")
+        local struct_output_en=$(read_prompt_file_en "$agent_dir" "struct-output")
 
         # 构建基础 agent 对象
         local agent_obj
@@ -95,6 +100,12 @@ build_prompt_section_en() {
             --arg up "$user_prompt_en" \
             --arg sp "$system_prompt_en" \
             '{"user-prompt": $up, "system-prompt": $sp}')
+
+        if [ -n "$struct_output_en" ]; then
+            agent_obj=$(echo "$agent_obj" | jq \
+                --arg so "$struct_output_en" \
+                '. + {"struct-output": $so}')
+        fi
 
         # 读取该agent的tools（如果有）
         if [ -d "${agent_dir}tools" ]; then
@@ -166,7 +177,8 @@ build_prompt_section_zh() {
 
         # 检查是否包含prompt文件（至少有一个.md或.en.md文件）
         if [ ! -f "${agent_dir}user-prompt.md" ] && [ ! -f "${agent_dir}user-prompt.en.md" ] && \
-           [ ! -f "${agent_dir}system-prompt.md" ] && [ ! -f "${agent_dir}system-prompt.en.md" ]; then
+           [ ! -f "${agent_dir}system-prompt.md" ] && [ ! -f "${agent_dir}system-prompt.en.md" ] && \
+           [ ! -f "${agent_dir}struct-output.md" ] && [ ! -f "${agent_dir}struct-output.en.md" ]; then
             continue
         fi
 
@@ -177,6 +189,7 @@ build_prompt_section_zh() {
         # 读取中文版本
         local user_prompt_zh=$(read_prompt_file_zh "$agent_dir" "user-prompt")
         local system_prompt_zh=$(read_prompt_file_zh "$agent_dir" "system-prompt")
+        local struct_output_zh=$(read_prompt_file_zh "$agent_dir" "struct-output")
 
         # 构建基础 agent 对象
         local agent_obj
@@ -184,6 +197,12 @@ build_prompt_section_zh() {
             --arg up "$user_prompt_zh" \
             --arg sp "$system_prompt_zh" \
             '{"user-prompt": $up, "system-prompt": $sp}')
+
+        if [ -n "$struct_output_zh" ]; then
+            agent_obj=$(echo "$agent_obj" | jq \
+                --arg so "$struct_output_zh" \
+                '. + {"struct-output": $so}')
+        fi
 
         # 读取该agent的tools（如果有）
         if [ -d "${agent_dir}tools" ]; then
@@ -265,12 +284,12 @@ main() {
         fi
     fi
 
-    # 2. 构建英文prompt部分（包含tools）
-    echo "   读取所有agent的英文prompt和tools..."
+    # 2. 构建英文prompt部分（包含struct-output、tools）
+    echo "   读取所有agent的英文prompt/struct-output和tools..."
     prompt_json=$(build_prompt_section_en)
 
-    # 3. 构建中文prompt部分（包含tools）
-    echo "   读取所有agent的中文prompt和tools..."
+    # 3. 构建中文prompt部分（包含struct-output、tools）
+    echo "   读取所有agent的中文prompt/struct-output和tools..."
     zh_prompt_json=$(build_prompt_section_zh)
 
     # 4. 只更新 prompt 和 zh_prompt 字段，保留其他所有字段
