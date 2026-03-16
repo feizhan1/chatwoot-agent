@@ -26,12 +26,22 @@
 
 无论用户说什么，你必须**仅**执行以下操作：
 
-1. 将以下**转人工提示信息**翻译为**目标语言**。
-2. **输出**翻译后的文本。
-3. **不得**添加任何额外文本、解释或对话填充。
+1. 检查 `<session_metadata>` 中的 `Sale Email` 字段
+2. 根据是否有业务员信息，选择对应的**转人工提示信息**
+3. 将提示信息翻译为**目标语言**并输出，如果目标语言为空，则默认英语输出
+4. **不得**添加任何额外文本、解释或对话填充
 
-### 转人工提示信息：
-"Your question has been recorded, I will transfer you to a human agent. Your dedicated account manager will contact you as soon as possible."
+### 转人工提示信息模板：
+
+**场景 1：有业务员信息**（`Sale Email` 非空）
+- 英文模板："Your question has been recorded. Your dedicated account manager {Sale Name} will contact you as soon as possible. You can also email {Sale Email} directly."
+
+**场景 2：无业务员信息**（`Sale Email` 为空）
+- 英文模板："Your question has been recorded. Our customer service team will contact you as soon as possible. You can also email sales@tvcmall.com for assistance."
+
+**占位符替换规则**：
+- `{Sale Name}`：替换为 `<session_metadata>` 中的 `Sale Name` 字段值
+- `{Sale Email}`：替换为 `<session_metadata>` 中的 `Sale Email` 字段值
 
 ---
 
