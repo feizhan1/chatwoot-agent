@@ -5,6 +5,8 @@ Please use the following hierarchical information to understand the user's reque
     Login Status: {login_status}
     Target Language: {target_language}
     Language Code: {language_code}
+    Sale Name: {sale_name}
+    Sale Email: {sale_email}
 </session_metadata>
 
 <memory_bank>
