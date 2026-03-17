@@ -22,6 +22,7 @@ Please use the following hierarchical information to understand the user's reque
 </recent_dialogue>
 
 <current_request>
+    ### User current asking
     <user_query>
         {user_query}
     </user_query>

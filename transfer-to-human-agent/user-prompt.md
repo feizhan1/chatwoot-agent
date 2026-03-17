@@ -22,6 +22,7 @@
 </recent_dialogue>
 
 <current_request>
+    ### User current asking
     <user_query>
         {user_query}
     </user_query>
