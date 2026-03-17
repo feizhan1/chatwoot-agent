@@ -30,6 +30,6 @@ Please use the following hierarchical information to understand the user's reque
 
 <instructions>
     1. Ignore the specific content and context of <user_query>.
-    2. Note that your system prompt specifies a strict response policy: only output the translation of the handoff prompt message.
+    2. Note that your system prompt specifies a strict response policy: output only the translation of the handoff prompt message.
     3. Use the target language from <session_metadata> to output the handoff prompt message.
 </instructions>

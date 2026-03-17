@@ -33,11 +33,11 @@ Please identify the image intent based on the following structured context, and 
 </current_system_time>
 
 <instructions>
-    1. Strictly follow system-prompt rules for judgment, DO NOT answer business questions.
-    2. If <user_query> is non-empty: use user_query as the primary input for determination; recent_dialogue and active_context are only used to complete entities and disambiguation.
-    3. If <user_query> is empty: DO NOT extract intent from user_query; retrieve intent from the most recent 1-2 rounds in recent_dialogue.
+    1. Strictly judge according to system-prompt rules, DO NOT answer business questions.
+    2. If <user_query> is not empty: use user_query as the primary judgment input; recent_dialogue and active_context are only used for entity completion and disambiguation.
+    3. If <user_query> is empty: DO NOT extract intent from user_query; retrieve intent from the most recent 1-2 turns in recent_dialogue.
     4. Only two output formats are allowed:
-       - The user might want xxx, need to clarify with the user
+       - The user may want to xxx, need to clarify with the user
        - The user has no clear intent
     5. DO NOT output JSON, DO NOT output explanations, DO NOT output any other text.
 </instructions>

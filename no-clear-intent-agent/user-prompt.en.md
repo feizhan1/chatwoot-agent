@@ -1,4 +1,4 @@
-Please use the following layered information to understand the user's request.
+Please use the following hierarchical information to understand the user's request.
 
 <session_metadata>
     Channel: {channel}
@@ -26,7 +26,7 @@ Please use the following layered information to understand the user's request.
 </current_request>
 
 <instructions>
-    1. Analyze <user_query>.
-    2. Note that your system prompt specifies strict response strategies, regardless of context.
+    1. Analyze the <user_query>.
+    2. Note that your system prompt specifies strict response policies, regardless of context.
     3. Output the required response in the target language.
 </instructions>

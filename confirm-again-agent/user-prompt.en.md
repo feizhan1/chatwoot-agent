@@ -1,4 +1,4 @@
-Please use the following context information to handle the user's request.
+Please use the following context information to process the user's request.
 
 <session_metadata>
     Channel: {channel}
@@ -35,8 +35,8 @@ Please use the following context information to handle the user's request.
 
 <instructions>
     1. Analyze <user_query> and <recent_dialogue> to identify **what specific information is missing**.
-    2. Check <session_metadata> to personalize tone (e.g., if logged in, reference their account context as appropriate).
+    2. Review <session_metadata> to personalize tone (e.g., if logged in, reference their account context as appropriate).
     3. **Do not answer business questions yet.**
     4. Based on the missing information, generate a **helpful follow-up question** to clarify user intent.
-       (e.g., "Could you please provide the order number?" or "Which specific product model are you referring to?")
+       (For example: "Could you please provide the order number?" or "Which specific product model are you referring to?")
 </instructions>
