@@ -45,10 +45,3 @@
     ### current system time
     {current_system_time}
 </current_system_time>
-
-<instructions>
-    请严格遵循系统提示词中的规则，分析上述提供的 XML 数据上下文。
-    匹配最合适的 SOP。
-    如果信息不足以唯一定位产品，不要输出澄清问句；请按系统提示词路由到兜底 SOP，并将 extracted_product_identifier 置为 null。
-    请直接输出 JSON，不要添加任何额外的解释性文字。
-</instructions>
