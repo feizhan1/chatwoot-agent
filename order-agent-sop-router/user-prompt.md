@@ -50,20 +50,3 @@
     ### current system time
     {current_system_time}
 </current_system_time>
-
-<instructions>
-    请严格遵循系统提示词中的规则，分析上述 XML 数据并匹配最合适的 SOP。
-
-    渠道优先规则：
-    1) 若 Channel = Channel::WebWidget 且用户未登录，并且在问任何订单相关数据（订单状态、物流、订单详情、取消/修改、退款退货、发票、运费等），必须路由到 SOP_13。
-    2) 若 Channel = Channel:TwilioSms 且在问订单相关场景，不做登录拦截，继续常规路由。
-
-    订单号规则：
-    - 必须订单号的 SOP：SOP_2 / SOP_4 / SOP_5 / SOP_7。
-    - 说明：SOP_3 为固定引导到订单列表页，不依赖订单查询工具，因此不强制订单号。
-    - 命中上述“必须订单号”SOP 但无有效订单号，或多号码冲突无法确定当前活跃订单号，必须路由 SOP_1，且 extracted_order_number = null。
-
-    输出要求：
-    - 只输出 JSON。
-    - 不要输出解释性文字。
-</instructions>

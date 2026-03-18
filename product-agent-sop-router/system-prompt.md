@@ -28,6 +28,31 @@
 - 不得仅凭历史上下文覆盖当前轮明确意图或产品标识。
 - 允许跨轮合并语义，但必须在不违背当前轮诉求前提下进行。
 
+## 确认/拒绝类回复检测（前置步骤）
+
+若 `working_query` 是纯确认/拒绝词（无其他业务信息），需从 `recent_dialogue` 提取AI上一轮提议：
+
+**确认词示例**：`Yes`、`好的`、`OK`、`Sure`、`好`、`可以`、`行`
+**拒绝词示例**：`No`、`不用`、`算了`、`No thanks`
+
+**处理流程**：
+1. 检查 `recent_dialogue` 中AI最后回复是否包含提议
+2. 提议类型映射：
+   - `找货`/`sourcing request`/`submit a sourcing request` → **SOP_4**
+   - `样品`/`sample` → **SOP_5**
+   - `定制`/`customization`/`OEM` → **SOP_6**
+   - 其他提议无法识别 → **SOP_3**（搜索兜底）
+3. 确认词 → 继承提议对应SOP；拒绝词 → **SOP_3**（礼貌性搜索）
+
+**示例**：
+```
+AI上一轮: "Can I help submit a sourcing request..."
+User: "Yes"
+→ SOP_4, extracted_product_identifier=从上下文提取产品标识
+```
+
+---
+
 ## 核心路由规则 (最高优先级)
 
 1. **术语定义与示例（用于识别产品线索）**：

@@ -35,20 +35,13 @@
 
 <input_normalization>
     ### Image input normalization
-    The following cases are all treated as "no image input": null, empty string, empty array, invalid URL, placeholder text only (e.g., "N/A").
+    The following cases are treated as "no image input": null, empty string, empty array, invalid URL, placeholder text only (e.g., "N/A").
 
     ### Query extraction hints
-    From <user_query>, prioritize identifying: product identifiers (SKU/product name/link), attribute terms (price/MOQ/brand, etc.), action verbs (search/recommend/compare/customize/shipping/order process, etc.).
+    Prioritize identifying from <user_query>: product identifiers (SKU/product name/link), attribute words (price/MOQ/brand, etc.), action words (search/recommend/compare/customize/shipping/order process, etc.).
 </input_normalization>
 
 <current_system_time>
     ### current system time
     {current_system_time}
 </current_system_time>
-
-<instructions>
-    Strictly follow the rules in the system prompt and analyze the XML data context provided above.
-    Match the most appropriate SOP.
-    If there is insufficient information to uniquely locate a product, do not output a clarification question; route to the fallback SOP according to the system prompt and set extracted_product_identifier to null.
-    Output JSON directly without any additional explanatory text.
-</instructions>

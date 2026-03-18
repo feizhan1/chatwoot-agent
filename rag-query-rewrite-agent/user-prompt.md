@@ -1,8 +1,6 @@
 <session_metadata>
     Channel: {channel}
     Login Status: {login_status}
-    Target Language: {target_language}
-    Language Code: {language_code}
 </session_metadata>
 
 <memory_bank>

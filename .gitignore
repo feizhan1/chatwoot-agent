@@ -18,6 +18,10 @@ package-lock.json
 
 # Python
 __pycache__/
+
+# 本地文档（仅供开发参考，不提交到远程）
+SYSTEM_ARCHITECTURE.md
+QUICK_REFERENCE.md
 *.pyc
 .venv/
 
