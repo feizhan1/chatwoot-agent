@@ -11,6 +11,7 @@ echo ""
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONFIG_FILE="$SCRIPT_DIR/translation-config.env"
 CONFIG_EXAMPLE="$SCRIPT_DIR/translation-config.env.example"
+HOOK_INSTALL_SCRIPT="$SCRIPT_DIR/install-hooks.sh"
 
 # 检查是否已配置
 if [ -f "$CONFIG_FILE" ]; then
@@ -18,6 +19,10 @@ if [ -f "$CONFIG_FILE" ]; then
     read -p "是否要重新配置？(y/N) " -n 1 -r
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        if [ -x "$HOOK_INSTALL_SCRIPT" ]; then
+            echo "🪝 安装仓库内 Git hooks..."
+            bash "$HOOK_INSTALL_SCRIPT"
+        fi
         echo "✅ 保持现有配置"
         exit 0
     fi
@@ -65,6 +70,14 @@ else
 fi
 
 echo ""
+echo "🪝 安装仓库内 Git hooks..."
+if [ -x "$HOOK_INSTALL_SCRIPT" ]; then
+    bash "$HOOK_INSTALL_SCRIPT"
+else
+    echo "⚠️  警告: 未找到 hook 安装脚本: $HOOK_INSTALL_SCRIPT"
+fi
+
+echo ""
 echo "================================================"
 echo "🎉 设置完成！"
 echo ""
@@ -79,7 +92,10 @@ echo "2. 手动模式："
 echo "   ./scripts/translate-prompt.sh <文件路径>"
 echo "   示例: ./scripts/translate-prompt.sh production-agent/system-prompt.md"
 echo ""
-echo "3. 批量翻译所有文件："
+echo "3. 重装 Git Hook（可选）："
+echo "   ./scripts/install-hooks.sh"
+echo ""
+echo "4. 批量翻译所有文件："
 echo "   ./scripts/batch-translate.sh"
 echo ""
 echo "⚠️  重要提醒："

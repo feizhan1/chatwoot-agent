@@ -9,11 +9,13 @@ echo "================================================"
 echo ""
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="$(git rev-parse --show-toplevel)"
 
 # 测试 1: 检查脚本文件
 echo "📝 测试 1: 检查脚本文件..."
 REQUIRED_FILES=(
     "$SCRIPT_DIR/setup-translation.sh"
+    "$SCRIPT_DIR/install-hooks.sh"
     "$SCRIPT_DIR/translate-prompt.sh"
     "$SCRIPT_DIR/batch-translate.sh"
     "$SCRIPT_DIR/translation-config.env.example"
@@ -33,6 +35,7 @@ echo ""
 echo "🔐 测试 2: 检查执行权限..."
 EXEC_FILES=(
     "$SCRIPT_DIR/setup-translation.sh"
+    "$SCRIPT_DIR/install-hooks.sh"
     "$SCRIPT_DIR/translate-prompt.sh"
     "$SCRIPT_DIR/batch-translate.sh"
 )
@@ -49,10 +52,23 @@ done
 # 测试 3: 检查 Git Hook
 echo ""
 echo "🪝 测试 3: 检查 Git Hook..."
-HOOK_FILE="$(git rev-parse --git-dir)/hooks/pre-commit"
+HOOKS_PATH="$(git config --get core.hooksPath || true)"
+
+if [ -z "$HOOKS_PATH" ]; then
+    HOOK_FILE="$(git rev-parse --git-dir)/hooks/pre-commit"
+else
+    case "$HOOKS_PATH" in
+        /*)
+            HOOK_FILE="$HOOKS_PATH/pre-commit"
+            ;;
+        *)
+            HOOK_FILE="$PROJECT_ROOT/$HOOKS_PATH/pre-commit"
+            ;;
+    esac
+fi
 
 if [ -f "$HOOK_FILE" ]; then
-    echo "   ✅ Pre-commit hook 已安装"
+    echo "   ✅ Pre-commit hook 已安装: $HOOK_FILE"
     if [ -x "$HOOK_FILE" ]; then
         echo "   ✅ Hook 具有执行权限"
     else
@@ -61,6 +77,7 @@ if [ -f "$HOOK_FILE" ]; then
     fi
 else
     echo "   ❌ Pre-commit hook 未安装"
+    echo "   💡 请先运行: ./scripts/install-hooks.sh"
     exit 1
 fi
 

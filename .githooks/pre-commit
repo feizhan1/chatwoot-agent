@@ -1,0 +1,237 @@
+#!/bin/bash
+
+# Git Hook: 自动将修改的中文提示词翻译为英文
+# 触发时机: git commit 之前
+# 作用: 检测 system-prompt.md 和 user-prompt.md 的修改，自动生成 .en.md 英文版本
+
+set -e
+
+echo "🔍 检查提示词、工具文件和 SOP 文件修改..."
+
+# 读取翻译配置（用于选择提供者 / 模型）
+PROJECT_ROOT="$(git rev-parse --show-toplevel)"
+CONFIG_FILE="$PROJECT_ROOT/scripts/translation-config.env"
+if [ -f "$CONFIG_FILE" ]; then
+    # shellcheck disable=SC1090
+    source "$CONFIG_FILE"
+fi
+TRANSLATION_PROVIDER="${TRANSLATION_PROVIDER:-anthropic}"
+
+# 解析目标 .en.md 路径（优先已跟踪路径，避免 SOP/sop 大小写不一致）
+resolve_en_file_path() {
+    local source_file="$1"
+    local default_en_file="${source_file%.md}.en.md"
+    local source_dir source_basename source_basename_lower
+    local tracked_file tracked_basename tracked_basename_lower
+    local existing_file existing_basename existing_basename_lower
+
+    source_dir="$(dirname "$source_file")"
+    source_basename="$(basename "$source_file" .md)"
+    source_basename_lower="$(echo "$source_basename" | tr '[:upper:]' '[:lower:]')"
+
+    # 优先匹配已跟踪文件路径
+    while IFS= read -r tracked_file; do
+        [ -z "$tracked_file" ] && continue
+        [ "$(dirname "$tracked_file")" != "$source_dir" ] && continue
+
+        tracked_basename="$(basename "$tracked_file" .en.md)"
+        tracked_basename_lower="$(echo "$tracked_basename" | tr '[:upper:]' '[:lower:]')"
+        if [ "$tracked_basename_lower" = "$source_basename_lower" ]; then
+            echo "$tracked_file"
+            return 0
+        fi
+    done < <(git ls-files "*.en.md" 2>/dev/null || true)
+
+    # 次选匹配工作区已存在文件
+    for existing_file in "$source_dir"/*.en.md; do
+        [ ! -f "$existing_file" ] && continue
+
+        existing_basename="$(basename "$existing_file" .en.md)"
+        existing_basename_lower="$(echo "$existing_basename" | tr '[:upper:]' '[:lower:]')"
+        if [ "$existing_basename_lower" = "$source_basename_lower" ]; then
+            echo "$existing_file"
+            return 0
+        fi
+    done
+
+    echo "$default_en_file"
+}
+
+# 获取暂存区中修改的提示词文件（排除 bak 后缀的目录）
+CHANGED_PROMPT_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '(system-prompt|user-prompt)\.md$' | grep -v '\.en\.md$' | grep -v 'bak/' || true)
+
+# 获取暂存区中修改的工具文件（*/tools/*.md，排除 .en.md）
+CHANGED_TOOL_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '/tools/.*\.md$' | grep -v '\.en\.md$' | grep -v 'bak/' || true)
+
+# 获取暂存区中修改的 sop.md 文件（用于翻译及生成 sop_dict）
+CHANGED_SOP_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -iE '/sop\.md$' | grep -iv '\.en\.md$' | grep -v 'bak/' || true)
+
+# 合并所有需要翻译的文件（提示词 + 工具文件 + sop.md）
+CHANGED_FILES=$(echo -e "$CHANGED_PROMPT_FILES\n$CHANGED_TOOL_FILES\n$CHANGED_SOP_FILES" | grep -v '^$' || true)
+
+if [ -z "$CHANGED_FILES" ]; then
+    echo "✅ 无提示词、工具文件或 SOP 文件修改，跳过"
+    exit 0
+fi
+
+TRANSLATION_FAILED=0
+
+if [ -n "$CHANGED_FILES" ]; then
+    echo "📝 发现以下文件需要翻译:"
+    echo "$CHANGED_FILES" | sed 's/^/   - /'
+
+    # 检查翻译脚本是否存在
+    TRANSLATE_SCRIPT="$(git rev-parse --show-toplevel)/scripts/translate-prompt.sh"
+
+    if [ ! -f "$TRANSLATE_SCRIPT" ]; then
+        echo "⚠️  警告: 翻译脚本不存在 ($TRANSLATE_SCRIPT)"
+        echo "💡 请先运行: ./scripts/setup-translation.sh"
+        echo "❌ 提交已中止"
+        exit 1
+    fi
+
+    echo "🌐 正在翻译为英文..."
+fi
+
+# 逐个翻译文件
+for file in $CHANGED_FILES; do
+    echo "   翻译: $file"
+
+    # 检查文件大小，如果超过 300 行则使用分块翻译
+    LINE_COUNT=$(wc -l < "$file" | tr -d ' ')
+
+    if [ "$LINE_COUNT" -gt 300 ]; then
+        echo "   📏 文件较大（${LINE_COUNT}行），使用分块翻译策略..."
+
+        # 使用分块翻译
+        PROJECT_ROOT="$(git rev-parse --show-toplevel)"
+        PART1="${file%.md}-part1.md"
+        PART2="${file%.md}-part2.md"
+        EN_FILE="$(resolve_en_file_path "$file")"
+
+        # 计算分块点（70% 位置）
+        SPLIT_LINE=$((LINE_COUNT * 7 / 10))
+
+        # 分块
+        head -n "$SPLIT_LINE" "$file" > "$PART1"
+        tail -n +"$((SPLIT_LINE + 1))" "$file" > "$PART2"
+
+        # 翻译两部分（根据提供者选择大模型）
+        if [ "$TRANSLATION_PROVIDER" = "openai" ]; then
+            LARGE_MODEL="${OPENAI_LARGE_MODEL:-${OPENAI_MODEL:-gpt-4o-128k}}"
+            LARGE_TOKENS="${OPENAI_LARGE_MAX_TOKENS:-16000}"
+        elif [ "$TRANSLATION_PROVIDER" = "openrouter" ]; then
+            LARGE_MODEL="${OPENROUTER_LARGE_MODEL:-${OPENROUTER_MODEL:-anthropic/claude-opus-4.6}}"
+            LARGE_TOKENS="${OPENROUTER_LARGE_MAX_TOKENS:-16000}"
+        else
+            LARGE_MODEL="claude-opus-4-5-20251101"
+            LARGE_TOKENS="16000"
+        fi
+
+        if env MODEL="$LARGE_MODEL" MAX_TOKENS="$LARGE_TOKENS" TRANSLATION_PROVIDER="$TRANSLATION_PROVIDER" bash "$TRANSLATE_SCRIPT" "$PART1" && \
+           env MODEL="$LARGE_MODEL" MAX_TOKENS="$LARGE_TOKENS" TRANSLATION_PROVIDER="$TRANSLATION_PROVIDER" bash "$TRANSLATE_SCRIPT" "$PART2"; then
+            # 合并翻译结果
+            cat "${PART1%.md}.en.md" "${PART2%.md}.en.md" > "$EN_FILE"
+
+            # 清理临时文件
+            rm -f "$PART1" "$PART2" "${PART1%.md}.en.md" "${PART2%.md}.en.md"
+
+            git add "$EN_FILE"
+            echo "   ✓ 已生成并添加: $EN_FILE"
+        else
+            echo "   ❌ 分块翻译失败: $file"
+            rm -f "$PART1" "$PART2" "${PART1%.md}.en.md" "${PART2%.md}.en.md"
+            TRANSLATION_FAILED=1
+        fi
+    else
+        # 小文件直接翻译
+        if ! bash "$TRANSLATE_SCRIPT" "$file"; then
+            echo "   ❌ 翻译失败: $file"
+            TRANSLATION_FAILED=1
+        else
+            # 将生成的英文文件添加到暂存区
+            EN_FILE="$(resolve_en_file_path "$file")"
+            if [ -f "$EN_FILE" ]; then
+                git add "$EN_FILE"
+                echo "   ✓ 已生成并添加: $EN_FILE"
+            else
+                echo "   ❌ 未找到翻译输出文件: $EN_FILE"
+                TRANSLATION_FAILED=1
+            fi
+        fi
+    fi
+done
+
+if [ $TRANSLATION_FAILED -eq 0 ]; then
+    echo "✅ 翻译完成"
+    echo "🎉 自动翻译完成，英文版本已添加到本次提交"
+
+    # === 步骤3: 更新 sop_dict.json 和 sop_dict.en.json ===
+    if [ -n "$CHANGED_SOP_FILES" ]; then
+        echo ""
+        echo "📋 更新 sop_dict.json / sop_dict.en.json..."
+
+        GENERATE_SOP_SCRIPT="$PROJECT_ROOT/scripts/generate-sop-dict.sh"
+
+        if [ ! -f "$GENERATE_SOP_SCRIPT" ]; then
+            echo "⚠️  警告: sop-dict 生成脚本不存在 ($GENERATE_SOP_SCRIPT)"
+        else
+            for sop_file in $CHANGED_SOP_FILES; do
+                SOP_DIR="$(dirname "$sop_file")"
+
+                # 从中文 sop.md 生成 sop_dict.json
+                if bash "$GENERATE_SOP_SCRIPT" "$sop_file"; then
+                    git add "$SOP_DIR/sop_dict.json"
+                else
+                    echo "   ❌ sop_dict.json 生成失败: $sop_file"
+                    exit 1
+                fi
+
+                # 从英文 sop.en.md 生成 sop_dict.en.json（翻译刚生成）
+                EN_SOP_FILE="$(resolve_en_file_path "$sop_file")"
+                if [ -f "$EN_SOP_FILE" ]; then
+                    if bash "$GENERATE_SOP_SCRIPT" "$EN_SOP_FILE"; then
+                        git add "$SOP_DIR/sop_dict.en.json"
+                    else
+                        echo "   ❌ sop_dict.en.json 生成失败: $EN_SOP_FILE"
+                        exit 1
+                    fi
+                fi
+            done
+        fi
+    fi
+
+    # === 步骤4: 生成env.json（在 sop_dict 更新之后执行）===
+    echo ""
+    echo "📝 生成 env.json..."
+
+    GENERATE_ENV_SCRIPT="$PROJECT_ROOT/scripts/generate-env-json.sh"
+
+    if [ ! -f "$GENERATE_ENV_SCRIPT" ]; then
+        echo "⚠️  警告: env.json生成脚本不存在 ($GENERATE_ENV_SCRIPT)"
+        echo "⏭️  跳过env.json生成"
+    else
+        if bash "$GENERATE_ENV_SCRIPT"; then
+            # 检查env.json是否有变化
+            if git diff --quiet "$PROJECT_ROOT/env.json" 2>/dev/null; then
+                echo "   ℹ️  env.json 无变化"
+            else
+                git add "$PROJECT_ROOT/env.json"
+                echo "   ✅ env.json 已更新并添加到暂存区"
+            fi
+        else
+            echo "   ❌ env.json 生成失败"
+            echo ""
+            echo "提示: 可以手动运行 scripts/generate-env-json.sh 查看详细错误"
+            exit 1
+        fi
+    fi
+else
+    echo "❌ 部分文件翻译失败"
+    echo "💡 您可以选择:"
+    echo "   1. 修复翻译脚本后重新提交"
+    echo "   2. 使用 git commit --no-verify 跳过翻译（不推荐）"
+    exit 1
+fi
+
+exit 0

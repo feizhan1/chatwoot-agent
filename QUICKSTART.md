@@ -7,6 +7,9 @@
 ```
 
 按提示输入 Anthropic API Key（[获取地址](https://console.anthropic.com/settings/keys)）
+  
+> `setup-translation.sh` 会自动安装仓库内 Git Hook（`.githooks/pre-commit`）。  
+> 如需手动重装，可执行：`./scripts/install-hooks.sh`
 
 ---
 
@@ -61,6 +64,9 @@ git commit --no-verify -m "临时提交"
 
 # 重新配置 API Key
 ./scripts/setup-translation.sh
+
+# 手动重装 Git Hook
+./scripts/install-hooks.sh
 
 # 查看详细文档
 cat README.md
